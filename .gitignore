@@ -130,3 +130,7 @@ dmypy.json
 
 # IDEA
 .idea/
+
+# Client
+client/validation-app/package-lock.json
+client/validation-app/node_modules/
