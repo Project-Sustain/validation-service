@@ -3,11 +3,11 @@ from flask import Flask, request
 from werkzeug.utils import secure_filename
 from http import HTTPStatus
 
-UPLOAD_FOLDER = './uploads'
+UPLOAD_DIR = './uploads'
 ALLOWED_EXTENSIONS = {'zip'}
 
 app = Flask(__name__)
-app.config['UPLOAD_DIR'] = UPLOAD_FOLDER
+app.config['UPLOAD_DIR'] = UPLOAD_DIR
 
 
 def allowed_file(filename):
@@ -17,7 +17,6 @@ def allowed_file(filename):
 
 @app.route('/')
 def hello():
-    print(os.getcwd())
     return 'Hello, World!'
 
 
