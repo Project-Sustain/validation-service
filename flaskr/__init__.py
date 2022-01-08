@@ -17,6 +17,7 @@ def allowed_file(filename):
 
 @app.route('/')
 def hello():
+    print(os.getcwd())
     return 'Hello, World!'
 
 
