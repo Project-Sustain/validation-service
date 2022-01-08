@@ -131,6 +131,9 @@ dmypy.json
 # IDEA
 .idea/
 
+# Project
+uploads/*.zip
+
 # Client
 client/validation-app/package-lock.json
 client/validation-app/node_modules/
