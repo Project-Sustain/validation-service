@@ -49,9 +49,12 @@ def hello():
 
 @app.route('/validation', methods=['POST'])
 def validation():
+    validation_request_str = request.form["request"]
+    if validation_request_str == '':
+        return 'Empty request submitted', HTTPStatus.BAD_REQUEST
 
-    pprint(request.form)
-    print(request.form["test_key"])
+    validation_request = json.loads(validation_request_str)
+    pprint(validation_request)
 
     # Check if the POST request has the file part
     if 'file' not in request.files:
