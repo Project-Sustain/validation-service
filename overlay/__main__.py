@@ -1,11 +1,13 @@
 import os
 import sys
-import master
+import getopt
+from . import worker_server
 
 
 def print_usage():
-    print("USAGE\n\tpython3 overlay [master|slave] [start|stop] [OPTIONS]")
-    print("OPTIONS\n\t--master=<hostname>\tMust be specified when starting a slave")
+    print("USAGE\n\tpython3 overlay [OPTIONS]\n")
+    print("OPTIONS\n\t--master\t\tStarts the master server")
+    print("\t--worker <master_hostname>\tStarts the worker server, connecting to the master specified\n")
 
 
 def print_usage_and_exit():
@@ -16,25 +18,29 @@ def print_usage_and_exit():
 def main():
     print(f"Running main({sys.argv})...")
 
-    if 3 <= len(sys.argv) <= 4:
-        node_type = sys.argv[1].lower()
-        action = sys.argv[2].lower()
+    argv = sys.argv[1:]
+    try:
+        opts, args = getopt.getopt(argv, "mw:", ["master", "worker", "master_host="])
 
-        if node_type == "slave":
-            if action == "start" and len(sys.argv) == 4:
-                print("TODO")
-            elif action == "stop":
-                print("TODO")
-            else:
-                print_usage_and_exit()
-        elif node_type == "master":
-            if action == "start":
-                master.start_server()
-            elif action == "stop":
-                print("TODO")
-            else:
-                print_usage_and_exit()
-    else:
+        master_hostname = None
+        node_type = None
+
+        for opt, arg in opts:
+            if opt in ['-m', '--master']:
+                node_type = "master"
+            elif opt in ['--master_host']:
+                master_hostname = arg
+            elif opt in ['-w', '--worker']:
+                node_type = "worker"
+
+        if node_type == "master":
+            print("Starting master node ... TODO")
+        elif node_type == "worker":
+            print(f"Starting worker server, with master {master_hostname}... TODO")
+            worker_server.serve(master_hostname)
+
+    except Exception as e:
+        print(f"Error: {e}")
         print_usage_and_exit()
 
 

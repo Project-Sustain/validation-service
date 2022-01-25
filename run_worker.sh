@@ -2,4 +2,4 @@
 
 echo -e "Checking dependencies..."
 
-python3 overlay --master
+python3 overlay --worker --master_host=localhost
