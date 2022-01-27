@@ -5,7 +5,7 @@ from pymongo import MongoClient
 
 
 def get_gis_join_locations():
-    resources_dir = 'resources'
+    resources_dir = 'overlay/resources'
     county_gis_joins = load_gis_joins(resources_dir)
     info(f"Loaded in county GISJOIN list of size {len(county_gis_joins)}, retrieving chunk locations from MongoDB...")
 
