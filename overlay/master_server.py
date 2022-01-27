@@ -6,7 +6,7 @@ from logging import info, error
 from concurrent import futures
 import hashlib
 
-LOCAL_TESTING = True
+LOCAL_TESTING = False
 SAVE_DIR = "testing/master/saved_models"
 
 
