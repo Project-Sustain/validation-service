@@ -1,0 +1,73 @@
+{
+	"queryPlanner" : {
+		"mongosPlannerVersion" : 1,
+		"winningPlan" : {
+			"stage" : "SINGLE_SHARD",
+			"shards" : [
+				{
+					"shardName" : "shard7rs",
+					"connectionString" : "shard7rs/lattice-123:27017,lattice-124:27017,lattice-125:27017",
+					"serverInfo" : {
+						"host" : "lattice-123",
+						"port" : 27017,
+						"version" : "4.4.4",
+						"gitVersion" : "8db30a63db1a9d84bdcad0c83369623f708e0397"
+					},
+					"plannerVersion" : 1,
+					"namespace" : "sustaindb.noaa_nam",
+					"indexFilterSet" : false,
+					"parsedQuery" : {
+						"COUNTY_GISJOIN" : {
+							"$eq" : "G0201100"
+						}
+					},
+					"queryHash" : "0D2C8019",
+					"planCacheKey" : "17476D0F",
+					"winningPlan" : {
+						"stage" : "FETCH",
+						"inputStage" : {
+							"stage" : "SHARDING_FILTER",
+							"inputStage" : {
+								"stage" : "IXSCAN",
+								"keyPattern" : {
+									"COUNTY_GISJOIN" : 1
+								},
+								"indexName" : "COUNTY_GISJOIN_1",
+								"isMultiKey" : false,
+								"multiKeyPaths" : {
+									"COUNTY_GISJOIN" : [ ]
+								},
+								"isUnique" : false,
+								"isSparse" : false,
+								"isPartial" : false,
+								"indexVersion" : 2,
+								"direction" : "forward",
+								"indexBounds" : {
+									"COUNTY_GISJOIN" : [
+										"[\"G0201100\", \"G0201100\"]"
+									]
+								}
+							}
+						}
+					},
+					"rejectedPlans" : [ ]
+				}
+			]
+		}
+	},
+	"serverInfo" : {
+		"host" : "lattice-100",
+		"port" : 27018,
+		"version" : "4.4.4",
+		"gitVersion" : "8db30a63db1a9d84bdcad0c83369623f708e0397"
+	},
+	"ok" : 1,
+	"operationTime" : Timestamp(1643301092, 1),
+	"$clusterTime" : {
+		"clusterTime" : Timestamp(1643301096, 5),
+		"signature" : {
+			"hash" : BinData(0,"AAAAAAAAAAAAAAAAAAAAAAAAAAA="),
+			"keyId" : NumberLong(0)
+		}
+	}
+}

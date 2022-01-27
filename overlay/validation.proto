@@ -1,15 +1,77 @@
-// The greeting service definition.
-service Greeter {
-  // Sends a greeting
-  rpc SayHello (HelloRequest) returns (HelloReply) {}
+syntax = "proto3";
+
+
+// Master service definition
+service Master {
+
+  // Allows streamed uploading of a .zip model to the Master
+  rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
+
+  // Registers a Worker to track
+  rpc RegisterWorker (WorkerRegistrationRequest) returns (WorkerRegistrationResponse) {}
 }
 
-// The request message containing the user's name.
-message HelloRequest {
-  optional string name = 1;
+// Worker registration request that gets sent to the master, to be tracked
+message WorkerRegistrationRequest {
+  string hostname = 1;
+  int32  port = 2;
 }
 
-// The response message containing the greetings
-message HelloReply {
-  optional string message = 1;
+// Worker registration response message the master sends back to the worker
+message WorkerRegistrationResponse {
+  bool success = 1;
+}
+
+// Worker service definition
+service Worker {
+
+  // Allows streamed uploading of a .zip model to the Worker
+  rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
+
+  // Registers a Worker to track via heartbeats
+  rpc BeginValidationJob(WorkerJobRequest) returns (WorkerRegistrationResponse) {}
+}
+
+// Worker job request for a set of GISJOINs, and a model to validate
+message WorkerJobRequest {
+  string id = 1;
+  string model_framework = 2;
+  string model_type = 3;
+  string database = 4;
+  string collection = 5;
+  string label_field = 6;
+  string validation_metric = 7;
+  repeated string feature_fields = 8;
+  repeated string gis_joins = 9;
+}
+
+enum WorkerJobStatusCode {
+  WORKER_JOB_STATUS_CODE_UNKNOWN = 0;
+  WORKER_JOB_STATUS_CODE_OK = 1;
+  WORKER_JOB_STATUS_CODE_ERROR = 2;
+  WORKER_JOB_STATUS_CODE_FAILED = 3;
+}
+
+// Worker job request for a set of GISJOINs, and a model to validate
+message WorkerJobResponse {
+  string id = 1;
+  string error_message = 2;
+  WorkerJobStatusCode worker_job_status_code = 3;
+}
+
+message FileChunk {
+  string id = 1;
+  bytes data = 2;
+}
+
+enum UploadStatusCode {
+  UPLOAD_STATUS_CODE_UNKNOWN = 0;
+  UPLOAD_STATUS_CODE_OK = 1;
+  UPLOAD_STATUS_CODE_FAILED = 2;
+}
+
+message UploadStatus {
+  string message = 1;
+  string file_hash = 2;
+  UploadStatusCode upload_status_code = 3;
 }

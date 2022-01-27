@@ -1,19 +1,14 @@
-from concurrent import futures
 import logging
+from logging import info
 import grpc
-from . import validation_pb2, validation_pb2_grpc
+import validation_pb2
+import validation_pb2_grpc
 
 
-class Greeter(validation_pb2_grpc.GreeterServicer):
-
-    def SayHello(self, request, context):
-        return validation_pb2.HelloReply(message='Hello, %s!' % request.name)
-
-
-def serve(master_hostname):
-    logging.basicConfig()
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    validation_pb2_grpc.add_GreeterServicer_to_server(Greeter(), server)
-    server.add_insecure_port('[::]:50051')
-    server.start()
-    server.wait_for_termination()
+def run(master_hostname="localhost", master_port=50051, worker_port=50055):
+    logging.basicConfig(level=logging.INFO)
+    with grpc.insecure_channel('localhost:50051') as channel:
+        stub = validation_pb2_grpc.MasterStub(channel)
+        registration_response = stub.RegisterWorker(
+            validation_pb2.WorkerRegistrationRequest(hostname="localhost", port=worker_port))
+    info(f"Greeter response received: {registration_response}")

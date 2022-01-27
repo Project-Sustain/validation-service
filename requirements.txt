@@ -1,4 +1,5 @@
-werkzeug~=1.0.1
-Flask~=1.1.2
+werkzeug
+Flask
 grpcio
 grpcio-tools
+pymongo
