@@ -1,8 +1,13 @@
 import json
 import grpc
+import os
+import hashlib
 from flask import Flask, request
 from http import HTTPStatus
 from pprint import pprint
+
+from werkzeug.utils import secure_filename
+
 import file_chunker
 import validation_pb2
 import validation_pb2_grpc
@@ -19,7 +24,9 @@ app.config['UPLOAD_DIR'] = UPLOAD_DIR
 # Main entrypoint
 def run(master_hostname="localhost", master_port=50051, flask_port=5000):
     print("Running flask server...")
-    app.run()  # Entrypoint
+    app.config['MASTER_HOSTNAME'] = master_hostname
+    app.config['MASTER_PORT'] = master_port
+    app.run(host="0.0.0.0", port=flask_port)  # Entrypoint
 
 
 def allowed_file(filename):
@@ -53,15 +60,22 @@ def validation():
         return 'Empty file submitted', HTTPStatus.BAD_REQUEST
 
     # Save file
-    # if file and allowed_file(file.filename):
-    #     filename = secure_filename(file.filename)
-    #     file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-    #     return f'File {filename} successfully saved', HTTPStatus.OK
+    saved_filename = "my_model.zip"
+    if file and allowed_file(file.filename):
+        file.save(os.path.join(app.config['UPLOAD_DIR'], saved_filename))
+
+    # Get file hash
+    with open(f"{UPLOAD_DIR}/{saved_filename}", "rb") as f:
+        hasher = hashlib.md5()
+        buf = f.read()
+        hasher.update(buf)
+    info(f"Uploaded file hash: {hasher.hexdigest()}")
 
     # Create gRPC request to master node
-    master_hostname = "inf0rmatiker-desktop"
-    master_port = 50051
-    with grpc.insecure_channel(f'{master_hostname}:{master_port}') as channel:
-        stub = validation_pb2_grpc.MasterStub(channel)
-        file_upload_response = stub.UploadFile(file_chunker.chunk_file(file))
+    with open(f"{UPLOAD_DIR}/{saved_filename}", "rb") as f:
+        with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
+            stub = validation_pb2_grpc.MasterStub(channel)
+            file_upload_response = stub.UploadFile(file_chunker.chunk_file(f))
+
     info(f"Response received: {file_upload_response}")
+    return f'File {saved_filename} successfully saved', HTTPStatus.OK
