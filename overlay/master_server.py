@@ -85,6 +85,10 @@ class Master(validation_pb2_grpc.MasterServicer):
             upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_FAILED
         )
 
+    def SubmitValidationJob(self, request, context):
+        info(request)
+        return validation_pb2.ValidationJobResponse(message="Got the job")
+
 
 def run(master_port=50051):
     if LOCAL_TESTING:

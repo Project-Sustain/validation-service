@@ -20,6 +20,11 @@ class MasterStub(object):
                 request_serializer=validation__pb2.FileChunk.SerializeToString,
                 response_deserializer=validation__pb2.UploadStatus.FromString,
                 )
+        self.SubmitValidationJob = channel.unary_unary(
+                '/Master/SubmitValidationJob',
+                request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
+                response_deserializer=validation__pb2.ValidationJobResponse.FromString,
+                )
         self.RegisterWorker = channel.unary_unary(
                 '/Master/RegisterWorker',
                 request_serializer=validation__pb2.WorkerRegistrationRequest.SerializeToString,
@@ -33,6 +38,13 @@ class MasterServicer(object):
 
     def UploadFile(self, request_iterator, context):
         """Allows streamed uploading of a .zip model to the Master
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubmitValidationJob(self, request, context):
+        """Submits a validation job to the cluster
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -52,6 +64,11 @@ def add_MasterServicer_to_server(servicer, server):
                     servicer.UploadFile,
                     request_deserializer=validation__pb2.FileChunk.FromString,
                     response_serializer=validation__pb2.UploadStatus.SerializeToString,
+            ),
+            'SubmitValidationJob': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubmitValidationJob,
+                    request_deserializer=validation__pb2.ValidationJobRequest.FromString,
+                    response_serializer=validation__pb2.ValidationJobResponse.SerializeToString,
             ),
             'RegisterWorker': grpc.unary_unary_rpc_method_handler(
                     servicer.RegisterWorker,
@@ -83,6 +100,23 @@ class Master(object):
         return grpc.experimental.stream_unary(request_iterator, target, '/Master/UploadFile',
             validation__pb2.FileChunk.SerializeToString,
             validation__pb2.UploadStatus.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SubmitValidationJob(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Master/SubmitValidationJob',
+            validation__pb2.ValidationJobRequest.SerializeToString,
+            validation__pb2.ValidationJobResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -121,8 +155,8 @@ class WorkerStub(object):
                 )
         self.BeginValidationJob = channel.unary_unary(
                 '/Worker/BeginValidationJob',
-                request_serializer=validation__pb2.WorkerJobRequest.SerializeToString,
-                response_deserializer=validation__pb2.WorkerRegistrationResponse.FromString,
+                request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
+                response_deserializer=validation__pb2.WorkerJobResponse.FromString,
                 )
 
 
@@ -154,8 +188,8 @@ def add_WorkerServicer_to_server(servicer, server):
             ),
             'BeginValidationJob': grpc.unary_unary_rpc_method_handler(
                     servicer.BeginValidationJob,
-                    request_deserializer=validation__pb2.WorkerJobRequest.FromString,
-                    response_serializer=validation__pb2.WorkerRegistrationResponse.SerializeToString,
+                    request_deserializer=validation__pb2.ValidationJobRequest.FromString,
+                    response_serializer=validation__pb2.WorkerJobResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -197,7 +231,7 @@ class Worker(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Worker/BeginValidationJob',
-            validation__pb2.WorkerJobRequest.SerializeToString,
-            validation__pb2.WorkerRegistrationResponse.FromString,
+            validation__pb2.ValidationJobRequest.SerializeToString,
+            validation__pb2.WorkerJobResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

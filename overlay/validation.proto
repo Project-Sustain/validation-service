@@ -7,6 +7,9 @@ service Master {
   // Allows streamed uploading of a .zip model to the Master
   rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
 
+  // Submits a validation job to the cluster
+  rpc SubmitValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
+
   // Registers a Worker to track
   rpc RegisterWorker (WorkerRegistrationRequest) returns (WorkerRegistrationResponse) {}
 }
@@ -29,11 +32,11 @@ service Worker {
   rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
 
   // Registers a Worker to track via heartbeats
-  rpc BeginValidationJob(WorkerJobRequest) returns (WorkerRegistrationResponse) {}
+  rpc BeginValidationJob(ValidationJobRequest) returns (WorkerJobResponse) {}
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
-message WorkerJobRequest {
+message ValidationJobRequest {
   string id = 1;
   string model_framework = 2;
   string model_type = 3;
@@ -43,6 +46,10 @@ message WorkerJobRequest {
   string validation_metric = 7;
   repeated string feature_fields = 8;
   repeated string gis_joins = 9;
+}
+
+message ValidationJobResponse {
+  string message = 1;
 }
 
 enum WorkerJobStatusCode {
