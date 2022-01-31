@@ -1,6 +1,8 @@
 import pickle
 
-from overlay.scikitlearn.wireformats.validation_request import ValidationRequest
+from overlay.constants import DB_PORT, DB_HOST
+from overlay.scikitlearn.db.querier import Querier
+from overlay.validation_pb2 import ValidationJobRequest
 
 
 class LinearRegression:
@@ -10,8 +12,11 @@ class LinearRegression:
     def load_model(self, model_path):
         self.model = pickle.load(open(model_path, 'rb'))
 
-    def validate(self, validation_request: ValidationRequest):
-        X_test = validation_request.independent_vars
-        y_test = validation_request.dependent_vars
-        score = self.model.score(X_test, y_test)
-        return validation_request.gis_join, score
+    def validate(self, validation_request: ValidationJobRequest):
+        sustaindb = Querier(f'{DB_HOST}:{DB_PORT}', 'sustaindb')
+        results = sustaindb.query("county_svi", "G0100150")
+        print(f'results: {results}')
+
+
+if __name__ == "__main__":
+    print("Starting...")

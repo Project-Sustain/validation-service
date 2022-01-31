@@ -1,6 +1,6 @@
 import pickle
 
-from overlay.scikitlearn.wireformats.validation_request import ValidationRequest
+from overlay.validation_pb2 import ValidationJobRequest
 
 
 class SupportVectorRegression:
@@ -10,8 +10,5 @@ class SupportVectorRegression:
     def load_model(self, model_path):
         self.model = pickle.load(open(model_path, 'rb'))
 
-    def validate(self, validation_requet: ValidationRequest):
-        X_test = validation_requet.independent_vars
-        y_test = validation_requet.dependent_vars
-        score = self.model.score(X_test, y_test)
-        return validation_requet.gis_join, score
+    def validate(self, validation_request: ValidationJobRequest):
+        pass
