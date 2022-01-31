@@ -12,11 +12,11 @@ LOCAL_TESTING = False
 
 class WorkerMetadata:
 
-    def __init__(self, hostname, port):
+    def __init__(self, hostname, port, gis_joins):
         self.hostname = hostname
         self.port = port
         self.jobs = []
-        self.gis_joins = []
+        self.gis_joins = gis_joins
 
     def add_gis_join(self, gis_join):
         self.gis_joins.append(gis_join)
@@ -35,7 +35,15 @@ class Master(validation_pb2_grpc.MasterServicer):
 
     def RegisterWorker(self, request, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
-        self.tracked_workers.append(WorkerMetadata(request.hostname, request.port))
+        gis_joins = []
+        for gis_join, servers in self.gis_join_locations.items():
+            for server in servers:
+                if server == request.hostname:
+                    gis_joins.append(gis_join)
+
+        new_worker = WorkerMetadata(request.hostname, request.port, gis_joins)
+        self.tracked_workers.append(new_worker)
+        info(f"Added Worker: {new_worker}")
         return validation_pb2.WorkerRegistrationResponse(success=True)
 
     def UploadFile(self, request_iterator, context):
@@ -98,8 +106,12 @@ class Master(validation_pb2_grpc.MasterServicer):
         )
 
     def SubmitValidationJob(self, request, context):
-        info(request)
-        return validation_pb2.ValidationJobResponse(message="Got the job")
+        info(f"SubmitValidationJob Request: {request}")
+        for worker in self.tracked_workers:
+            info(f"Submitting validation job to {worker} for GISJOINs {worker.gis_joins}")
+
+            break  # TODO: Remove
+        return validation_pb2.ValidationJobResponse(message="OK")
 
 
 def run(master_port=50051):

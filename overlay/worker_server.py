@@ -8,6 +8,7 @@ import validation_pb2_grpc
 import hashlib
 import zipfile
 from concurrent import futures
+import tensorflowvalidation
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
@@ -84,6 +85,23 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             file_hash="None",
             upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_FAILED
         )
+
+    def BeginValidationJob(self, request, context):
+        info(f"Received BeginValidationJob Request: {request}")
+        for gis_join in request.gis_joins:
+            tensorflowvalidation.validate_model(
+                request.id,
+                f"{self.saved_models_path}",
+                request.model_type,
+                request.database,
+                request.collection,
+                request.label_field,
+                request.validation_metric,
+                request.feature_fields,
+                request.gis_joins
+            )
+        return validation_pb2.WorkerJobResponse(request.id, "", validation_pb2.WORKER_JOB_STATUS_CODE_OK)
+
 
 
 def run(master_hostname="localhost", master_port=50051, worker_port=50055):
