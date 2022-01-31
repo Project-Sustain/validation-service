@@ -4,3 +4,4 @@ grpcio
 grpcio-tools
 pymongo
 sklearn
+python-dotenv
