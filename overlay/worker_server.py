@@ -1,10 +1,12 @@
 import logging
 from logging import info, error
 import grpc
+import os
 import socket
 import validation_pb2
 import validation_pb2_grpc
 import hashlib
+import zipfile
 from concurrent import futures
 
 
@@ -59,6 +61,12 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                     buf = f.read()
                     hasher.update(buf)
                 info(f"Uploaded file hash: {hasher.hexdigest()}")
+
+                # Unzip file
+                with zipfile.ZipFile(f"{self.saved_models_path}/{file_id}", "r") as zip_ref:
+                    directory = f"{self.saved_models_path}/{file_id[:-4]}"
+                    os.mkdir(directory)
+                    zip_ref.extractall(directory)
 
                 # Success
                 return validation_pb2.UploadStatus(
