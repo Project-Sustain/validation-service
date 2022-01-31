@@ -5,7 +5,7 @@ syntax = "proto3";
 service Master {
 
   // Allows streamed uploading of a .zip model to the Master
-  rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
+  rpc UploadFile(ModelFile) returns (UploadStatus) {}
 
   // Submits a validation job to the cluster
   rpc SubmitValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
@@ -29,7 +29,7 @@ message WorkerRegistrationResponse {
 service Worker {
 
   // Allows streamed uploading of a .zip model to the Worker
-  rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
+  rpc UploadFile(ModelFile) returns (UploadStatus) {}
 
   // Registers a Worker to track via heartbeats
   rpc BeginValidationJob(ValidationJobRequest) returns (WorkerJobResponse) {}
@@ -46,6 +46,7 @@ message ValidationJobRequest {
   string validation_metric = 7;
   repeated string feature_fields = 8;
   repeated string gis_joins = 9;
+  ModelFile model_file = 10;
 }
 
 message ValidationJobResponse {
@@ -66,9 +67,10 @@ message WorkerJobResponse {
   WorkerJobStatusCode worker_job_status_code = 3;
 }
 
-message FileChunk {
-  string id = 1;
-  bytes data = 2;
+message ModelFile {
+  string type = 1;
+  string md5_hash = 2;
+  bytes data = 3;
 }
 
 enum UploadStatusCode {

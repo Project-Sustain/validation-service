@@ -8,7 +8,7 @@ from pprint import pprint
 
 from werkzeug.utils import secure_filename
 
-import file_chunker
+import filereader
 import validation_pb2
 import validation_pb2_grpc
 
@@ -59,38 +59,35 @@ def validation():
     if file.filename == '':
         return 'Empty file submitted', HTTPStatus.BAD_REQUEST
 
-    # Save file
-    saved_filename = "my_model.zip"
     if file and allowed_file(file.filename):
-        file.save(os.path.join(app.config['UPLOAD_DIR'], saved_filename))
+        file_bytes = file.read()
 
-    # Get file hash
-    with open(f"{UPLOAD_DIR}/{saved_filename}", "rb") as f:
         hasher = hashlib.md5()
-        buf = f.read()
-        hasher.update(buf)
-    info(f"Uploaded file hash: {hasher.hexdigest()}")
+        hasher.update(file_bytes)
+        md5_hash = hasher.hexdigest()
+        info(f"Uploaded file of size {len(file_bytes)} bytes, and hash: {md5_hash}")
 
-    # Create gRPC request to master node
-    with open(f"{UPLOAD_DIR}/{saved_filename}", "rb") as f:
         with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
             stub = validation_pb2_grpc.MasterStub(channel)
-            file_upload_response = stub.UploadFile(file_chunker.chunk_file(f, validation_request.id))
+            model_file = validation_pb2.ModelFile(
+                type="zip",
+                md5_hash=md5_hash,
+                data=file_bytes
+            )
+            validation_grpc_request = validation_pb2.ValidationJobRequest(
+                id="",
+                model_framework=validation_request.model_framework,
+                model_type=validation_request.model_type,
+                database=validation_request.database,
+                collection=validation_request.collection,
+                label_field=validation_request.label_field,
+                validation_metric=validation_request.validation_metric,
+                feature_fields=validation_request.feature_fields,
+                gis_joins=[],
+                model_file=model_file
+            )
 
-    info(f"Response received: {file_upload_response}")
+            validation_grpc_response = stub.SubmitValidationJob(validation_grpc_request)
+            info(f"Validation Response received: {validation_grpc_response}")
 
-    # Create gRPC request to master node for validation job
-    with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
-        stub = validation_pb2_grpc.MasterStub(channel)
-        validation_job_response = stub.SubmitValidationJob(validation_pb2.ValidationJobRequest(
-            id=validation_request.id,
-            model_framework=validation_request.model_framework,
-            model_type=validation_request.model_type,
-            database=validation_request.database,
-            collection=validation_request.collection,
-            label_field=validation_request.label_field,
-            validation_metric=validation_request.validation_metric,
-            feature_fields=validation_request.feature_fields
-        ))
-
-    return f'File {saved_filename} successfully saved', HTTPStatus.OK
+    return f"ValidationJobResponse: {validation_grpc_response}", HTTPStatus.OK

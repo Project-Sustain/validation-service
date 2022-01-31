@@ -16,5 +16,12 @@ def chunk_file(f, request_id):
         yield validation_pb2.FileChunk(id=f"{request_id}.zip", data=chunk)
 
 
+def read_file_bytes(file_path):
+    file_bytes = None
+    with open(file_path, "rb") as f:
+        file_bytes = f.read()
+    return file_bytes
+
+
 if __name__ == "__main__":
     main()

@@ -1,5 +1,0 @@
-tensorflow
-pymongo
-matplotlib
-tensorflow-io
-pandas
