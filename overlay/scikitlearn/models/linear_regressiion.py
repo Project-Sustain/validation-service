@@ -1,6 +1,6 @@
 import pickle
 
-from overlay.constants import DB_PORT, DB_HOST
+from overlay.constants import DB_PORT, DB_HOST, DB_NAME
 from overlay.scikitlearn.db.querier import Querier
 from overlay.validation_pb2 import ValidationJobRequest
 
@@ -19,4 +19,4 @@ class LinearRegression:
 
 
 if __name__ == "__main__":
-    print("Starting...")
+    pass

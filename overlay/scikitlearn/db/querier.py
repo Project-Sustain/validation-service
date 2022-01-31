@@ -11,3 +11,9 @@ class Querier:
         client_query = {"GISJOIN": gis_join}
         query_results = list(collection.find(client_query))
         return query_results
+
+
+if __name__ == "__main__":
+    sustaindb = Querier("localhost:27017", "sustaindb")
+    results = sustaindb.query("county_median_age", "G0100150")
+    print(results)
