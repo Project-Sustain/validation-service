@@ -1,7 +1,9 @@
 import json
-import logging
-from logging import info, error
+from logging import info
+
 from pymongo import MongoClient
+
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME
 
 
 def get_gis_join_locations():
@@ -9,8 +11,8 @@ def get_gis_join_locations():
     county_gis_joins = load_gis_joins(resources_dir)
     info(f"Loaded in county GISJOIN list of size {len(county_gis_joins)}, retrieving chunk locations from MongoDB...")
 
-    mongo_client = MongoClient("mongodb://lattice-100:27018")
-    db = mongo_client["sustaindb"]
+    mongo_client = MongoClient(f"mongodb://{DB_HOST}:{DB_PORT}")
+    db = mongo_client[DB_NAME]
     collection = db["noaa_nam"]
     for gis_join in county_gis_joins.keys():
         explained_query = collection.find({"COUNTY_GISJOIN": gis_join}).explain()

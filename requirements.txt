@@ -3,3 +3,4 @@ Flask
 grpcio
 grpcio-tools
 pymongo
+python-dotenv
