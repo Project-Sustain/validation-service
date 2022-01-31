@@ -81,7 +81,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                     with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
                         with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
                             stub = validation_pb2_grpc.WorkerStub(channel)
-                            upload_response = stub.UploadFile(file_chunker.chunk_file(f))
+                            upload_response = stub.UploadFile(file_chunker.chunk_file(f, file_id[:-4]))
                             if upload_response == validation_pb2.UPLOAD_STATUS_CODE_FAILED:
                                 raise ValueError(f"Failed to upload file {file_id} to worker {worker.hostname}")
                     info(f"Successfully uploaded file to worker {worker.hostname}")
@@ -109,7 +109,20 @@ class Master(validation_pb2_grpc.MasterServicer):
         info(f"SubmitValidationJob Request: {request}")
         for worker in self.tracked_workers:
             info(f"Submitting validation job to {worker} for GISJOINs {worker.gis_joins}")
-
+            with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
+                stub = validation_pb2_grpc.WorkerStub(channel)
+                validation_job_response = stub.BeginValidationJob(validation_pb2.ValidationJobRequest(
+                    id=request.id,
+                    model_framework=request.model_framework,
+                    model_type=request.model_type,
+                    database=request.database,
+                    collection=request.collection,
+                    label_field=request.label_field,
+                    validation_metric=request.validation_metric,
+                    feature_fields=request.feature_fields,
+                    gis_joins=worker.gis_joins
+                ))
+                info(validation_job_response)
             break  # TODO: Remove
         return validation_pb2.ValidationJobResponse(message="OK")
 

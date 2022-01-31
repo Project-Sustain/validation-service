@@ -10,10 +10,10 @@ def main():
             info(chunk)
 
 
-def chunk_file(f):
+def chunk_file(f, request_id):
     for chunk in iter(lambda: f.read(4096), bytes()):
         info(f"Read {len(chunk)} bytes")
-        yield validation_pb2.FileChunk(id="a57c2f.zip", data=chunk)
+        yield validation_pb2.FileChunk(id=f"{request_id}.zip", data=chunk)
 
 
 if __name__ == "__main__":

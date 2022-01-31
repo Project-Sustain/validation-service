@@ -75,7 +75,22 @@ def validation():
     with open(f"{UPLOAD_DIR}/{saved_filename}", "rb") as f:
         with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
             stub = validation_pb2_grpc.MasterStub(channel)
-            file_upload_response = stub.UploadFile(file_chunker.chunk_file(f))
+            file_upload_response = stub.UploadFile(file_chunker.chunk_file(f, validation_request.id))
 
     info(f"Response received: {file_upload_response}")
+
+    # Create gRPC request to master node for validation job
+    with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
+        stub = validation_pb2_grpc.MasterStub(channel)
+        validation_job_response = stub.SubmitValidationJob(validation_pb2.ValidationJobRequest(
+            id=validation_request.id,
+            model_framework=validation_request.model_framework,
+            model_type=validation_request.model_type,
+            database=validation_request.database,
+            collection=validation_request.collection,
+            label_field=validation_request.label_field,
+            validation_metric=validation_request.validation_metric,
+            feature_fields=validation_request.feature_fields
+        ))
+
     return f'File {saved_filename} successfully saved', HTTPStatus.OK
