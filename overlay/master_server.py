@@ -2,12 +2,12 @@ import grpc
 import validation_pb2
 import validation_pb2_grpc
 import data_locality
+import file_chunker
 from logging import info, error
 from concurrent import futures
 import hashlib
 
 LOCAL_TESTING = False
-SAVE_DIR = "testing/master/saved_models"
 
 
 class WorkerMetadata:
@@ -22,7 +22,7 @@ class WorkerMetadata:
         self.gis_joins.append(gis_join)
 
     def __repr__(self):
-        return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}, gis_joins={self.gis_joins}"
+        return f"WorkerMetadata: hostname={self.hostname}, port={self.port}, jobs={self.jobs}, gis_joins={self.gis_joins}"
 
 
 class Master(validation_pb2_grpc.MasterServicer):
@@ -49,7 +49,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             for file_chunk in request_iterator:
                 file_id = file_chunk.id
                 if not file_pointer:
-                    file_pointer = open(f"{SAVE_DIR}/{file_id}", "wb")
+                    file_pointer = open(f"{self.saved_models_path}/{file_id}", "wb")
 
                 file_bytes = file_chunk.data
                 info(f"Length of chunk index {chunk_index}: {len(file_bytes)}")
@@ -62,11 +62,21 @@ class Master(validation_pb2_grpc.MasterServicer):
 
             # Get file hash
             if file_id:
-                with open(f"{SAVE_DIR}/{file_id}", "rb") as f:
+                with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
                     hasher = hashlib.md5()
                     buf = f.read()
                     hasher.update(buf)
                 info(f"Uploaded file hash: {hasher.hexdigest()}")
+
+                # Upload file to all workers
+                for worker in self.tracked_workers:
+                    with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
+                        with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
+                            stub = validation_pb2_grpc.WorkerStub(channel)
+                            upload_response = stub.UploadFile(file_chunker.chunk_file(f))
+                            if upload_response == validation_pb2.UPLOAD_STATUS_CODE_FAILED:
+                                raise ValueError(f"Failed to upload file {file_id} to worker {worker.hostname}")
+                    info(f"Successfully uploaded file to worker {worker.hostname}")
 
                 # Success
                 return validation_pb2.UploadStatus(
@@ -75,6 +85,8 @@ class Master(validation_pb2_grpc.MasterServicer):
                     upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_OK
                 )
 
+        except ValueError as e:
+            error(f"{e}")
         except Exception as e:
             error(f"Failed to receive chunk index {chunk_index}: {e}")
 
