@@ -3,7 +3,7 @@ from logging import info
 
 from pymongo import MongoClient
 
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from constants import DB_HOST, DB_PORT, DB_NAME
 
 
 def get_gis_join_locations():
