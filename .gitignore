@@ -138,6 +138,8 @@ uploads/*.zip
 client/validation-app/package-lock.json
 client/validation-app/node_modules/
 
+# env
+env.sh
 # Logs
 log.txt
 
