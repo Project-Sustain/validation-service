@@ -128,13 +128,13 @@ class Master(validation_pb2_grpc.MasterServicer):
             workers_to_gis_joins_map[worker].append(gis_join)
 
         # to be executed in a new thread
-        def start_worker_thread(_worker: WorkerMetadata):
+        def start_worker_thread(_worker: WorkerMetadata, _gis_joins_list):
             info(f"Submitting validation job to {_worker} for GISJOINs {_worker.gis_joins}")
             with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
                 stub = validation_pb2_grpc.WorkerStub(channel)
                 job_id = generate_job_id()
                 request.id = job_id
-                request.gis_joins = _worker.gis_joins
+                request.gis_joins = _gis_joins_list
                 validation_job_response = stub.BeginValidationJob(request)
                 info(validation_job_response)
                 validation_job_responses.append(validation_job_response)
@@ -142,7 +142,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         for worker, gis_joins_list in workers_to_gis_joins_map:
             if len(gis_joins_list) > 0:
                 # start new thread
-                t = threading.Thread(target=start_worker_thread, args=(worker))
+                t = threading.Thread(target=start_worker_thread, args=(worker, gis_joins_list))
                 threads.append(t)
                 t.start()
 
