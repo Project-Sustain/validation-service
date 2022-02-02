@@ -15,9 +15,9 @@ class MasterStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.UploadFile = channel.stream_unary(
+        self.UploadFile = channel.unary_unary(
                 '/Master/UploadFile',
-                request_serializer=validation__pb2.FileChunk.SerializeToString,
+                request_serializer=validation__pb2.ModelFile.SerializeToString,
                 response_deserializer=validation__pb2.UploadStatus.FromString,
                 )
         self.SubmitValidationJob = channel.unary_unary(
@@ -36,7 +36,7 @@ class MasterServicer(object):
     """Master service definition
     """
 
-    def UploadFile(self, request_iterator, context):
+    def UploadFile(self, request, context):
         """Allows streamed uploading of a .zip model to the Master
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -60,9 +60,9 @@ class MasterServicer(object):
 
 def add_MasterServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'UploadFile': grpc.stream_unary_rpc_method_handler(
+            'UploadFile': grpc.unary_unary_rpc_method_handler(
                     servicer.UploadFile,
-                    request_deserializer=validation__pb2.FileChunk.FromString,
+                    request_deserializer=validation__pb2.ModelFile.FromString,
                     response_serializer=validation__pb2.UploadStatus.SerializeToString,
             ),
             'SubmitValidationJob': grpc.unary_unary_rpc_method_handler(
@@ -87,7 +87,7 @@ class Master(object):
     """
 
     @staticmethod
-    def UploadFile(request_iterator,
+    def UploadFile(request,
             target,
             options=(),
             channel_credentials=None,
@@ -97,8 +97,8 @@ class Master(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/Master/UploadFile',
-            validation__pb2.FileChunk.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/Master/UploadFile',
+            validation__pb2.ModelFile.SerializeToString,
             validation__pb2.UploadStatus.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -148,9 +148,9 @@ class WorkerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.UploadFile = channel.stream_unary(
+        self.UploadFile = channel.unary_unary(
                 '/Worker/UploadFile',
-                request_serializer=validation__pb2.FileChunk.SerializeToString,
+                request_serializer=validation__pb2.ModelFile.SerializeToString,
                 response_deserializer=validation__pb2.UploadStatus.FromString,
                 )
         self.BeginValidationJob = channel.unary_unary(
@@ -164,7 +164,7 @@ class WorkerServicer(object):
     """Worker service definition
     """
 
-    def UploadFile(self, request_iterator, context):
+    def UploadFile(self, request, context):
         """Allows streamed uploading of a .zip model to the Worker
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -181,9 +181,9 @@ class WorkerServicer(object):
 
 def add_WorkerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'UploadFile': grpc.stream_unary_rpc_method_handler(
+            'UploadFile': grpc.unary_unary_rpc_method_handler(
                     servicer.UploadFile,
-                    request_deserializer=validation__pb2.FileChunk.FromString,
+                    request_deserializer=validation__pb2.ModelFile.FromString,
                     response_serializer=validation__pb2.UploadStatus.SerializeToString,
             ),
             'BeginValidationJob': grpc.unary_unary_rpc_method_handler(
@@ -203,7 +203,7 @@ class Worker(object):
     """
 
     @staticmethod
-    def UploadFile(request_iterator,
+    def UploadFile(request,
             target,
             options=(),
             channel_credentials=None,
@@ -213,8 +213,8 @@ class Worker(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(request_iterator, target, '/Worker/UploadFile',
-            validation__pb2.FileChunk.SerializeToString,
+        return grpc.experimental.unary_unary(request, target, '/Worker/UploadFile',
+            validation__pb2.ModelFile.SerializeToString,
             validation__pb2.UploadStatus.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

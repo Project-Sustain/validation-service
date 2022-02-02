@@ -1,28 +1,34 @@
+import threading
+import uuid
+from concurrent import futures
+from logging import info
+
 import grpc
+
+import data_locality
 import validation_pb2
 import validation_pb2_grpc
-import data_locality
-from logging import info, error
-from concurrent import futures
-import hashlib
 
 LOCAL_TESTING = False
-SAVE_DIR = "testing/master/saved_models"
 
 
 class WorkerMetadata:
 
-    def __init__(self, hostname, port):
+    def __init__(self, hostname, port, gis_joins):
         self.hostname = hostname
         self.port = port
         self.jobs = []
-        self.gis_joins = []
+        self.gis_joins = gis_joins
 
     def add_gis_join(self, gis_join):
         self.gis_joins.append(gis_join)
 
     def __repr__(self):
-        return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}, gis_joins={self.gis_joins}"
+        return f"WorkerMetadata: hostname={self.hostname}, port={self.port}, jobs={self.jobs}, gis_joins={self.gis_joins}"
+
+
+def generate_job_id():
+    return uuid.uuid4().hex
 
 
 class Master(validation_pb2_grpc.MasterServicer):
@@ -30,64 +36,123 @@ class Master(validation_pb2_grpc.MasterServicer):
     def __init__(self, gis_join_locations):
         super(Master, self).__init__()
         self.tracked_workers = []
+        self.gis_join_worker_map = {}  # gis_join --> worker
+        self.tracked_jobs = []
         self.saved_models_path = "testing/master/saved_models"
         self.gis_join_locations = gis_join_locations
 
     def RegisterWorker(self, request, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
-        self.tracked_workers.append(WorkerMetadata(request.hostname, request.port))
+        gis_joins = []
+        for gis_join, servers in self.gis_join_locations.items():
+            for server in servers:
+                if server == request.hostname:
+                    gis_joins.append(gis_join)
+                    self.gis_join_worker_map[gis_join] = server
+
+        new_worker = WorkerMetadata(request.hostname, request.port, gis_joins)
+        self.tracked_workers.append(new_worker)
+        info(f"Added Worker: {new_worker}")
         return validation_pb2.WorkerRegistrationResponse(success=True)
 
     def UploadFile(self, request_iterator, context):
-        info(f"Received UploadFile stream request, processing chunks...")
-        total_bytes_received = 0
-        chunk_index = 0
-
-        try:
-            file_pointer = None
-            file_id = None
-            for file_chunk in request_iterator:
-                file_id = file_chunk.id
-                if not file_pointer:
-                    file_pointer = open(f"{SAVE_DIR}/{file_id}", "wb")
-
-                file_bytes = file_chunk.data
-                info(f"Length of chunk index {chunk_index}: {len(file_bytes)}")
-                chunk_index += 1
-                total_bytes_received += len(file_bytes)
-                file_pointer.write(file_bytes)
-
-            file_pointer.close()
-            info(f"Finished receiving chunks, {total_bytes_received} total bytes received")
-
-            # Get file hash
-            if file_id:
-                with open(f"{SAVE_DIR}/{file_id}", "rb") as f:
-                    hasher = hashlib.md5()
-                    buf = f.read()
-                    hasher.update(buf)
-                info(f"Uploaded file hash: {hasher.hexdigest()}")
-
-                # Success
-                return validation_pb2.UploadStatus(
-                    message="Success",
-                    file_hash=hasher.hexdigest(),
-                    upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_OK
-                )
-
-        except Exception as e:
-            error(f"Failed to receive chunk index {chunk_index}: {e}")
-
-        # Failure, hopefully we don't make it here
-        return validation_pb2.UploadStatus(
-            message="Failed",
-            file_hash="None",
-            upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_FAILED
-        )
+        # info(f"Received UploadFile stream request, processing chunks...")
+        # total_bytes_received = 0
+        # chunk_index = 0
+        #
+        # try:
+        #     file_pointer = None
+        #     file_id = None
+        #     for file_chunk in request_iterator:
+        #         file_id = file_chunk.id
+        #         if not file_pointer:
+        #             file_pointer = open(f"{self.saved_models_path}/{file_id}", "wb")
+        #
+        #         file_bytes = file_chunk.data
+        #         info(f"Length of chunk index {chunk_index}: {len(file_bytes)}")
+        #         chunk_index += 1
+        #         total_bytes_received += len(file_bytes)
+        #         file_pointer.write(file_bytes)
+        #
+        #     file_pointer.close()
+        #     info(f"Finished receiving chunks, {total_bytes_received} total bytes received")
+        #
+        #     # Get file hash
+        #     if file_id:
+        #         with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
+        #             hasher = hashlib.md5()
+        #             buf = f.read()
+        #             hasher.update(buf)
+        #         info(f"Uploaded file hash: {hasher.hexdigest()}")
+        #
+        #         # Upload file to all workers
+        #         for worker in self.tracked_workers:
+        #             with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
+        #                 with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
+        #                     stub = validation_pb2_grpc.WorkerStub(channel)
+        #                     upload_response = stub.UploadFile(file_chunker.chunk_file(f, file_id[:-4]))
+        #                     if upload_response == validation_pb2.UPLOAD_STATUS_CODE_FAILED:
+        #                         raise ValueError(f"Failed to upload file {file_id} to worker {worker.hostname}")
+        #             info(f"Successfully uploaded file to worker {worker.hostname}")
+        #
+        #         # Success
+        #         return validation_pb2.UploadStatus(
+        #             message="Success",
+        #             file_hash=hasher.hexdigest(),
+        #             upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_OK
+        #         )
+        #
+        # except ValueError as e:
+        #     error(f"{e}")
+        # except Exception as e:
+        #     error(f"Failed to receive chunk index {chunk_index}: {e}")
+        #
+        # # Failure, hopefully we don't make it here
+        # return validation_pb2.UploadStatus(
+        #     message="Failed",
+        #     file_hash="None",
+        #     upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_FAILED
+        # )
+        pass
 
     def SubmitValidationJob(self, request, context):
-        info(request)
-        return validation_pb2.ValidationJobResponse(message="Got the job")
+        info(f"SubmitValidationJob Request: {request}")
+        threads = []
+        validation_job_responses = []
+        workers_to_gis_joins_map = {}  # worker --> [gis_join_1, gis_join_2, ...]
+        for gis_join in request.gis_joins:
+            worker = self.gis_join_worker_map[gis_join]
+            if not workers_to_gis_joins_map[worker]:
+                # key not found in map, initialize new list
+                workers_to_gis_joins_map[worker] = []
+            workers_to_gis_joins_map[worker].append(gis_join)
+
+        # to be executed in a new thread
+        def start_worker_thread(_worker: WorkerMetadata, _gis_joins_list):
+            info(f"Submitting validation job to {_worker} for GISJOINs {_worker.gis_joins}")
+            with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
+                stub = validation_pb2_grpc.WorkerStub(channel)
+                job_id = generate_job_id()
+                request.id = job_id
+                request.gis_joins = _gis_joins_list
+                validation_job_response = stub.BeginValidationJob(request)
+                info(validation_job_response)
+                validation_job_responses.append(validation_job_response)
+
+        for worker, gis_joins_list in workers_to_gis_joins_map:
+            if len(gis_joins_list) > 0:
+                # start new thread
+                t = threading.Thread(target=start_worker_thread, args=(worker, gis_joins_list))
+                threads.append(t)
+                t.start()
+
+        # wait for all worker threads to complete
+        for thread in threads:
+            thread.join()
+
+        # TODO: combine results
+
+        return validation_pb2.ValidationJobResponse(message="OK")
 
 
 def run(master_port=50051):

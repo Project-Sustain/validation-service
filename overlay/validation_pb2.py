@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xd0\x01\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x17\n\x0fmodel_framework\x18\x02 \x01(\t\x12\x12\n\nmodel_type\x18\x03 \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\x04 \x01(\t\x12\x12\n\ncollection\x18\x05 \x01(\t\x12\x13\n\x0blabel_field\x18\x06 \x01(\t\x12\x19\n\x11validation_metric\x18\x07 \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x08 \x03(\t\x12\x11\n\tgis_joins\x18\t \x03(\t\"(\n\x15ValidationJobResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"l\n\x11WorkerJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\rerror_message\x18\x02 \x01(\t\x12\x34\n\x16worker_job_status_code\x18\x03 \x01(\x0e\x32\x14.WorkerJobStatusCode\"%\n\tFileChunk\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode*\x9d\x01\n\x13WorkerJobStatusCode\x12\"\n\x1eWORKER_JOB_STATUS_CODE_UNKNOWN\x10\x00\x12\x1d\n\x19WORKER_JOB_STATUS_CODE_OK\x10\x01\x12 \n\x1cWORKER_JOB_STATUS_CODE_ERROR\x10\x02\x12!\n\x1dWORKER_JOB_STATUS_CODE_FAILED\x10\x03*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02\x32\xca\x01\n\x06Master\x12+\n\nUploadFile\x12\n.FileChunk\x1a\r.UploadStatus\"\x00(\x01\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32x\n\x06Worker\x12+\n\nUploadFile\x12\n.FileChunk\x1a\r.UploadStatus\"\x00(\x01\x12\x41\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x12.WorkerJobResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xf0\x01\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x17\n\x0fmodel_framework\x18\x02 \x01(\t\x12\x12\n\nmodel_type\x18\x03 \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\x04 \x01(\t\x12\x12\n\ncollection\x18\x05 \x01(\t\x12\x13\n\x0blabel_field\x18\x06 \x01(\t\x12\x19\n\x11validation_metric\x18\x07 \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x08 \x03(\t\x12\x11\n\tgis_joins\x18\t \x03(\t\x12\x1e\n\nmodel_file\x18\n \x01(\x0b\x32\n.ModelFile\"(\n\x15ValidationJobResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"l\n\x11WorkerJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\x15\n\rerror_message\x18\x02 \x01(\t\x12\x34\n\x16worker_job_status_code\x18\x03 \x01(\x0e\x32\x14.WorkerJobStatusCode\"9\n\tModelFile\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode*\x9d\x01\n\x13WorkerJobStatusCode\x12\"\n\x1eWORKER_JOB_STATUS_CODE_UNKNOWN\x10\x00\x12\x1d\n\x19WORKER_JOB_STATUS_CODE_OK\x10\x01\x12 \n\x1cWORKER_JOB_STATUS_CODE_ERROR\x10\x02\x12!\n\x1dWORKER_JOB_STATUS_CODE_FAILED\x10\x03*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02\x32\xc8\x01\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32v\n\x06Worker\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x41\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x12.WorkerJobResponse\"\x00\x62\x06proto3'
 )
 
 _WORKERJOBSTATUSCODE = _descriptor.EnumDescriptor(
@@ -53,8 +53,8 @@ _WORKERJOBSTATUSCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=630,
-  serialized_end=787,
+  serialized_start=682,
+  serialized_end=839,
 )
 _sym_db.RegisterEnumDescriptor(_WORKERJOBSTATUSCODE)
 
@@ -84,8 +84,8 @@ _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=789,
-  serialized_end=897,
+  serialized_start=841,
+  serialized_end=949,
 )
 _sym_db.RegisterEnumDescriptor(_UPLOADSTATUSCODE)
 
@@ -242,6 +242,13 @@ _VALIDATIONJOBREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='model_file', full_name='ValidationJobRequest.model_file', index=9,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -255,7 +262,7 @@ _VALIDATIONJOBREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=129,
-  serialized_end=337,
+  serialized_end=369,
 )
 
 
@@ -286,8 +293,8 @@ _VALIDATIONJOBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=339,
-  serialized_end=379,
+  serialized_start=371,
+  serialized_end=411,
 )
 
 
@@ -332,29 +339,36 @@ _WORKERJOBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=381,
-  serialized_end=489,
+  serialized_start=413,
+  serialized_end=521,
 )
 
 
-_FILECHUNK = _descriptor.Descriptor(
-  name='FileChunk',
-  full_name='FileChunk',
+_MODELFILE = _descriptor.Descriptor(
+  name='ModelFile',
+  full_name='ModelFile',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='FileChunk.id', index=0,
+      name='type', full_name='ModelFile.type', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='data', full_name='FileChunk.data', index=1,
-      number=2, type=12, cpp_type=9, label=1,
+      name='md5_hash', full_name='ModelFile.md5_hash', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='data', full_name='ModelFile.data', index=2,
+      number=3, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -371,8 +385,8 @@ _FILECHUNK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=491,
-  serialized_end=528,
+  serialized_start=523,
+  serialized_end=580,
 )
 
 
@@ -417,10 +431,11 @@ _UPLOADSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=530,
-  serialized_end=627,
+  serialized_start=582,
+  serialized_end=679,
 )
 
+_VALIDATIONJOBREQUEST.fields_by_name['model_file'].message_type = _MODELFILE
 _WORKERJOBRESPONSE.fields_by_name['worker_job_status_code'].enum_type = _WORKERJOBSTATUSCODE
 _UPLOADSTATUS.fields_by_name['upload_status_code'].enum_type = _UPLOADSTATUSCODE
 DESCRIPTOR.message_types_by_name['WorkerRegistrationRequest'] = _WORKERREGISTRATIONREQUEST
@@ -428,7 +443,7 @@ DESCRIPTOR.message_types_by_name['WorkerRegistrationResponse'] = _WORKERREGISTRA
 DESCRIPTOR.message_types_by_name['ValidationJobRequest'] = _VALIDATIONJOBREQUEST
 DESCRIPTOR.message_types_by_name['ValidationJobResponse'] = _VALIDATIONJOBRESPONSE
 DESCRIPTOR.message_types_by_name['WorkerJobResponse'] = _WORKERJOBRESPONSE
-DESCRIPTOR.message_types_by_name['FileChunk'] = _FILECHUNK
+DESCRIPTOR.message_types_by_name['ModelFile'] = _MODELFILE
 DESCRIPTOR.message_types_by_name['UploadStatus'] = _UPLOADSTATUS
 DESCRIPTOR.enum_types_by_name['WorkerJobStatusCode'] = _WORKERJOBSTATUSCODE
 DESCRIPTOR.enum_types_by_name['UploadStatusCode'] = _UPLOADSTATUSCODE
@@ -469,12 +484,12 @@ WorkerJobResponse = _reflection.GeneratedProtocolMessageType('WorkerJobResponse'
   })
 _sym_db.RegisterMessage(WorkerJobResponse)
 
-FileChunk = _reflection.GeneratedProtocolMessageType('FileChunk', (_message.Message,), {
-  'DESCRIPTOR' : _FILECHUNK,
+ModelFile = _reflection.GeneratedProtocolMessageType('ModelFile', (_message.Message,), {
+  'DESCRIPTOR' : _MODELFILE,
   '__module__' : 'validation_pb2'
-  # @@protoc_insertion_point(class_scope:FileChunk)
+  # @@protoc_insertion_point(class_scope:ModelFile)
   })
-_sym_db.RegisterMessage(FileChunk)
+_sym_db.RegisterMessage(ModelFile)
 
 UploadStatus = _reflection.GeneratedProtocolMessageType('UploadStatus', (_message.Message,), {
   'DESCRIPTOR' : _UPLOADSTATUS,
@@ -492,15 +507,15 @@ _MASTER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=900,
-  serialized_end=1102,
+  serialized_start=952,
+  serialized_end=1152,
   methods=[
   _descriptor.MethodDescriptor(
     name='UploadFile',
     full_name='Master.UploadFile',
     index=0,
     containing_service=None,
-    input_type=_FILECHUNK,
+    input_type=_MODELFILE,
     output_type=_UPLOADSTATUS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -538,15 +553,15 @@ _WORKER = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1104,
-  serialized_end=1224,
+  serialized_start=1154,
+  serialized_end=1272,
   methods=[
   _descriptor.MethodDescriptor(
     name='UploadFile',
     full_name='Worker.UploadFile',
     index=0,
     containing_service=None,
-    input_type=_FILECHUNK,
+    input_type=_MODELFILE,
     output_type=_UPLOADSTATUS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
