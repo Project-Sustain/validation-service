@@ -1,12 +1,13 @@
+import threading
+import uuid
+from concurrent import futures
+from logging import info
+
 import grpc
+
+import data_locality
 import validation_pb2
 import validation_pb2_grpc
-import data_locality
-import filereader
-from logging import info, error
-from concurrent import futures
-import hashlib
-import uuid
 
 LOCAL_TESTING = False
 
@@ -38,7 +39,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         self.tracked_jobs = []
         self.saved_models_path = "testing/master/saved_models"
         self.gis_join_locations = gis_join_locations
-
 
     def RegisterWorker(self, request, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
@@ -115,17 +115,26 @@ class Master(validation_pb2_grpc.MasterServicer):
 
     def SubmitValidationJob(self, request, context):
         info(f"SubmitValidationJob Request: {request}")
+        threads = []
+        validation_job_responses = []
+
+        def start_worker_thread(_worker: WorkerMetadata):
+            info(f"Submitting validation job to {_worker} for GISJOINs {_worker.gis_joins}")
+            with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
+                stub = validation_pb2_grpc.WorkerStub(channel)
+                job_id = generate_job_id()
+                request.id = job_id
+                request.gis_joins = _worker.gis_joins
+                validation_job_response = stub.BeginValidationJob(request)
+                info(validation_job_response)
+                validation_job_responses.append(validation_job_response)
+
         for worker in self.tracked_workers:
             if len(worker.gis_joins) > 0:
-                info(f"Submitting validation job to {worker} for GISJOINs {worker.gis_joins}")
-                with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
-                    stub = validation_pb2_grpc.WorkerStub(channel)
-                    job_id = generate_job_id()
-                    request.id = job_id
-                    request.gis_joins = worker.gis_joins
-                    validation_job_response = stub.BeginValidationJob(request)
-
-                    info(validation_job_response)
+                # start new thread
+                t = threading.Thread(target=start_worker_thread, args=(worker))
+                threads.append(t)
+                t.start()
                 break  # TODO: Remove
 
         return validation_pb2.ValidationJobResponse(message="OK")
