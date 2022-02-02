@@ -12,6 +12,19 @@ import validation_pb2_grpc
 LOCAL_TESTING = False
 
 
+class WorkerJobMetadata:
+
+    def __init__(self, gis_joins):
+        self.gis_joins = gis_joins
+        self.status = "NEW"
+
+    def complete(self):
+        self.status = "DONE"
+
+    def __repr__(self):
+        return f"WorkerJobMetadata: status={self.status}, gis_joins={self.gis_joins}"
+
+
 class WorkerMetadata:
 
     def __init__(self, hostname, port, gis_joins):
@@ -115,6 +128,9 @@ class Master(validation_pb2_grpc.MasterServicer):
         # )
         pass
 
+    # TODO: Handle concurrent responses, return to client
+    # TODO: Test model file distribution as single request
+    # TODO:
     def SubmitValidationJob(self, request, context):
         info(f"SubmitValidationJob Request: {request}")
         threads = []
