@@ -36,6 +36,7 @@ class Master(validation_pb2_grpc.MasterServicer):
     def __init__(self, gis_join_locations):
         super(Master, self).__init__()
         self.tracked_workers = []
+        self.gis_join_worker_map = {}  # gis_join --> worker
         self.tracked_jobs = []
         self.saved_models_path = "testing/master/saved_models"
         self.gis_join_locations = gis_join_locations
@@ -47,6 +48,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             for server in servers:
                 if server == request.hostname:
                     gis_joins.append(gis_join)
+                    self.gis_join_worker_map[gis_join] = server
 
         new_worker = WorkerMetadata(request.hostname, request.port, gis_joins)
         self.tracked_workers.append(new_worker)
@@ -117,7 +119,15 @@ class Master(validation_pb2_grpc.MasterServicer):
         info(f"SubmitValidationJob Request: {request}")
         threads = []
         validation_job_responses = []
+        workers_to_gis_joins_map = {}  # worker --> [gis_join_1, gis_join_2, ...]
+        for gis_join in request.gis_joins:
+            worker = self.gis_join_worker_map[gis_join]
+            if not workers_to_gis_joins_map[worker]:
+                # key not found in map, initialize new list
+                workers_to_gis_joins_map[worker] = []
+            workers_to_gis_joins_map[worker].append(gis_join)
 
+        # to be executed in a new thread
         def start_worker_thread(_worker: WorkerMetadata):
             info(f"Submitting validation job to {_worker} for GISJOINs {_worker.gis_joins}")
             with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
@@ -129,13 +139,15 @@ class Master(validation_pb2_grpc.MasterServicer):
                 info(validation_job_response)
                 validation_job_responses.append(validation_job_response)
 
-        for worker in self.tracked_workers:
-            if len(worker.gis_joins) > 0:
+        for worker, gis_joins_list in workers_to_gis_joins_map:
+            if len(gis_joins_list) > 0:
                 # start new thread
                 t = threading.Thread(target=start_worker_thread, args=(worker))
                 threads.append(t)
                 t.start()
-                break  # TODO: Remove
+
+        for thread in threads:
+            thread.join()
 
         return validation_pb2.ValidationJobResponse(message="OK")
 
