@@ -146,8 +146,11 @@ class Master(validation_pb2_grpc.MasterServicer):
                 threads.append(t)
                 t.start()
 
+        # wait for all worker threads to complete
         for thread in threads:
             thread.join()
+
+        # TODO: combine results
 
         return validation_pb2.ValidationJobResponse(message="OK")
 
