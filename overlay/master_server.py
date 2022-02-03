@@ -49,6 +49,7 @@ def generate_job_id():
 
 
 def get_or_create_worker_job(worker, job_id):
+    info(f"Creating job for worker={worker.hostname}, job={job_id}")
     if job_id not in worker.jobs:
         worker.jobs[job_id] = WorkerJobMetadata(job_id, worker)
     return worker.jobs[job_id]
@@ -156,9 +157,10 @@ class Master(validation_pb2_grpc.MasterServicer):
         info(f"Generated job id {job_id}")
 
         for gis_join in request.gis_joins:
+            info(f"Processing job GISJOIN {gis_join}")
             worker_for_gis_join = None
             gis_join_hosts = self.gis_join_locations[gis_join]
-
+            info(f"GISJOIN hosts: {gis_join_hosts}")
             for worker_host in gis_join_hosts:
                 if self.is_worker_registered(worker_host):
                     worker_for_gis_join = self.tracked_workers[worker_host]
