@@ -71,21 +71,16 @@ class Master(validation_pb2_grpc.MasterServicer):
     def RegisterWorker(self, request, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
-        if request.hostname not in self.tracked_workers:
-            worker = WorkerMetadata(request.hostname, request.port)
+        worker = WorkerMetadata(request.hostname, request.port)
 
-            for gis_join, servers in self.gis_join_locations.items():
-                for server in servers:
-                    if server == request.hostname:
-                        worker.gis_joins.append(gis_join)
+        for gis_join, servers in self.gis_join_locations.items():
+            for server in servers:
+                if server == request.hostname:
+                    worker.gis_joins.append(gis_join)
 
-            self.tracked_workers[request.hostname] = worker
-            info(f"Added Worker: {worker}")
-            return validation_pb2.WorkerRegistrationResponse(success=True)
-
-        else:
-            error(f"Worker {request.hostname} already exists and is being tracked!")
-            return validation_pb2.WorkerRegistrationResponse(success=True)
+        self.tracked_workers[request.hostname] = worker
+        info(f"Added Worker: {worker}")
+        return validation_pb2.WorkerRegistrationResponse(success=True)
 
     def UploadFile(self, request_iterator, context):
         # info(f"Received UploadFile stream request, processing chunks...")
@@ -150,7 +145,7 @@ class Master(validation_pb2_grpc.MasterServicer):
     # TODO: Handle concurrent responses, return to client
     # TODO: Test model file distribution as single request
     def SubmitValidationJob(self, request, context):
-        info(f"SubmitValidationJob Request: {request}")
+        # info(f"SubmitValidationJob Request: {request}")
         threads = []
         worker_jobs = []  # List of WorkerJobMetadata, which also contain a reference to a WorkerMetadata
         validation_job_responses = []
