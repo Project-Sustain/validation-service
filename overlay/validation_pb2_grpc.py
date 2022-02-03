@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from . import validation_pb2 as validation__pb2
+from overlay import validation_pb2 as validation__pb2
 
 
 class MasterStub(object):
