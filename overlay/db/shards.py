@@ -2,7 +2,7 @@ import sys
 from pymongo import MongoClient
 from logging import info, error
 
-from .. import DB_HOST, DB_PORT, DB_NAME
+from . import DB_HOST, DB_PORT, DB_NAME
 
 
 class ShardMetadata:
