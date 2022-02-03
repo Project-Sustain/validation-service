@@ -9,7 +9,6 @@ import db.locality
 
 import grpc
 
-import data_locality
 import validation_pb2
 import validation_pb2_grpc
 import socket
