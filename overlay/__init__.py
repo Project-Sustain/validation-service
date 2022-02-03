@@ -1,4 +1,3 @@
-from constants import DB_HOST, DB_PORT, DB_NAME
 import constants
 import db
 import filereader
