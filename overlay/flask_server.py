@@ -75,7 +75,7 @@ def validation():
                 data=file_bytes
             )
             validation_grpc_request = validation_pb2.ValidationJobRequest(
-                id="",
+                id="",  # The Master will assign a job id
                 model_framework=validation_request.model_framework,
                 model_type=validation_request.model_type,
                 database=validation_request.database,
