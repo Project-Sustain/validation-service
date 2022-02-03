@@ -16,4 +16,4 @@ if [[ $# -eq 1 ]]; then
 
 fi
 
-python3 overlay --master --port="$MASTER_PORT" > log.txt &
+python3.8 overlay --master --port="$MASTER_PORT" > log.txt &

@@ -10,4 +10,4 @@ function print_usage {
 MASTER_URI="$1"
 WORKER_PORT="$2"
 
-python3 overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt
+python3.8 overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt

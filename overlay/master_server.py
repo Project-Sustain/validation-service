@@ -26,7 +26,7 @@ class WorkerJobMetadata:
         self.status = "DONE"
 
     def __repr__(self):
-        return f"WorkerJobMetadata: status={self.status}, gis_joins={self.gis_joins}"
+        return f"WorkerJobMetadata: job_id={self.job_id}, worker={self.worker.hostname}, status={self.status}, gis_joins={self.gis_joins}"
 
 
 class WorkerMetadata:
@@ -153,6 +153,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         worker_jobs = []  # List of WorkerJobMetadata, which also contain a reference to a WorkerMetadata
         validation_job_responses = []
         job_id = generate_job_id()  # Random UUID for the job
+        info(f"Generated job id {job_id}")
 
         for gis_join in request.gis_joins:
             worker_for_gis_join = None
@@ -183,6 +184,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Define async function to launch worker job
         async def run_worker_job(_worker_job: WorkerJobMetadata) -> None:
+            info("Inside async run_worker_job()...")
             _worker = _worker_job.worker
             async with grpc.aio.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
                 stub = validation_pb2_grpc.WorkerStub(channel)
@@ -199,7 +201,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                     gis_joins=_worker_job.gis_joins,
                     model_file=request.model_file
                 ))
-                info(f"Response received: {response}")
+            info(f"Response received: {response}")
 
         # Iterate over all the worker jobs created for this job, and launch them asynchronously
         for worker_job in worker_jobs:
@@ -208,6 +210,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                 # t = threading.Thread(target=start_worker_thread, args=(worker, gis_joins_list))
                 # threads.append(t)
                 # t.start()
+                info(f"Launching worker job {worker_job}")
                 asyncio.run(run_worker_job(worker_job))
 
 
