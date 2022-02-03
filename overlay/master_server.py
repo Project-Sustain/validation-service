@@ -156,6 +156,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         validation_job_responses = []
         job_id = generate_job_id()  # Random UUID for the job
         info(f"Generated job id {job_id}")
+        info(f"GISJOINS: {request.gis_joins}")
 
         for gis_join in request.gis_joins:
             info(f"Processing job GISJOIN {gis_join}")
@@ -167,7 +168,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                     worker_for_gis_join = self.tracked_workers[worker_host]
                     break
 
-            if not worker_for_gis_join:
+            if worker_for_gis_join is None:
                 error(f"Unable to find a registered worker for GISJOIN {gis_join}")
                 continue  # Skip this GISJOIN, there's no local workers for it
 
