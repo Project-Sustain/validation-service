@@ -42,11 +42,12 @@ message ValidationJobRequest {
   string model_type = 3;
   string database = 4;
   string collection = 5;
-  string label_field = 6;
-  string validation_metric = 7;
-  repeated string feature_fields = 8;
-  repeated string gis_joins = 9;
-  ModelFile model_file = 10;
+  string spatial_field = 6;
+  string label_field = 7;
+  string validation_metric = 8;
+  repeated string feature_fields = 9;
+  repeated string gis_joins = 10;
+  ModelFile model_file = 11;
 }
 
 message ValidationJobResponse {

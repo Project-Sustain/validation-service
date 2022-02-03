@@ -1,12 +1,17 @@
 {
-  "id": "abcd123",
   "model_framework": "tensorflow",
   "model_type": "Linear Regression",
   "database": "sustaindb",
-  "collection": "NOAA_NAM",
-  "label_field": "",
+  "collection": "noaa_nam",
+  "spatial_field": "COUNTY_GISJOIN",
+  "label_field": "SOIL_TEMPERATURE_0_TO_01_M_BELOW_SURFACE_KELVIN",
   "validation_metric": "RMSE",
   "feature_fields": [
-    ""
+    "PRESSURE_AT_SURFACE_PASCAL",
+    "TEMPERATURE_AT_SURFACE_KELVIN",
+    "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
+  ],
+  "gis_joins": [
+    "G1302750"
   ]
 }
