@@ -2,7 +2,7 @@ import sys
 from pymongo import MongoClient
 from logging import info, error
 
-from .. import constants
+from ..overlay import constants
 
 
 class ShardMetadata:
