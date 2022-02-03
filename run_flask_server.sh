@@ -9,7 +9,7 @@ if [[ $# -eq 2 ]]; then
 
   MASTER_URI=$1
   FLASK_PORT=$2
-  python3.8 overlay --flaskserver --master_uri="$MASTER_URI" --port="$FLASK_PORT"
+  python3.8 -m overlay --flaskserver --master_uri="$MASTER_URI" --port="$FLASK_PORT"
 
 else
   print_usage
