@@ -75,7 +75,7 @@ def validation():
                 data=file_bytes
             )
 
-            info(validation_request.model_framework)
+            info(validation_request["model_framework"])
 
             validation_grpc_request = validation_pb2.ValidationJobRequest(
                 model_framework=validation_request["model_framework"],
