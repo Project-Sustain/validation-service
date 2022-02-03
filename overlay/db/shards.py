@@ -2,7 +2,7 @@ import sys
 from pymongo import MongoClient
 from logging import info, error
 
-from ..overlay import constants
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME
 
 
 class ShardMetadata:
@@ -27,7 +27,7 @@ class ShardMetadata:
 #       }
 def discover_shards():
     info("Discovering MongoDB shards...")
-    client = MongoClient(f"mongodb://{constants.DB_HOST}:{constants.DB_PORT}")
+    client = MongoClient(f"mongodb://{DB_HOST}:{DB_PORT}")
     shard_status = client.admin.command({"listShards": 1})
     shard_metadata = None
     if shard_status["ok"] == 1.0:

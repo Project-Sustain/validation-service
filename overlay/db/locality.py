@@ -5,7 +5,7 @@ from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
 from logging import info
 
 # sys.path.append('./overlay')
-# from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME
 
 # Progress Bar widgets
 widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
