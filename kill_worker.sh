@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WORKER_PROCESS=$(ps -aux | grep "[r]un_worker.sh")
+WORKER_PROCESS=$(ps -aux | grep "[o]verlay --worker")
 
 if [[ $WORKER_PROCESS != "" ]]; then
   echo "$WORKER_PROCESS"
