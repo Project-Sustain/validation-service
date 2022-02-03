@@ -6,11 +6,12 @@ import socket
 import hashlib
 import zipfile
 from concurrent import futures
-import tensorflow_validation
+
 import socket
 
-from . import validation_pb2
-from . import validation_pb2_grpc
+from overlay import validation_pb2
+from overlay import validation_pb2_grpc
+from overlay import tensorflow_validation
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
