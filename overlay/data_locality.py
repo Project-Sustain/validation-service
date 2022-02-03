@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from constants import DB_HOST, DB_PORT, DB_NAME
 
 
+# Returns a map of { gis_join -> [hostname_1, hostname_2, hostname_3] } locations
 def get_gis_join_locations():
     resources_dir = 'overlay/resources'
     county_gis_joins = load_gis_joins(resources_dir)
