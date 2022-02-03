@@ -2,9 +2,9 @@ import sys
 import getopt
 import logging
 from logging import info, error
-from . import worker_server
-from . import master_server
-from . import flask_server
+import worker_server
+import master_server
+import flask_server
 
 
 def print_usage():
