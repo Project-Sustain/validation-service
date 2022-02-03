@@ -78,16 +78,15 @@ def validation():
             info(validation_request.model_framework)
 
             validation_grpc_request = validation_pb2.ValidationJobRequest(
-                id="",
-                model_framework=validation_request.model_framework,
-                model_type=validation_request.model_type,
-                database=validation_request.database,
-                collection=validation_request.collection,
-                spatial_field=validation_request.spatial_field,
-                label_field=validation_request.label_field,
-                validation_metric=validation_request.validation_metric,
-                feature_fields=validation_request.feature_fields,
-                gis_joins=validation_request.gis_joins,
+                model_framework=validation_request["model_framework"],
+                model_type=validation_request["model_type"],
+                database=validation_request["database"],
+                collection=validation_request["collection"],
+                spatial_field=validation_request["spatial_field"],
+                label_field=validation_request["label_field"],
+                validation_metric=validation_request["validation_metric"],
+                feature_fields=validation_request["feature_fields"],
+                gis_joins=validation_request["gis_joins"],
                 model_file=model_file
             )
 
