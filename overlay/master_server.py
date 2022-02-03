@@ -50,7 +50,7 @@ def generate_job_id():
 
 def get_or_create_worker_job(worker, job_id):
     if job_id not in worker.jobs:
-        worker.jobs[job_id] = WorkerJobMetadata(worker)
+        worker.jobs[job_id] = WorkerJobMetadata(job_id, worker)
     return worker.jobs[job_id]
 
 
