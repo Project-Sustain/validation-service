@@ -210,7 +210,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                 # threads.append(t)
                 # t.start()
                 info(f"Launching worker job {worker_job}")
-                asyncio.run(run_worker_job(worker_job))
+                # asyncio.run(run_worker_job(worker_job))
 
 
         # wait for all worker threads to complete
