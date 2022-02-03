@@ -5,3 +5,4 @@ grpcio-tools
 pymongo
 python-dotenv
 asyncio
+progressbar

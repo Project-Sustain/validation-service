@@ -4,6 +4,8 @@ from concurrent import futures
 from logging import info, error
 import asyncio
 from copy import copy, deepcopy
+import db.shards
+import db.locality
 
 import grpc
 
@@ -13,6 +15,15 @@ import validation_pb2_grpc
 import socket
 
 LOCAL_TESTING = False
+
+
+class JobMetadata:
+
+    def __init__(self, job_id, gis_joins):
+        self.job_id = job_id
+        self.worker_jobs = {}  # Mapping of { worker_hostname -> WorkerJobMetadata }
+        self.gis_joins = gis_joins
+        self.status = "NEW"
 
 
 class WorkerJobMetadata:
@@ -32,17 +43,14 @@ class WorkerJobMetadata:
 
 class WorkerMetadata:
 
-    def __init__(self, hostname, port):
+    def __init__(self, hostname, port, shard):
         self.hostname = hostname
         self.port = port
+        self.shard = shard
         self.jobs = {}  # Mapping of { job_id -> WorkerJobMetadata }
-        self.gis_joins = []  # List of gis_joins local to this worker
-
-    def add_gis_join(self, gis_join):
-        self.gis_joins.append(gis_join)
 
     def __repr__(self):
-        return f"WorkerMetadata: hostname={self.hostname}, port={self.port}, jobs={self.jobs}, gis_joins={self.gis_joins}"
+        return f"WorkerMetadata: hostname={self.hostname}, port={self.port}, shard={self.shard.shard_name}, jobs={self.jobs},"
 
 
 def generate_job_id():
@@ -58,29 +66,37 @@ def get_or_create_worker_job(worker, job_id):
 
 class Master(validation_pb2_grpc.MasterServicer):
 
-    def __init__(self, gis_join_locations):
+    def __init__(self, gis_join_locations, shard_metadata):
         super(Master, self).__init__()
         self.tracked_workers = {}  # Mapping of { hostname -> WorkerMetadata }
         self.tracked_jobs = []  # List of JobMetadata
         self.saved_models_path = "testing/master/saved_models"
-        self.gis_join_locations = gis_join_locations  # Mapping of { gis_join -> [hostname_1, hostname_2, hostname_3] }
+        self.gis_join_locations = gis_join_locations  # Mapping of { gis_join -> ShardMetadata }
+        self.shard_metadata = shard_metadata
 
     def is_worker_registered(self, hostname):
         return hostname in self.tracked_workers
 
+    def choose_worker_from_shard(self, shard):
+        for worker_host in shard.shard_servers:
+            if self.is_worker_registered(worker_host):
+                return self.tracked_workers[worker_host]
+        return None
+
     def RegisterWorker(self, request, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
-        worker = WorkerMetadata(request.hostname, request.port)
+        for shard in self.shard_metadata.values():
+            for shard_server in shard.shard_servers:
+                if shard_server == request.hostname:
+                    worker = WorkerMetadata(request.hostname, request.port, shard)
+                    info(f"Successfully added Worker: {worker}")
+                    self.tracked_workers[request.hostname] = worker
+                    return validation_pb2.WorkerRegistrationResponse(success=True)
 
-        for gis_join, servers in self.gis_join_locations.items():
-            for server in servers:
-                if server == request.hostname:
-                    worker.gis_joins.append(gis_join)
+        error(f"Failed to find a shard that {request.hostname} belongs to")
+        return validation_pb2.WorkerRegistrationResponse(success=False)
 
-        self.tracked_workers[request.hostname] = worker
-        info(f"Added Worker: {worker}")
-        return validation_pb2.WorkerRegistrationResponse(success=True)
 
     def UploadFile(self, request_iterator, context):
         # info(f"Received UploadFile stream request, processing chunks...")
@@ -145,30 +161,27 @@ class Master(validation_pb2_grpc.MasterServicer):
     # TODO: Handle concurrent responses, return to client
     # TODO: Test model file distribution as single request
     def SubmitValidationJob(self, request, context):
-        # info(f"SubmitValidationJob Request: {request}")
-        threads = []
-        worker_jobs = []  # List of WorkerJobMetadata, which also contain a reference to a WorkerMetadata
+        info(f"SubmitValidationJob request for GISJOINs {request.gis_joins}")
         validation_job_responses = []
         job_id = generate_job_id()  # Random UUID for the job
-        info(f"Generated job id {job_id}")
-        info(f"GISJOINS: {request.gis_joins}")
+        job = JobMetadata(job_id, request.gis_joins)
+        info(f"Created job id {job_id}")
 
         for gis_join in request.gis_joins:
-            info(f"Processing job GISJOIN {gis_join}")
-            worker_for_gis_join = None
-            gis_join_hosts = self.gis_join_locations[gis_join]
-            info(f"GISJOIN hosts: {gis_join_hosts}")
-            for worker_host in gis_join_hosts:
-                if self.is_worker_registered(worker_host):
-                    worker_for_gis_join = self.tracked_workers[worker_host]
-                    break
+            shard_hosting_gis_join = self.gis_join_locations[gis_join]
+            worker = self.choose_worker_from_shard(shard_hosting_gis_join)
+            if worker is None:
+                error(f"Unable to find registered worker for GISJOIN {gis_join}")
+                continue
 
-            if worker_for_gis_join is None:
-                error(f"Unable to find a registered worker for GISJOIN {gis_join}")
-                continue  # Skip this GISJOIN, there's no local workers for it
+            # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
+            worker_job = get_or_create_worker_job(worker, job_id)
+            worker_job.gis_joins.append(gis_join)
+            job.worker_jobs[worker.hostname] = worker_job
 
-            # Found a registered worker for this GISJOIN, get or create a job for it
-            worker_jobs.append(get_or_create_worker_job(worker_for_gis_join, job_id))
+        for worker_job in job.worker_jobs:
+            info(worker_job)
+
 
         # to be executed in a new thread
         def start_worker_thread(_worker: WorkerMetadata, _gis_joins_list):
@@ -203,7 +216,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             info(f"Response received: {response}")
 
         # Iterate over all the worker jobs created for this job, and launch them asynchronously
-        for worker_job in worker_jobs:
+        for worker_job in job.worker_jobs:
             if len(worker_job.gis_joins) > 0:
                 # start new thread
                 # t = threading.Thread(target=start_worker_thread, args=(worker, gis_joins_list))
@@ -224,13 +237,23 @@ class Master(validation_pb2_grpc.MasterServicer):
 
 def run(master_port=50051):
     if LOCAL_TESTING:
+        shard_metadata = {}
         gis_join_locations = {}
+
     else:
-        gis_join_locations = data_locality.get_gis_join_locations()
+        shard_metadata = db.shards.discover_shards()
+        if shard_metadata is None:
+            error("Shard discovery returned None. Exiting...")
+            exit(1)
+        else:
+            for shard in shard_metadata.values():
+                info(shard)
+
+        gis_join_locations = db.locality.discover_gis_join_chunk_locations(shard_metadata)
 
     # Initialize server and master
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    master = Master(gis_join_locations)
+    master = Master(gis_join_locations, shard_metadata)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
     hostname = socket.gethostname()
 
