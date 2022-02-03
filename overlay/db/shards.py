@@ -2,7 +2,7 @@ import sys
 from pymongo import MongoClient
 from logging import info, error
 
-sys.path.append('../overlay')
+sys.path.append('../../overlay')
 from overlay.constants import DB_HOST, DB_PORT
 
 
