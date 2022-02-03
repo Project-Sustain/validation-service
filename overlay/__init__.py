@@ -1,2 +1,2 @@
-import constants
-import db
+from . import constants
+from . import db

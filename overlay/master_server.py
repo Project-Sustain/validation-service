@@ -4,8 +4,7 @@ from concurrent import futures
 from logging import info, error
 import asyncio
 from copy import copy, deepcopy
-import db.shards
-import db.locality
+from .db import shards, locality
 
 import grpc
 
@@ -240,7 +239,7 @@ def run(master_port=50051):
         gis_join_locations = {}
 
     else:
-        shard_metadata = db.shards.discover_shards()
+        shard_metadata = shards.discover_shards()
         if shard_metadata is None:
             error("Shard discovery returned None. Exiting...")
             exit(1)
@@ -248,7 +247,7 @@ def run(master_port=50051):
             for shard in shard_metadata.values():
                 info(shard)
 
-        gis_join_locations = db.locality.discover_gis_join_chunk_locations(shard_metadata)
+        gis_join_locations = locality.discover_gis_join_chunk_locations(shard_metadata)
 
     # Initialize server and master
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
