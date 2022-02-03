@@ -4,10 +4,8 @@ WORKER_PROCESS=$(ps -aux | grep "[o]verlay --worker")
 
 if [[ $WORKER_PROCESS != "" ]]; then
   echo "$WORKER_PROCESS"
-  WORKER_PID=$(echo "$WORKER_PROCESS" | awk '{ print $2 }')
 
-  kill "$WORKER_PID"
-  echo "Found and killed worker process with pid $WORKER_PID"
+  kill $(ps -aux | grep "[o]verlay --worker" | awk '{ print $2 }')
 else
   echo "Did not find any worker processes to kill"
 fi
