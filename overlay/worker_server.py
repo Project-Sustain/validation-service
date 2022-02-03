@@ -10,6 +10,7 @@ import hashlib
 import zipfile
 from concurrent import futures
 import tensorflow_validation
+import socket
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
@@ -115,9 +116,10 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
     validation_pb2_grpc.add_WorkerServicer_to_server(worker, server)
+    hostname = socket.gethostname()
 
     # Start the server
-    info(f"Starting worker server on port {worker_port}")
-    server.add_insecure_port(f"[::]:{worker_port}")
+    info(f"Starting worker server on {hostname}:{worker_port}")
+    server.add_insecure_port(f"{hostname}:{worker_port}")
     server.start()
     server.wait_for_termination()

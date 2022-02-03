@@ -10,6 +10,7 @@ import grpc
 import data_locality
 import validation_pb2
 import validation_pb2_grpc
+import socket
 
 LOCAL_TESTING = False
 
@@ -235,9 +236,10 @@ def run(master_port=50051):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     master = Master(gis_join_locations)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
+    hostname = socket.gethostname()
 
     # Start the server
-    info(f"Starting master server on port {master_port}")
-    server.add_insecure_port(f"[::]:{master_port}")
+    info(f"Starting master server on {hostname}:{master_port}")
+    server.add_insecure_port(f"{hostname}:{master_port}")
     server.start()
     server.wait_for_termination()
