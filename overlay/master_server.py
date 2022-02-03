@@ -6,7 +6,7 @@ import grpc
 from concurrent import futures
 from logging import info, error
 
-from db import shards, locality
+from overlay.db import shards, locality
 from . import validation_pb2
 from . import validation_pb2_grpc
 
