@@ -192,6 +192,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                     model_type=request.model_type,
                     database=request.database,
                     collection=request.collection,
+                    spatial_field=request.spatial_field,
                     label_field=request.label_field,
                     validation_metric=request.validation_metric,
                     feature_fields=request.feature_fields,
