@@ -3,7 +3,7 @@ from pymongo import MongoClient
 from logging import info, error
 
 sys.path.append('..')
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from constants import DB_HOST, DB_PORT, DB_NAME
 
 
 class ShardMetadata:
