@@ -1,3 +1,3 @@
-from . import locality
-from . import querier
-from . import shards
+import locality
+import querier
+import shards
