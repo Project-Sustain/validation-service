@@ -1,16 +1,16 @@
-import logging
 from logging import info, error
 import grpc
 import os
 import io
 import socket
-import validation_pb2
-import validation_pb2_grpc
 import hashlib
 import zipfile
 from concurrent import futures
 import tensorflow_validation
 import socket
+
+from . import validation_pb2
+from . import validation_pb2_grpc
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):

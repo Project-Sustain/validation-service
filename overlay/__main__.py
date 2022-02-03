@@ -2,9 +2,10 @@ import sys
 import getopt
 import logging
 from logging import info, error
-import worker_server
-import master_server
-import flask_server
+
+from overlay import flask_server
+from overlay import master_server
+from overlay import worker_server
 
 
 def print_usage():

@@ -5,14 +5,14 @@ import hashlib
 from flask import Flask, request
 from http import HTTPStatus
 from pprint import pprint
+from logging import info
 
 from werkzeug.utils import secure_filename
 
-import filereader
-import validation_pb2
-import validation_pb2_grpc
+from . import filereader
+from . import validation_pb2
+from . import validation_pb2_grpc
 
-from logging import info
 
 UPLOAD_DIR = './uploads'
 ALLOWED_EXTENSIONS = {'zip'}

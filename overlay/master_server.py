@@ -1,16 +1,15 @@
 import threading
 import uuid
+import socket
+import asyncio
+import grpc
 from concurrent import futures
 from logging import info, error
-import asyncio
-from copy import copy, deepcopy
+
 from db import shards, locality
+from . import validation_pb2
+from . import validation_pb2_grpc
 
-import grpc
-
-import validation_pb2
-import validation_pb2_grpc
-import socket
 
 LOCAL_TESTING = False
 
