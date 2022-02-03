@@ -4,7 +4,7 @@ from concurrent import futures
 from logging import info, error
 import asyncio
 from copy import copy, deepcopy
-from .db import shards, locality
+from db import shards, locality
 
 import grpc
 
