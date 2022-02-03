@@ -1,6 +1,9 @@
+import sys
 from pymongo import MongoClient
-from overlay.constants import DB_HOST, DB_PORT
 from logging import info, error
+
+sys.path.append('../overlay')
+from overlay.constants import DB_HOST, DB_PORT
 
 
 class ShardMetadata:
