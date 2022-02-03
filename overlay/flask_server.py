@@ -74,6 +74,9 @@ def validation():
                 md5_hash=md5_hash,
                 data=file_bytes
             )
+
+            info(validation_request.model_framework)
+
             validation_grpc_request = validation_pb2.ValidationJobRequest(
                 id="",
                 model_framework=validation_request.model_framework,
