@@ -176,8 +176,8 @@ class Master(validation_pb2_grpc.MasterServicer):
             worker_job.gis_joins.append(gis_join)
             job.worker_jobs[worker.hostname] = worker_job
 
-        for worker_job in job.worker_jobs:
-            info(worker_job)
+        for worker_hostname, worker_job in job.worker_jobs.items():
+            info(f"{worker_hostname}: {worker_job}")
 
 
         # to be executed in a new thread
@@ -213,7 +213,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             info(f"Response received: {response}")
 
         # Iterate over all the worker jobs created for this job, and launch them asynchronously
-        for worker_job in job.worker_jobs:
+        for worker_hostname, worker_job in job.worker_jobs.items():
             if len(worker_job.gis_joins) > 0:
                 # start new thread
                 # t = threading.Thread(target=start_worker_thread, args=(worker, gis_joins_list))
