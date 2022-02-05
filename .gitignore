@@ -140,3 +140,7 @@ client/validation-app/node_modules/
 
 # Logs
 log.txt
+
+# Saved models
+testing/worker/saved_models/*
+!testing/worker/saved_models/README.md
