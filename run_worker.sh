@@ -10,4 +10,5 @@ function print_usage {
 MASTER_URI="$1"
 WORKER_PORT="$2"
 
-nohup python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt 2>&1 & disown
+#nohup python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt 2>&1 & disown
+python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT"

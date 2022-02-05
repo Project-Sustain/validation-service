@@ -109,7 +109,11 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         #         request.feature_fields,
         #         request.gis_joins
         #     )
-        return validation_pb2.WorkerJobResponse(request.id, "", validation_pb2.WORKER_JOB_STATUS_CODE_OK)
+        return validation_pb2.WorkerJobResponse(
+            id=request.id,
+            error_message="",
+            worker_job_status_code=validation_pb2.WORKER_JOB_STATUS_CODE_OK
+        )
 
 
 def run(master_hostname="localhost", master_port=50051, worker_port=50055):

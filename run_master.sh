@@ -9,7 +9,7 @@ function print_usage {
 MASTER_PORT=50051
 
 if [[ $# -ge 1 ]]; then
-  [[ $1 == "-h " ]]  && print_usage && exit 0
+  [[ $1 == "-h" ]]  && print_usage && exit 0
   MASTER_PORT=$1
   if [ $# -eq 2 ] && [ "$2" == "--local" ]; then
     python3.8 -m overlay --master --port="$MASTER_PORT" --local
