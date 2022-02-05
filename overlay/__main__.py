@@ -25,11 +25,12 @@ def main():
 
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, "mwfp:u:", ["master", "worker", "flaskserver", "port=", "master_uri="])
+        opts, args = getopt.getopt(argv, "mwfp:u:l", ["master", "worker", "flaskserver", "port=", "master_uri=", "local"])
 
         node_type_arg = None
         port_arg = None
         master_uri_arg = None
+        local_testing = False
 
         for opt, arg in opts:
             if opt in ['-m', '--master']:
@@ -42,20 +43,23 @@ def main():
                 master_uri_arg = arg
             elif opt in ['-p', '--port']:
                 port_arg = int(arg)
+            elif opt in ['-l', '--local']:
+                local_testing = True
 
         if node_type_arg == "master":
-            master_server.run(port_arg) if port_arg else master_server.run()
+            master_server.run(master_port=port_arg, local_testing=local_testing) \
+                if port_arg is not None else master_server.run(local_testing=local_testing)
         elif node_type_arg == "worker":
             ok, master_hostname, master_port = is_valid_master_uri(master_uri_arg)
             if ok:
-                if port_arg:
+                if port_arg is not None:
                     worker_server.run(master_hostname, master_port, port_arg)
                 else:
                     worker_server.run(master_hostname, master_port)
         elif node_type_arg == "flaskserver":
             ok, master_hostname, master_port = is_valid_master_uri(master_uri_arg)
             if ok:
-                if port_arg:
+                if port_arg is not None:
                     flask_server.run(master_hostname, master_port, port_arg)
                 else:
                     flask_server.run(master_hostname, master_port)
@@ -66,7 +70,7 @@ def main():
 
 
 def is_valid_master_uri(uri):
-    if uri and uri != "":
+    if uri is not None and uri != "":
         if ":" in uri:
             parts = uri.split(":")
             if len(parts) == 2:

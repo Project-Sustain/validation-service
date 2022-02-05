@@ -11,9 +11,6 @@ from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 
 
-LOCAL_TESTING = False
-
-
 class JobMetadata:
 
     def __init__(self, job_id, gis_joins):
@@ -63,13 +60,14 @@ def get_or_create_worker_job(worker, job_id):
 
 class Master(validation_pb2_grpc.MasterServicer):
 
-    def __init__(self, gis_join_locations, shard_metadata):
+    def __init__(self, gis_join_locations, shard_metadata, local_testing=False):
         super(Master, self).__init__()
         self.tracked_workers = {}  # Mapping of { hostname -> WorkerMetadata }
         self.tracked_jobs = []  # List of JobMetadata
         self.saved_models_path = "testing/master/saved_models"
         self.gis_join_locations = gis_join_locations  # Mapping of { gis_join -> ShardMetadata }
         self.shard_metadata = shard_metadata
+        self.local_testing = local_testing
 
     def is_worker_registered(self, hostname):
         return hostname in self.tracked_workers
@@ -232,11 +230,16 @@ class Master(validation_pb2_grpc.MasterServicer):
         return validation_pb2.ValidationJobResponse(message="OK")
 
 
-def run(master_port=50051):
-    if LOCAL_TESTING:
-        shard_metadata = {}
-        gis_join_locations = {}
+def run(master_port=50051, local_testing=False):
 
+    # Emulated environment
+    if local_testing:
+        shard_metadata = {
+            "shard1rs": shards.ShardMetadata("shard1rs", [socket.gethostname()])
+        }
+        gis_join_locations = {"G2000010": shard_metadata["shard1rs"]}
+
+    # Production environment
     else:
         shard_metadata = shards.discover_shards()
         if shard_metadata is None:
@@ -250,7 +253,7 @@ def run(master_port=50051):
 
     # Initialize server and master
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    master = Master(gis_join_locations, shard_metadata)
+    master = Master(gis_join_locations, shard_metadata, local_testing)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
     hostname = socket.gethostname()
 
