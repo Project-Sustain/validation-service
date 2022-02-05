@@ -12,6 +12,7 @@ WORKER_PORT="$2"
 DAEMON="$3"
 
 if [ "$DAEMON" == "--daemon" ]; then
+  echo "Running worker as daemon"
   nohup python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt 2>&1 & disown
 else
   python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT"
