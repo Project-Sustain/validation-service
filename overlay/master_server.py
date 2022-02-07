@@ -120,7 +120,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             for shard_server in shard.shard_servers:
                 if shard_server == request.hostname:
                     worker = WorkerMetadata(request.hostname, request.port, shard)
-                    info(f"Successfully added Worker: {worker}")
+                    info(f"Successfully added Worker: {worker}, responsible for GISJOINs {shard.gis_joins}")
                     self.tracked_workers[request.hostname] = worker
                     return validation_pb2.WorkerRegistrationResponse(success=True)
 
