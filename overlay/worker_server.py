@@ -2,8 +2,6 @@ from logging import info, error
 import grpc
 import os
 import io
-import socket
-import hashlib
 import zipfile
 from concurrent import futures
 
@@ -11,7 +9,7 @@ import socket
 
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.db.querier import Querier
 from overlay.tensorflow_validation import validation as tf_validation
 
@@ -25,7 +23,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.hostname = hostname
         self.port = port
         self.jobs = []
-        self.saved_models_path = "testing/worker/saved_models"
+        self.saved_models_path = MODELS_DIR
         self.querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
 
         # Register ourselves with the master
@@ -76,7 +74,19 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         )
 
 
+def make_models_dir_if_not_exists():
+    if not os.path.exists(MODELS_DIR):
+        os.makedirs(MODELS_DIR)
+
+
 def run(master_hostname="localhost", master_port=50051, worker_port=50055):
+
+    if MODELS_DIR == "":
+        error("MODELS_DIR environment variable must be set!")
+        exit(1)
+
+    make_models_dir_if_not_exists()
+
     # Initialize server and worker
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
