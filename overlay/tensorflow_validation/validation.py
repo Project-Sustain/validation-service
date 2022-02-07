@@ -24,7 +24,7 @@ def validate_model(models_dir, job_id, model_type, documents, feature_fields, la
     label_df = features_df.pop(label_field)
 
     # Load model from disk
-    model_path = f"{models_dir}/{job_id}"
+    model_path = f"{models_dir}/{job_id}/my_model"
     model = tf.keras.models.load_model(model_path)
     model.summary()
     validation_results = model.evaluate(features_df, label_df, batch_size=128)
