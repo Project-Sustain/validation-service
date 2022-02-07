@@ -27,6 +27,6 @@ def validate_model(models_dir, job_id, model_type, documents, feature_fields, la
     model_path = f"{models_dir}/{job_id}/my_model"
     model = tf.keras.models.load_model(model_path)
     model.summary()
-    validation_results = model.evaluate(features_df, label_df, batch_size=128)
+    validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True)
     info(f"Model validation results: {validation_results}")
     return validation_results['loss']
