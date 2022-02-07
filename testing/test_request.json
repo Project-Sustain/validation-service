@@ -3,15 +3,23 @@
   "model_type": "Linear Regression",
   "database": "sustaindb",
   "collection": "noaa_nam",
-  "spatial_field": "COUNTY_GISJOIN",
-  "label_field": "SOIL_TEMPERATURE_0_TO_01_M_BELOW_SURFACE_KELVIN",
-  "validation_metric": "RMSE",
+  "gis_join_key": "COUNTY_GISJOIN",
   "feature_fields": [
     "PRESSURE_AT_SURFACE_PASCAL",
     "TEMPERATURE_AT_SURFACE_KELVIN",
     "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
   ],
+  "label_field": "SOIL_TEMPERATURE_0_TO_01_M_BELOW_SURFACE_KELVIN",
+  "normalize_inputs": true,
+  "validation_metric": "RMSE",
   "gis_joins": [
-    "G1302750"
+    "G1801230",
+    "G2000570",
+    "G1800390",
+    "G2000270",
+    "G2000390",
+    "G1901510",
+    "G1801590",
+    "G1900090"
   ]
 }

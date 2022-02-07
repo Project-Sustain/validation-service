@@ -90,7 +90,7 @@ async def launch_worker_jobs(job: JobMetadata, request: validation_pb2.Validatio
         if len(worker_job.gis_joins) > 0:
             jobs_to_launch.append(asyncio.create_task(run_worker_job(worker_job, request, job_results)))
 
-    await asyncio.gather(jobs_to_launch)
+    await asyncio.gather(*jobs_to_launch)
 
 
 class Master(validation_pb2_grpc.MasterServicer):
