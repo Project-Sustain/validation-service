@@ -1,6 +1,0 @@
-[submodule "overlay/tensorflow-validation"]
-	path = overlay/tensorflow-validation
-	url = git@github.com:Project-Sustain/tensorflow-validation.git
-[submodule "overlay/tensorflow_validation"]
-	path = overlay/tensorflow_validation
-	url = git@github.com:Project-Sustain/tensorflow_validation.git
