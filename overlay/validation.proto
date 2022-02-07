@@ -28,11 +28,8 @@ message WorkerRegistrationResponse {
 // Worker service definition
 service Worker {
 
-  // Allows streamed uploading of a .zip model to the Worker
-  rpc UploadFile(ModelFile) returns (UploadStatus) {}
-
   // Registers a Worker to track via heartbeats
-  rpc BeginValidationJob(ValidationJobRequest) returns (WorkerJobResponse) {}
+  rpc BeginValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
@@ -42,30 +39,24 @@ message ValidationJobRequest {
   string model_type = 3;
   string database = 4;
   string collection = 5;
-  string spatial_field = 6;
+  string gis_join_key = 6;
+  repeated string feature_fields = 10;
   string label_field = 7;
-  string validation_metric = 8;
-  repeated string feature_fields = 9;
-  repeated string gis_joins = 10;
-  ModelFile model_file = 11;
+  bool normalize_inputs = 8;
+  string validation_metric = 9;
+  repeated string gis_joins = 11;
+  ModelFile model_file = 12;
 }
 
 message ValidationJobResponse {
-  string message = 1;
-}
-
-enum WorkerJobStatusCode {
-  WORKER_JOB_STATUS_CODE_UNKNOWN = 0;
-  WORKER_JOB_STATUS_CODE_OK = 1;
-  WORKER_JOB_STATUS_CODE_ERROR = 2;
-  WORKER_JOB_STATUS_CODE_FAILED = 3;
-}
-
-// Worker job request for a set of GISJOINs, and a model to validate
-message WorkerJobResponse {
   string id = 1;
-  string error_message = 2;
-  WorkerJobStatusCode worker_job_status_code = 3;
+  repeated ValidationMetric metrics = 2;
+}
+
+message ValidationMetric {
+  string gis_join = 1;
+  double loss = 2;
+  double accuracy = 3;
 }
 
 message ModelFile {

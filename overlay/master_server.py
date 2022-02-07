@@ -126,10 +126,11 @@ class Master(validation_pb2_grpc.MasterServicer):
                     model_type=request.model_type,
                     database=request.database,
                     collection=request.collection,
-                    spatial_field=request.spatial_field,
-                    label_field=request.label_field,
-                    validation_metric=request.validation_metric,
+                    gis_join_key=request.gis_join_key,
                     feature_fields=request.feature_fields,
+                    label_field=request.label_field,
+                    normalize_inputs=request.normalize_inputs,
+                    validation_metric=request.validation_metric,
                     gis_joins=_worker_job.gis_joins,
                     model_file=request.model_file
                 ))

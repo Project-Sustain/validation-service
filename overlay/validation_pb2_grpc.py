@@ -148,28 +148,16 @@ class WorkerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.UploadFile = channel.unary_unary(
-                '/Worker/UploadFile',
-                request_serializer=validation__pb2.ModelFile.SerializeToString,
-                response_deserializer=validation__pb2.UploadStatus.FromString,
-                )
         self.BeginValidationJob = channel.unary_unary(
                 '/Worker/BeginValidationJob',
                 request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
-                response_deserializer=validation__pb2.WorkerJobResponse.FromString,
+                response_deserializer=validation__pb2.ValidationJobResponse.FromString,
                 )
 
 
 class WorkerServicer(object):
     """Worker service definition
     """
-
-    def UploadFile(self, request, context):
-        """Allows streamed uploading of a .zip model to the Worker
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def BeginValidationJob(self, request, context):
         """Registers a Worker to track via heartbeats
@@ -181,15 +169,10 @@ class WorkerServicer(object):
 
 def add_WorkerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'UploadFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.UploadFile,
-                    request_deserializer=validation__pb2.ModelFile.FromString,
-                    response_serializer=validation__pb2.UploadStatus.SerializeToString,
-            ),
             'BeginValidationJob': grpc.unary_unary_rpc_method_handler(
                     servicer.BeginValidationJob,
                     request_deserializer=validation__pb2.ValidationJobRequest.FromString,
-                    response_serializer=validation__pb2.WorkerJobResponse.SerializeToString,
+                    response_serializer=validation__pb2.ValidationJobResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -201,23 +184,6 @@ def add_WorkerServicer_to_server(servicer, server):
 class Worker(object):
     """Worker service definition
     """
-
-    @staticmethod
-    def UploadFile(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Worker/UploadFile',
-            validation__pb2.ModelFile.SerializeToString,
-            validation__pb2.UploadStatus.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def BeginValidationJob(request,
@@ -232,6 +198,6 @@ class Worker(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Worker/BeginValidationJob',
             validation__pb2.ValidationJobRequest.SerializeToString,
-            validation__pb2.WorkerJobResponse.FromString,
+            validation__pb2.ValidationJobResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

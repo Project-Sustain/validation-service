@@ -82,10 +82,11 @@ def validation():
                 model_type=validation_request["model_type"],
                 database=validation_request["database"],
                 collection=validation_request["collection"],
-                spatial_field=validation_request["spatial_field"],
+                gis_join_key=validation_request["gis_join_key"],
                 label_field=validation_request["label_field"],
-                validation_metric=validation_request["validation_metric"],
                 feature_fields=validation_request["feature_fields"],
+                normalize_inputs=validation_request["normalize_inputs"],
+                validation_metric=validation_request["validation_metric"],
                 gis_joins=validation_request["gis_joins"],
                 model_file=model_file
             )

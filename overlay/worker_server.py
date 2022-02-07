@@ -46,12 +46,15 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         zip_file = zipfile.ZipFile(io.BytesIO(request.model_file.data))
         zip_file.extractall(model_dir)
 
+        metrics = []  # list of proto ValidationMetric objects
+
         for gis_join in request.gis_joins:
             documents = self.querier.spatial_query(
-                request.collection, "COUNTY_GISJOIN", gis_join, request.feature_fields, request.label_field
+                request.collection, request.gis_join_key, gis_join, request.feature_fields, request.label_field
             )
 
-            tf_validation.validate_model(
+            # Calculate loss of model
+            loss = tf_validation.validate_model(
                 f"{self.saved_models_path}",
                 request.id,
                 request.model_type,
@@ -59,14 +62,17 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                 request.feature_fields,
                 request.label_field,
                 request.validation_metric,
-
-                request.gis_joins
+                True
             )
 
-        return validation_pb2.WorkerJobResponse(
+            metrics.append(validation_pb2.ValidationMetric(
+                gis_join=gis_join,
+                loss=loss
+            ))
+
+        return validation_pb2.ValidationJobResponse(
             id=request.id,
-            error_message="",
-            worker_job_status_code=validation_pb2.WORKER_JOB_STATUS_CODE_OK
+            metrics=metrics
         )
 
 

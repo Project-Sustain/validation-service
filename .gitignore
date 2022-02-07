@@ -142,5 +142,7 @@ client/validation-app/node_modules/
 log.txt
 
 # Saved models
+testing/master/saved_models/*
+!testing/master/saved_models/README.md
 testing/worker/saved_models/*
 !testing/worker/saved_models/README.md
