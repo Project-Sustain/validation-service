@@ -52,8 +52,8 @@ def generate_job_id():
 
 
 def get_or_create_worker_job(worker, job_id):
-    info(f"Creating job for worker={worker.hostname}, job={job_id}")
     if job_id not in worker.jobs:
+        info(f"Creating job for worker={worker.hostname}, job={job_id}")
         worker.jobs[job_id] = WorkerJobMetadata(job_id, worker)
     return worker.jobs[job_id]
 
