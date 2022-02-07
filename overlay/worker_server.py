@@ -11,7 +11,9 @@ import socket
 
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
-from overlay import tensorflow_validation
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.db.querier import Querier
+from overlay.tensorflow_validation import validation as tf_validation
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
@@ -24,6 +26,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.port = port
         self.jobs = []
         self.saved_models_path = "testing/worker/saved_models"
+        self.querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
 
         # Register ourselves with the master
         with grpc.insecure_channel(f"{master_hostname}:{master_port}") as channel:
@@ -36,60 +39,6 @@ class Worker(validation_pb2_grpc.WorkerServicer):
     def __repr__(self):
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
-    def UploadFile(self, request_iterator, context):
-        # info(f"Received UploadFile stream request, processing chunks...")
-        # total_bytes_received = 0
-        # chunk_index = 0
-        #
-        # try:
-        #     file_pointer = None
-        #     file_id = None
-        #     for file_chunk in request_iterator:
-        #         file_id = file_chunk.id
-        #         if not file_pointer:
-        #             file_pointer = open(f"{self.saved_models_path}/{file_id}", "wb")
-        #
-        #         file_bytes = file_chunk.data
-        #         info(f"Length of chunk index {chunk_index}: {len(file_bytes)}")
-        #         chunk_index += 1
-        #         total_bytes_received += len(file_bytes)
-        #         file_pointer.write(file_bytes)
-        #
-        #     file_pointer.close()
-        #     info(f"Finished receiving chunks, {total_bytes_received} total bytes received")
-        #
-        #     # Get file hash
-        #     if file_id:
-        #         with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
-        #             hasher = hashlib.md5()
-        #             buf = f.read()
-        #             hasher.update(buf)
-        #         info(f"Uploaded file hash: {hasher.hexdigest()}")
-        #
-        #         # Unzip file
-        #         with zipfile.ZipFile(f"{self.saved_models_path}/{file_id}", "r") as zip_ref:
-        #             directory = f"{self.saved_models_path}/{file_id[:-4]}"
-        #             os.mkdir(directory)
-        #             zip_ref.extractall(directory)
-        #
-        #         # Success
-        #         return validation_pb2.UploadStatus(
-        #             message="Success",
-        #             file_hash=hasher.hexdigest(),
-        #             upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_OK
-        #         )
-        #
-        # except Exception as e:
-        #     error(f"Failed to receive chunk index {chunk_index}: {e}")
-        #
-        # # Failure, hopefully we don't make it here
-        # return validation_pb2.UploadStatus(
-        #     message="Failed",
-        #     file_hash="None",
-        #     upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_FAILED
-        # )
-        pass
-
     def BeginValidationJob(self, request, context):
         info(f"Received BeginValidationJob Request: {request}")
         model_dir = f"{self.saved_models_path}/{request.id}"
@@ -97,18 +46,23 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         zip_file = zipfile.ZipFile(io.BytesIO(request.model_file.data))
         zip_file.extractall(model_dir)
 
-        # for gis_join in request.gis_joins:
-        #     tensorflow_validation.validate_model(
-        #         request.id,
-        #         f"{self.saved_models_path}",
-        #         request.model_type,
-        #         request.database,
-        #         request.collection,
-        #         request.label_field,
-        #         request.validation_metric,
-        #         request.feature_fields,
-        #         request.gis_joins
-        #     )
+        for gis_join in request.gis_joins:
+            documents = self.querier.spatial_query(
+                request.collection, "COUNTY_GISJOIN", gis_join, request.feature_fields, request.label_field
+            )
+
+            tf_validation.validate_model(
+                f"{self.saved_models_path}",
+                request.id,
+                request.model_type,
+                documents,
+                request.feature_fields,
+                request.label_field,
+                request.validation_metric,
+
+                request.gis_joins
+            )
+
         return validation_pb2.WorkerJobResponse(
             id=request.id,
             error_message="",

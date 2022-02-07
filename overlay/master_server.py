@@ -92,69 +92,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         error(f"Failed to find a shard that {request.hostname} belongs to")
         return validation_pb2.WorkerRegistrationResponse(success=False)
 
-
-    def UploadFile(self, request_iterator, context):
-        # info(f"Received UploadFile stream request, processing chunks...")
-        # total_bytes_received = 0
-        # chunk_index = 0
-        #
-        # try:
-        #     file_pointer = None
-        #     file_id = None
-        #     for file_chunk in request_iterator:
-        #         file_id = file_chunk.id
-        #         if not file_pointer:
-        #             file_pointer = open(f"{self.saved_models_path}/{file_id}", "wb")
-        #
-        #         file_bytes = file_chunk.data
-        #         info(f"Length of chunk index {chunk_index}: {len(file_bytes)}")
-        #         chunk_index += 1
-        #         total_bytes_received += len(file_bytes)
-        #         file_pointer.write(file_bytes)
-        #
-        #     file_pointer.close()
-        #     info(f"Finished receiving chunks, {total_bytes_received} total bytes received")
-        #
-        #     # Get file hash
-        #     if file_id:
-        #         with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
-        #             hasher = hashlib.md5()
-        #             buf = f.read()
-        #             hasher.update(buf)
-        #         info(f"Uploaded file hash: {hasher.hexdigest()}")
-        #
-        #         # Upload file to all workers
-        #         for worker in self.tracked_workers:
-        #             with open(f"{self.saved_models_path}/{file_id}", "rb") as f:
-        #                 with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
-        #                     stub = validation_pb2_grpc.WorkerStub(channel)
-        #                     upload_response = stub.UploadFile(file_chunker.chunk_file(f, file_id[:-4]))
-        #                     if upload_response == validation_pb2.UPLOAD_STATUS_CODE_FAILED:
-        #                         raise ValueError(f"Failed to upload file {file_id} to worker {worker.hostname}")
-        #             info(f"Successfully uploaded file to worker {worker.hostname}")
-        #
-        #         # Success
-        #         return validation_pb2.UploadStatus(
-        #             message="Success",
-        #             file_hash=hasher.hexdigest(),
-        #             upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_OK
-        #         )
-        #
-        # except ValueError as e:
-        #     error(f"{e}")
-        # except Exception as e:
-        #     error(f"Failed to receive chunk index {chunk_index}: {e}")
-        #
-        # # Failure, hopefully we don't make it here
-        # return validation_pb2.UploadStatus(
-        #     message="Failed",
-        #     file_hash="None",
-        #     upload_status_code=validation_pb2.UPLOAD_STATUS_CODE_FAILED
-        # )
-        pass
-
-    # TODO: Handle concurrent responses, return to client
-    # TODO: Test model file distribution as single request
     def SubmitValidationJob(self, request, context):
         info(f"SubmitValidationJob request for GISJOINs {request.gis_joins}")
         validation_job_responses = []
@@ -176,18 +113,6 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         for worker_hostname, worker_job in job.worker_jobs.items():
             info(f"{worker_hostname}: {worker_job}")
-
-
-        # to be executed in a new thread
-        def start_worker_thread(_worker: WorkerMetadata, _gis_joins_list):
-            info(f"Submitting validation job to {_worker} for GISJOINs {_worker.gis_joins}")
-            with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
-                stub = validation_pb2_grpc.WorkerStub(channel)
-                request.id = job_id
-                request.gis_joins = _gis_joins_list
-                validation_job_response = stub.BeginValidationJob(request)
-                info(validation_job_response)
-                validation_job_responses.append(validation_job_response)
 
         # Define async function to launch worker job
         async def run_worker_job(_worker_job: WorkerJobMetadata) -> None:
@@ -219,11 +144,6 @@ class Master(validation_pb2_grpc.MasterServicer):
                 # t.start()
                 info(f"Launching worker job {worker_job}")
                 asyncio.run(run_worker_job(worker_job))
-
-
-        # wait for all worker threads to complete
-        # for thread in threads:
-        #     thread.join()
 
         # TODO: combine results
 
