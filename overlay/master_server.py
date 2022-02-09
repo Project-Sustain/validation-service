@@ -125,7 +125,7 @@ def launch_worker_jobs_concurrently(job: JobMetadata, request: ValidationJobRequ
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
         info(future)
-        responses.append(future)
+        responses.append(future.result())
 
     return responses
 
