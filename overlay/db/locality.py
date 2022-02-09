@@ -95,11 +95,12 @@ def load_gis_join_chunk_locations(shard_metadata: dict) -> dict:
 
 def save_gis_join_chunk_locations(shard_metadata: dict) -> None:
     json_str = "{\n"
-    last_entry: int = len(shard_metadata)-1
+    last_entry: int = len(shard_metadata.keys()) - 1
     current_entry = 0
     for key, value in shard_metadata.items():
         json_str += f"\"{key}\": {value.to_json()}"
         json_str += ",\n" if current_entry < last_entry else "\n"
+        current_entry += 1
 
     json_str += "}"
     with open(GIS_JOIN_CHUNK_LOCATION_FILE, "w") as f:
