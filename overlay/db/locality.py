@@ -61,8 +61,7 @@ def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     bar.finish()
 
     info(f"Saving GISJOIN chunk locations to {GIS_JOIN_CHUNK_LOCATION_FILE}")
-    with open(GIS_JOIN_CHUNK_LOCATION_FILE, "w") as f:
-        json.dump(gis_joins_to_shards, f, indent=4)
+    save_gis_join_chunk_locations(gis_joins_to_shards)
 
     return gis_joins_to_shards
 
