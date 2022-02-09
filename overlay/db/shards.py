@@ -1,6 +1,8 @@
 import sys
+import json
 from pymongo import MongoClient
 from logging import info, error
+
 
 from overlay.constants import DB_HOST, DB_PORT
 
@@ -14,6 +16,9 @@ class ShardMetadata:
 
     def __repr__(self):
         return f"ShardMetadata: shard_name={self.shard_name}, shard_servers={self.shard_servers}, {len(self.gis_joins)} gis_joins"
+
+    def to_json(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 
 # Discovers MongoDB cluster shards via mongo adminCommand({listShards: 1}).

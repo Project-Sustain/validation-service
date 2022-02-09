@@ -94,5 +94,16 @@ def load_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     return gis_join_chunk_locations
 
 
+def save_gis_join_chunk_locations(shard_metadata: dict) -> None:
+    json_str = "{\n"
+    for key, value in shard_metadata.items():
+        json_str += f"\"{key}\": {value.to_json()}\n"
+
+    json_str += "}"
+    with open(GIS_JOIN_CHUNK_LOCATION_FILE, "w") as f:
+        f.write(json_str)
+        info(f"Saved {GIS_JOIN_CHUNK_LOCATION_FILE}")
+
+
 def gis_join_chunk_locations_file_exists() -> bool:
     return os.path.exists(GIS_JOIN_CHUNK_LOCATION_FILE)
