@@ -96,11 +96,12 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                 else:
                     error(f"Failed to deregister worker: {registration_response}")
         else:
-            info("We were never registered, no need to deregister")
+            info("We are not registered, no need to deregister")
 
 
 def shutdown_gracefully(worker: Worker) -> None:
     worker.deregister()
+    exit(0)
 
 
 def make_models_dir_if_not_exists() -> None:
