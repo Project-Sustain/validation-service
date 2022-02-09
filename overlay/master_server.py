@@ -93,8 +93,7 @@ def launch_worker_jobs_concurrently(job: JobMetadata, request: ValidationJobRequ
     responses = []
 
     # Define worker job function to be run in the thread pool
-    def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest, _job_results: list) \
-            -> ValidationJobResponse:
+    def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
         info("Launching run_worker_job()...")
         _worker = _worker_job.worker
         with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
