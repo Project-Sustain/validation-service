@@ -146,3 +146,6 @@ testing/master/saved_models/*
 !testing/master/saved_models/README.md
 testing/worker/saved_models/*
 !testing/worker/saved_models/README.md
+
+# Cached GISJOIN info
+overlay/resources/gis_join_chunk_locations.json

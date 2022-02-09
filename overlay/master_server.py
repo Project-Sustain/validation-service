@@ -47,7 +47,7 @@ class WorkerMetadata:
         self.jobs = {}  # Mapping of { job_id -> WorkerJobMetadata }
 
     def __repr__(self):
-        return f"WorkerMetadata: hostname={self.hostname}, port={self.port}, shard={self.shard.shard_name}, jobs={self.jobs},"
+        return f"WorkerMetadata: hostname={self.hostname}, port={self.port}, shard={self.shard.shard_name}, jobs={self.jobs}"
 
 
 def generate_job_id() -> str:
@@ -203,9 +203,9 @@ def run(master_port=50051, local_testing=False):
             error("Shard discovery returned None. Exiting...")
             exit(1)
 
-        for shard in shard_metadata.values():
-            info(shard)
         gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
+        for shard in gis_join_locations.values():
+            info(shard)
 
     # Initialize server and master
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
