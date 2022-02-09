@@ -2,7 +2,7 @@ import uuid
 import asyncio
 import socket
 import uuid
-from concurrent import futures
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import info, error
 
 import grpc
@@ -60,7 +60,9 @@ def get_or_create_worker_job(worker, job_id):
     return worker.jobs[job_id]
 
 
-def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest, job_results: list):
+def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
+    responses = []
+
     # Iterate over all the worker jobs created for this job and launch them serially
     for worker_hostname, worker_job in job.worker_jobs.items():
         if len(worker_job.gis_joins) > 0:
@@ -82,7 +84,50 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                     gis_joins=worker_job.gis_joins,
                     model_file=request.model_file
                 ))
-                job_results.append(response)
+                responses.append(response)
+
+    return responses
+
+
+def launch_worker_jobs_concurrently(job: JobMetadata, request: ValidationJobRequest) -> list:
+    responses = []
+
+    # Define worker job function to be run in the thread pool
+    def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest, _job_results: list) \
+            -> ValidationJobResponse:
+        info("Launching run_worker_job()...")
+        _worker = _worker_job.worker
+        with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
+            stub = validation_pb2_grpc.WorkerStub(channel)
+            response: ValidationJobResponse = await stub.BeginValidationJob(ValidationJobRequest(
+                id=_worker_job.job_id,
+                model_framework=_request.model_framework,
+                model_type=_request.model_type,
+                database=_request.database,
+                collection=_request.collection,
+                gis_join_key=_request.gis_join_key,
+                feature_fields=_request.feature_fields,
+                label_field=_request.label_field,
+                normalize_inputs=_request.normalize_inputs,
+                validation_metric=_request.validation_metric,
+                gis_joins=_worker_job.gis_joins,
+                model_file=_request.model_file
+            ))
+            return response
+
+    # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
+    executors_list = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for worker_hostname, worker_job in job.worker_jobs.items():
+            if len(worker_job.gis_joins) > 0:
+                executors_list.append(executor.submit(run_worker_job, worker_job, request))
+
+    # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
+    for future in as_completed(executors_list):
+        info(future)
+        responses.append(future)
+
+    return responses
 
 
 async def launch_worker_jobs(job: JobMetadata, request: ValidationJobRequest, job_results: list):
@@ -188,12 +233,12 @@ class Master(validation_pb2_grpc.MasterServicer):
             info(f"{worker_hostname}: {worker_job}")
 
         # Submit jobs with asyncio and collect results
-        validation_job_responses = []
-        launch_worker_jobs_synchronously(job, request, validation_job_responses)
+        # validation_job_responses = launch_worker_jobs_synchronously(job, request)
+        validation_job_responses = launch_worker_jobs_concurrently(job, request)
 
         # asyncio.run(launch_worker_jobs(job, request, validation_job_responses))
-        for response in validation_job_responses:
-            info(f"Response: {response}")
+        #for response in validation_job_responses:
+        #    info(f"Response: {response}")
 
         return ValidationJobResponse(id=job_id)
 
@@ -219,7 +264,7 @@ def run(master_port=50051, local_testing=False):
             info(shard)
 
     # Initialize server and master
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(ThreadPoolExecutor(max_workers=10))
     master = Master(gis_join_locations, shard_metadata, local_testing)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
     hostname = socket.gethostname()
