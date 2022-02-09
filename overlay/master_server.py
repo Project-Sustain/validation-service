@@ -58,6 +58,31 @@ def get_or_create_worker_job(worker, job_id):
     return worker.jobs[job_id]
 
 
+def launch_worker_jobs_synchronously(job: JobMetadata, request: validation_pb2.ValidationJobRequest, job_results: list):
+    # Iterate over all the worker jobs created for this job and launch them serially
+    for worker_hostname, worker_job in job.worker_jobs.items():
+        if len(worker_job.gis_joins) > 0:
+            info("Launching async run_worker_job()...")
+            worker = worker_job.worker
+            with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
+                stub = validation_pb2_grpc.WorkerStub(channel)
+                response = await stub.BeginValidationJob(validation_pb2.ValidationJobRequest(
+                    id=worker_job.job_id,
+                    model_framework=request.model_framework,
+                    model_type=request.model_type,
+                    database=request.database,
+                    collection=request.collection,
+                    gis_join_key=request.gis_join_key,
+                    feature_fields=request.feature_fields,
+                    label_field=request.label_field,
+                    normalize_inputs=request.normalize_inputs,
+                    validation_metric=request.validation_metric,
+                    gis_joins=worker_job.gis_joins,
+                    model_file=request.model_file
+                ))
+                job_results.append(response)
+
+
 async def launch_worker_jobs(job: JobMetadata, request: validation_pb2.ValidationJobRequest, job_results: list):
     jobs_to_launch = []
 
@@ -150,7 +175,9 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Submit jobs with asyncio and collect results
         validation_job_responses = []
-        asyncio.run(launch_worker_jobs(job, request, validation_job_responses))
+        launch_worker_jobs_synchronously(job, request, validation_job_responses)
+
+        # asyncio.run(launch_worker_jobs(job, request, validation_job_responses))
         for response in validation_job_responses:
             info(f"Response: {response}")
 
