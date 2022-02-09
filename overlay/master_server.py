@@ -99,7 +99,7 @@ def launch_worker_jobs_concurrently(job: JobMetadata, request: ValidationJobRequ
         _worker = _worker_job.worker
         with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
-            response: ValidationJobResponse = await stub.BeginValidationJob(ValidationJobRequest(
+            response: ValidationJobResponse = stub.BeginValidationJob(ValidationJobRequest(
                 id=_worker_job.job_id,
                 model_framework=_request.model_framework,
                 model_type=_request.model_type,
