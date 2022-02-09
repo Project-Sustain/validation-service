@@ -6,10 +6,9 @@
   "gis_join_key": "COUNTY_GISJOIN",
   "feature_fields": [
     "PRESSURE_AT_SURFACE_PASCAL",
-    "TEMPERATURE_AT_SURFACE_KELVIN",
     "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
   ],
-  "label_field": "SOIL_TEMPERATURE_0_TO_01_M_BELOW_SURFACE_KELVIN",
+  "label_field": "TEMPERATURE_AT_SURFACE_KELVIN",
   "normalize_inputs": true,
   "validation_metric": "RMSE",
   "gis_joins": [

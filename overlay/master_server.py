@@ -1,5 +1,7 @@
+import os.path
 import threading
 import uuid
+import json
 import socket
 import asyncio
 import grpc
@@ -9,6 +11,7 @@ from logging import info, error
 from overlay.db import shards, locality
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
+from overlay.db.shards import ShardMetadata
 
 
 class JobMetadata:
@@ -47,7 +50,7 @@ class WorkerMetadata:
         return f"WorkerMetadata: hostname={self.hostname}, port={self.port}, shard={self.shard.shard_name}, jobs={self.jobs},"
 
 
-def generate_job_id():
+def generate_job_id() -> str:
     return uuid.uuid4().hex
 
 
@@ -188,22 +191,21 @@ def run(master_port=50051, local_testing=False):
 
     # Emulated environment
     if local_testing:
-        shard_metadata = {
+        shard_metadata: dict = {
             "shard1rs": shards.ShardMetadata("shard1rs", [socket.gethostname()])
         }
-        gis_join_locations = {"G2000010": shard_metadata["shard1rs"]}
+        gis_join_locations: dict = {"G2000010": shard_metadata["shard1rs"]}
 
-    # Production environment
+    # Production environment -- discover chunk/shard locations
     else:
-        shard_metadata = shards.discover_shards()
+        shard_metadata: dict = shards.discover_shards()
         if shard_metadata is None:
             error("Shard discovery returned None. Exiting...")
             exit(1)
-        else:
-            for shard in shard_metadata.values():
-                info(shard)
 
-        gis_join_locations = locality.discover_gis_join_chunk_locations(shard_metadata)
+        for shard in shard_metadata.values():
+            info(shard)
+        gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
 
     # Initialize server and master
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

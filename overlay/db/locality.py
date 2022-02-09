@@ -1,14 +1,27 @@
 import sys
 import json
+import os
 from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
 from logging import info
 
-# sys.path.append('./overlay')
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.db.shards import ShardMetadata
 
 # Progress Bar widgets
 widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
+
+
+GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
+
+
+# Decides whether to load in cached GISJOIN locations from a saved file,
+# or discover them via mongo
+def get_gis_join_chunk_locations(shard_metadata: dict) -> dict:
+    if gis_join_chunk_locations_file_exists():
+        return load_gis_join_chunk_locations(shard_metadata)
+    else:
+        return discover_gis_join_chunk_locations(shard_metadata)
 
 
 # Takes a mapping of { shard_name -> ShardMetadata } objects as input.
@@ -18,7 +31,7 @@ widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
 #   After:  ShardMetadata{ shard_name="shard7rs", ..., gis_joins=["G1900430", "G1800590", ...] }
 # Finally, returns a mapping of { gis_join -> ShardMetadata } allowing us to do O(1) lookups to find out which shard
 # a GISJOIN chunk belongs to.
-def discover_gis_join_chunk_locations(shard_metadata):
+def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     resources_dir = 'overlay/resources'
     county_gis_joins = load_gis_joins(resources_dir)
     info(f"Loaded in county GISJOIN list of size {len(county_gis_joins)}, retrieving chunk locations from MongoDB...")
@@ -44,11 +57,16 @@ def discover_gis_join_chunk_locations(shard_metadata):
         bar.update(counter)
 
     bar.finish()
+
+    info(f"Saving GISJOIN chunk locations to {GIS_JOIN_CHUNK_LOCATION_FILE}")
+    with open(GIS_JOIN_CHUNK_LOCATION_FILE, "w") as f:
+        json.dump(gis_joins_to_shards, f, indent=4)
+
     return gis_joins_to_shards
 
 
 # Loads all county GISJOIN values from gis_joins.json as a list.
-def load_gis_joins(resources_dir):
+def load_gis_joins(resources_dir: str):
     county_gis_joins = []
     gis_join_filename = f"{resources_dir}/gis_joins.json"
     with open(gis_join_filename, "r") as read_file:
@@ -60,3 +78,19 @@ def load_gis_joins(resources_dir):
                 county_gis_joins.append(county_value["GISJOIN"])
 
     return county_gis_joins
+
+
+def load_gis_join_chunk_locations(shard_metadata: dict) -> dict:
+    raw_dictionary: dict = {}
+    gis_join_chunk_locations: dict = {}
+    with open(GIS_JOIN_CHUNK_LOCATION_FILE, "r") as f:
+        raw_dictionary = json.load(f)
+
+    for gis_join_key, value in raw_dictionary.items():
+        gis_join_chunk_locations[gis_join_key] = shard_metadata[value["shard_name"]]
+
+    return gis_join_chunk_locations
+
+
+def gis_join_chunk_locations_file_exists() -> bool:
+    return os.path.exists(GIS_JOIN_CHUNK_LOCATION_FILE)

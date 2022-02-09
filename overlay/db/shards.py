@@ -2,15 +2,15 @@ import sys
 from pymongo import MongoClient
 from logging import info, error
 
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.constants import DB_HOST, DB_PORT
 
 
 class ShardMetadata:
 
-    def __init__(self, shard_name, shard_servers):
+    def __init__(self, shard_name: str, shard_servers: list, gis_joins: list):
         self.shard_name = shard_name
         self.shard_servers = shard_servers
-        self.gis_joins = []
+        self.gis_joins = gis_joins
 
     def __repr__(self):
         return f"ShardMetadata: shard_name={self.shard_name}, shard_servers={self.shard_servers}, {len(self.gis_joins)} gis_joins"
@@ -39,7 +39,8 @@ def discover_shards():
             shard_servers = [host_uri.split(":")[0] for host_uri in host_fields]
             shard_metadata[shard_name] = ShardMetadata(
                 shard_name,
-                shard_servers
+                shard_servers,
+                []
             )
             info(f"Discovered shard: {mongo_shard['host']}")
 
