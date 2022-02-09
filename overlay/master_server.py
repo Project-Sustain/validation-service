@@ -234,12 +234,14 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Submit jobs with asyncio and collect results
         # validation_job_responses = launch_worker_jobs_synchronously(job, request)
         validation_job_responses = launch_worker_jobs_concurrently(job, request)
+        all_validation_metrics = []
 
-        # asyncio.run(launch_worker_jobs(job, request, validation_job_responses))
-        #for response in validation_job_responses:
-        #    info(f"Response: {response}")
+        for response in validation_job_responses:
+            for validation_metric in response.metrics:
+                all_validation_metrics.append(validation_metric)
+            info(f"Response: {response}")
 
-        return ValidationJobResponse(id=job_id)
+        return ValidationJobResponse(id=job_id, metrics=all_validation_metrics)
 
 
 def run(master_port=50051, local_testing=False):
