@@ -88,6 +88,8 @@ def load_gis_join_chunk_locations(shard_metadata: dict) -> dict:
         raw_dictionary = json.load(f)
 
     for gis_join_key, value in raw_dictionary.items():
+        shard_metadata_ref: ShardMetadata = shard_metadata[value["shard_name"]]
+        shard_metadata_ref.gis_joins.append(gis_join_key)
         gis_join_chunk_locations[gis_join_key] = shard_metadata[value["shard_name"]]
 
     return gis_join_chunk_locations

@@ -15,7 +15,7 @@ class ShardMetadata:
         self.gis_joins = gis_joins
 
     def __repr__(self):
-        return f"ShardMetadata: shard_name={self.shard_name}, shard_servers={self.shard_servers}, {len(self.gis_joins)} gis_joins"
+        return f"ShardMetadata: shard_name={self.shard_name}, shard_servers={self.shard_servers}, gis_joins={self.gis_joins}"
 
     def to_json(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

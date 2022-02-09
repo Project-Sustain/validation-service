@@ -204,7 +204,7 @@ def run(master_port=50051, local_testing=False):
             exit(1)
 
         gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
-        for shard in gis_join_locations.values():
+        for shard in shard_metadata.values():
             info(shard)
 
     # Initialize server and master
