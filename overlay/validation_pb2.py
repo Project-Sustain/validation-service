@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xa0\x02\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x17\n\x0fmodel_framework\x18\x02 \x01(\t\x12\x12\n\nmodel_type\x18\x03 \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\x04 \x01(\t\x12\x12\n\ncollection\x18\x05 \x01(\t\x12\x14\n\x0cgis_join_key\x18\x06 \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\n \x03(\t\x12\x13\n\x0blabel_field\x18\x07 \x01(\t\x12\x18\n\x10normalize_inputs\x18\x08 \x01(\x08\x12\x19\n\x11validation_metric\x18\t \x01(\t\x12\x11\n\tgis_joins\x18\x0b \x03(\t\x12\x1e\n\nmodel_file\x18\x0c \x01(\x0b\x32\n.ModelFile\"G\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x07metrics\x18\x02 \x03(\x0b\x32\x11.ValidationMetric\"D\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\"9\n\tModelFile\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02\x32\xc8\x01\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32O\n\x06Worker\x12\x45\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xa0\x02\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x17\n\x0fmodel_framework\x18\x02 \x01(\t\x12\x12\n\nmodel_type\x18\x03 \x01(\t\x12\x10\n\x08\x64\x61tabase\x18\x04 \x01(\t\x12\x12\n\ncollection\x18\x05 \x01(\t\x12\x14\n\x0cgis_join_key\x18\x06 \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\n \x03(\t\x12\x13\n\x0blabel_field\x18\x07 \x01(\t\x12\x18\n\x10normalize_inputs\x18\x08 \x01(\x08\x12\x19\n\x11validation_metric\x18\t \x01(\t\x12\x11\n\tgis_joins\x18\x0b \x03(\t\x12\x1e\n\nmodel_file\x18\x0c \x01(\x0b\x32\n.ModelFile\"G\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x07metrics\x18\x02 \x03(\x0b\x32\x11.ValidationMetric\"D\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\"9\n\tModelFile\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32O\n\x06Worker\x12\x45\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x62\x06proto3'
 )
 
 _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
@@ -488,7 +488,7 @@ _MASTER = _descriptor.ServiceDescriptor(
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
   serialized_start=831,
-  serialized_end=1031,
+  serialized_end=1110,
   methods=[
   _descriptor.MethodDescriptor(
     name='UploadFile',
@@ -520,6 +520,16 @@ _MASTER = _descriptor.ServiceDescriptor(
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
+  _descriptor.MethodDescriptor(
+    name='DeregisterWorker',
+    full_name='Master.DeregisterWorker',
+    index=3,
+    containing_service=None,
+    input_type=_WORKERREGISTRATIONREQUEST,
+    output_type=_WORKERREGISTRATIONRESPONSE,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
 ])
 _sym_db.RegisterServiceDescriptor(_MASTER)
 
@@ -533,8 +543,8 @@ _WORKER = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1033,
-  serialized_end=1112,
+  serialized_start=1112,
+  serialized_end=1191,
   methods=[
   _descriptor.MethodDescriptor(
     name='BeginValidationJob',

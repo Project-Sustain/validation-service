@@ -3,12 +3,14 @@ import grpc
 import os
 import io
 import zipfile
+import signal
 from concurrent import futures
 
 import socket
 
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
+from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.db.querier import Querier
 from overlay.tensorflow_validation import validation as tf_validation
@@ -25,14 +27,20 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.jobs = []
         self.saved_models_path = MODELS_DIR
         self.querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
+        self.is_registered = False
 
         # Register ourselves with the master
         with grpc.insecure_channel(f"{master_hostname}:{master_port}") as channel:
             stub = validation_pb2_grpc.MasterStub(channel)
-            registration_response = stub.RegisterWorker(
-                validation_pb2.WorkerRegistrationRequest(hostname=hostname, port=port)
+            registration_response: WorkerRegistrationResponse = stub.RegisterWorker(
+                WorkerRegistrationRequest(hostname=hostname, port=port)
             )
-            info(registration_response)
+
+            if registration_response.success:
+                self.is_registered = True
+                info(f"Successfully registered worker {self.hostname}:{self.port}")
+            else:
+                error(f"Failed to register worker {self.hostname}:{self.port}: {registration_response}")
 
     def __repr__(self):
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
@@ -73,13 +81,34 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             metrics=metrics
         )
 
+    def deregister(self):
+        if self.is_registered:
+            # Deregister Worker from the Master
+            with grpc.insecure_channel(f"{self.master_hostname}:{self.master_port}") as channel:
+                stub = validation_pb2_grpc.MasterStub(channel)
+                registration_response: WorkerRegistrationResponse = stub.DeregisterWorker(
+                    WorkerRegistrationRequest(hostname=self.hostname, port=self.port)
+                )
 
-def make_models_dir_if_not_exists():
+                if registration_response.success:
+                    info(f"Successfully deregistered worker: {registration_response}")
+                    self.is_registered = False
+                else:
+                    error(f"Failed to deregister worker: {registration_response}")
+        else:
+            info("We were never registered, no need to deregister")
+
+
+def shutdown_gracefully(worker: Worker) -> None:
+    worker.deregister()
+
+
+def make_models_dir_if_not_exists() -> None:
     if not os.path.exists(MODELS_DIR):
         os.makedirs(MODELS_DIR)
 
 
-def run(master_hostname="localhost", master_port=50051, worker_port=50055):
+def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> None:
 
     if MODELS_DIR == "":
         error("MODELS_DIR environment variable must be set!")
@@ -90,6 +119,12 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055):
     # Initialize server and worker
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
+
+    # Set up Ctrl-C signal handling
+    def call_shutdown(signum, frame):
+        shutdown_gracefully(worker)
+    signal.signal(signal.SIGINT, call_shutdown)
+
     validation_pb2_grpc.add_WorkerServicer_to_server(worker, server)
     hostname = socket.gethostname()
 

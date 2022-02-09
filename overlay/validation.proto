@@ -12,6 +12,9 @@ service Master {
 
   // Registers a Worker to track
   rpc RegisterWorker (WorkerRegistrationRequest) returns (WorkerRegistrationResponse) {}
+
+  // De-registers a Worker from tracking
+  rpc DeregisterWorker (WorkerRegistrationRequest) returns (WorkerRegistrationResponse) {}
 }
 
 // Worker registration request that gets sent to the master, to be tracked

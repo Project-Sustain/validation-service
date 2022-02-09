@@ -1,17 +1,16 @@
-import os.path
-import threading
 import uuid
-import json
-import socket
 import asyncio
-import grpc
+import socket
+import uuid
 from concurrent import futures
 from logging import info, error
 
-from overlay.db import shards, locality
+import grpc
+
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
-from overlay.db.shards import ShardMetadata
+from overlay.db import shards, locality
+from overlay.validation_pb2 import WorkerRegistrationResponse, ValidationJobResponse, ValidationJobRequest
 
 
 class JobMetadata:
@@ -61,7 +60,7 @@ def get_or_create_worker_job(worker, job_id):
     return worker.jobs[job_id]
 
 
-def launch_worker_jobs_synchronously(job: JobMetadata, request: validation_pb2.ValidationJobRequest, job_results: list):
+def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest, job_results: list):
     # Iterate over all the worker jobs created for this job and launch them serially
     for worker_hostname, worker_job in job.worker_jobs.items():
         if len(worker_job.gis_joins) > 0:
@@ -69,7 +68,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: validation_pb2.V
             worker = worker_job.worker
             with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
                 stub = validation_pb2_grpc.WorkerStub(channel)
-                response = stub.BeginValidationJob(validation_pb2.ValidationJobRequest(
+                response = stub.BeginValidationJob(ValidationJobRequest(
                     id=worker_job.job_id,
                     model_framework=request.model_framework,
                     model_type=request.model_type,
@@ -86,17 +85,17 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: validation_pb2.V
                 job_results.append(response)
 
 
-async def launch_worker_jobs(job: JobMetadata, request: validation_pb2.ValidationJobRequest, job_results: list):
+async def launch_worker_jobs(job: JobMetadata, request: ValidationJobRequest, job_results: list):
     jobs_to_launch = []
 
     # Define async function to launch worker job
-    async def run_worker_job(_worker_job: WorkerJobMetadata, _request: validation_pb2.ValidationJobRequest,
+    async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest,
                              _job_results: list) -> None:
         info("Launching async run_worker_job()...")
         _worker = _worker_job.worker
         async with grpc.aio.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
-            response = await stub.BeginValidationJob(validation_pb2.ValidationJobRequest(
+            response = await stub.BeginValidationJob(ValidationJobRequest(
                 id=_worker_job.job_id,
                 model_framework=_request.model_framework,
                 model_type=_request.model_type,
@@ -150,10 +149,22 @@ class Master(validation_pb2_grpc.MasterServicer):
                     worker = WorkerMetadata(request.hostname, request.port, shard)
                     info(f"Successfully added Worker: {worker}, responsible for GISJOINs {shard.gis_joins}")
                     self.tracked_workers[request.hostname] = worker
-                    return validation_pb2.WorkerRegistrationResponse(success=True)
+                    return WorkerRegistrationResponse(success=True)
 
         error(f"Failed to find a shard that {request.hostname} belongs to")
-        return validation_pb2.WorkerRegistrationResponse(success=False)
+        return WorkerRegistrationResponse(success=False)
+
+    def DeregisterWorker(self, request, context):
+        info(f"Received Worker(De)RegistrationRequest: hostname={request.hostname}, port={request.port}")
+
+        if self.is_worker_registered(request.hostname):
+            info(f"Worker {request.hostname} is registered. Removing...")
+            del self.tracked_workers[request.hostname]
+            info(f"Worker {request.hostname} is now deregistered and removed.")
+            return WorkerRegistrationResponse(success=True)
+        else:
+            error(f"Worker {request.hostname} is not registered, can't remove")
+            return WorkerRegistrationResponse(success=False)
 
     def SubmitValidationJob(self, request, context):
         info(f"SubmitValidationJob request for GISJOINs {request.gis_joins}")
@@ -184,7 +195,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         for response in validation_job_responses:
             info(f"Response: {response}")
 
-        return validation_pb2.ValidationJobResponse(id=job_id)
+        return ValidationJobResponse(id=job_id)
 
 
 def run(master_port=50051, local_testing=False):

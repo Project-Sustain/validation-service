@@ -30,6 +30,11 @@ class MasterStub(object):
                 request_serializer=validation__pb2.WorkerRegistrationRequest.SerializeToString,
                 response_deserializer=validation__pb2.WorkerRegistrationResponse.FromString,
                 )
+        self.DeregisterWorker = channel.unary_unary(
+                '/Master/DeregisterWorker',
+                request_serializer=validation__pb2.WorkerRegistrationRequest.SerializeToString,
+                response_deserializer=validation__pb2.WorkerRegistrationResponse.FromString,
+                )
 
 
 class MasterServicer(object):
@@ -57,6 +62,13 @@ class MasterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def DeregisterWorker(self, request, context):
+        """De-registers a Worker from tracking
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MasterServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -72,6 +84,11 @@ def add_MasterServicer_to_server(servicer, server):
             ),
             'RegisterWorker': grpc.unary_unary_rpc_method_handler(
                     servicer.RegisterWorker,
+                    request_deserializer=validation__pb2.WorkerRegistrationRequest.FromString,
+                    response_serializer=validation__pb2.WorkerRegistrationResponse.SerializeToString,
+            ),
+            'DeregisterWorker': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeregisterWorker,
                     request_deserializer=validation__pb2.WorkerRegistrationRequest.FromString,
                     response_serializer=validation__pb2.WorkerRegistrationResponse.SerializeToString,
             ),
@@ -132,6 +149,23 @@ class Master(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Master/RegisterWorker',
+            validation__pb2.WorkerRegistrationRequest.SerializeToString,
+            validation__pb2.WorkerRegistrationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def DeregisterWorker(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Master/DeregisterWorker',
             validation__pb2.WorkerRegistrationRequest.SerializeToString,
             validation__pb2.WorkerRegistrationResponse.FromString,
             options, channel_credentials,
