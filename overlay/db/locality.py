@@ -19,8 +19,10 @@ GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 # or discover them via mongo
 def get_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     if gis_join_chunk_locations_file_exists():
+        info(f"Cached GISJOIN chunk locations file exists at {GIS_JOIN_CHUNK_LOCATION_FILE}; loading from file")
         return load_gis_join_chunk_locations(shard_metadata)
     else:
+        info(f"No cached GISJOIN chunk locations file found; discovering chunk locations via MongoDB queries")
         return discover_gis_join_chunk_locations(shard_metadata)
 
 
