@@ -11,8 +11,6 @@ MASTER_URI="$1"
 WORKER_PORT="$2"
 DAEMON="$3"
 
-echo -e "DB_HOST=$HOSTNAME\nDB_PORT=27018\nDB_NAME=sustaindb\nMODELS_DIR=/tmp/validation-service/saved_models" > .env
-
 if [ "$DAEMON" == "--daemon" ]; then
   echo "Running worker as daemon"
   nohup python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt 2>&1 & disown
