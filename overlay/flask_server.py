@@ -5,14 +5,14 @@ import hashlib
 from flask import Flask, request
 from http import HTTPStatus
 from pprint import pprint
+from logging import info
 
 from werkzeug.utils import secure_filename
 
-import filereader
-import validation_pb2
-import validation_pb2_grpc
+from . import filereader
+from . import validation_pb2
+from . import validation_pb2_grpc
 
-from logging import info
 
 UPLOAD_DIR = './uploads'
 ALLOWED_EXTENSIONS = {'zip'}
@@ -74,16 +74,21 @@ def validation():
                 md5_hash=md5_hash,
                 data=file_bytes
             )
+
+            info(validation_request["model_framework"])
+
             validation_grpc_request = validation_pb2.ValidationJobRequest(
-                id="",
-                model_framework=validation_request.model_framework,
-                model_type=validation_request.model_type,
-                database=validation_request.database,
-                collection=validation_request.collection,
-                label_field=validation_request.label_field,
-                validation_metric=validation_request.validation_metric,
-                feature_fields=validation_request.feature_fields,
-                gis_joins=[],
+                job_mode=validation_request["job_mode"],
+                model_framework=validation_request["model_framework"],
+                model_type=validation_request["model_type"],
+                database=validation_request["database"],
+                collection=validation_request["collection"],
+                gis_join_key=validation_request["gis_join_key"],
+                label_field=validation_request["label_field"],
+                feature_fields=validation_request["feature_fields"],
+                normalize_inputs=validation_request["normalize_inputs"],
+                validation_metric=validation_request["validation_metric"],
+                gis_joins=validation_request["gis_joins"],
                 model_file=model_file
             )
 

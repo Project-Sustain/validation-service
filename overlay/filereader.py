@@ -1,4 +1,4 @@
-import validation_pb2
+from . import validation_pb2
 from logging import info, error
 
 

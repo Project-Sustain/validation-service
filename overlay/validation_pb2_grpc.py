@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import validation_pb2 as validation__pb2
+from overlay import validation_pb2 as validation__pb2
 
 
 class MasterStub(object):
@@ -27,6 +27,11 @@ class MasterStub(object):
                 )
         self.RegisterWorker = channel.unary_unary(
                 '/Master/RegisterWorker',
+                request_serializer=validation__pb2.WorkerRegistrationRequest.SerializeToString,
+                response_deserializer=validation__pb2.WorkerRegistrationResponse.FromString,
+                )
+        self.DeregisterWorker = channel.unary_unary(
+                '/Master/DeregisterWorker',
                 request_serializer=validation__pb2.WorkerRegistrationRequest.SerializeToString,
                 response_deserializer=validation__pb2.WorkerRegistrationResponse.FromString,
                 )
@@ -57,6 +62,13 @@ class MasterServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def DeregisterWorker(self, request, context):
+        """De-registers a Worker from tracking
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_MasterServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -72,6 +84,11 @@ def add_MasterServicer_to_server(servicer, server):
             ),
             'RegisterWorker': grpc.unary_unary_rpc_method_handler(
                     servicer.RegisterWorker,
+                    request_deserializer=validation__pb2.WorkerRegistrationRequest.FromString,
+                    response_serializer=validation__pb2.WorkerRegistrationResponse.SerializeToString,
+            ),
+            'DeregisterWorker': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeregisterWorker,
                     request_deserializer=validation__pb2.WorkerRegistrationRequest.FromString,
                     response_serializer=validation__pb2.WorkerRegistrationResponse.SerializeToString,
             ),
@@ -137,6 +154,23 @@ class Master(object):
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
+    @staticmethod
+    def DeregisterWorker(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Master/DeregisterWorker',
+            validation__pb2.WorkerRegistrationRequest.SerializeToString,
+            validation__pb2.WorkerRegistrationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
 
 class WorkerStub(object):
     """Worker service definition
@@ -148,28 +182,16 @@ class WorkerStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.UploadFile = channel.unary_unary(
-                '/Worker/UploadFile',
-                request_serializer=validation__pb2.ModelFile.SerializeToString,
-                response_deserializer=validation__pb2.UploadStatus.FromString,
-                )
         self.BeginValidationJob = channel.unary_unary(
                 '/Worker/BeginValidationJob',
                 request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
-                response_deserializer=validation__pb2.WorkerJobResponse.FromString,
+                response_deserializer=validation__pb2.ValidationJobResponse.FromString,
                 )
 
 
 class WorkerServicer(object):
     """Worker service definition
     """
-
-    def UploadFile(self, request, context):
-        """Allows streamed uploading of a .zip model to the Worker
-        """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
 
     def BeginValidationJob(self, request, context):
         """Registers a Worker to track via heartbeats
@@ -181,15 +203,10 @@ class WorkerServicer(object):
 
 def add_WorkerServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'UploadFile': grpc.unary_unary_rpc_method_handler(
-                    servicer.UploadFile,
-                    request_deserializer=validation__pb2.ModelFile.FromString,
-                    response_serializer=validation__pb2.UploadStatus.SerializeToString,
-            ),
             'BeginValidationJob': grpc.unary_unary_rpc_method_handler(
                     servicer.BeginValidationJob,
                     request_deserializer=validation__pb2.ValidationJobRequest.FromString,
-                    response_serializer=validation__pb2.WorkerJobResponse.SerializeToString,
+                    response_serializer=validation__pb2.ValidationJobResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -201,23 +218,6 @@ def add_WorkerServicer_to_server(servicer, server):
 class Worker(object):
     """Worker service definition
     """
-
-    @staticmethod
-    def UploadFile(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Worker/UploadFile',
-            validation__pb2.ModelFile.SerializeToString,
-            validation__pb2.UploadStatus.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def BeginValidationJob(request,
@@ -232,6 +232,6 @@ class Worker(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Worker/BeginValidationJob',
             validation__pb2.ValidationJobRequest.SerializeToString,
-            validation__pb2.WorkerJobResponse.FromString,
+            validation__pb2.ValidationJobResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

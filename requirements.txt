@@ -4,3 +4,9 @@ grpcio
 grpcio-tools
 pymongo
 python-dotenv
+asyncio
+progressbar
+pandas
+numpy
+scikit-learn
+tensorflow

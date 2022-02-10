@@ -1,0 +1,33 @@
+{
+  "job_mode": "synchronous",
+  "model_framework": "tensorflow",
+  "model_type": "Linear Regression",
+  "database": "sustaindb",
+  "collection": "noaa_nam",
+  "gis_join_key": "COUNTY_GISJOIN",
+  "feature_fields": [
+    "PRESSURE_AT_SURFACE_PASCAL",
+    "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
+  ],
+  "label_field": "TEMPERATURE_AT_SURFACE_KELVIN",
+  "normalize_inputs": true,
+  "validation_metric": "RMSE",
+  "gis_joins": [
+    "G2000190",
+    "G2000090",
+    "G2000670",
+    "G2000610",
+    "G2000250",
+    "G2000070",
+    "G2000030",
+    "G2000470",
+
+    "G3500570",
+    "G3500510",
+    "G3500250",
+    "G3500410",
+    "G3500350",
+    "G3500550",
+    "G3500280"
+  ]
+}

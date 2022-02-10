@@ -4,15 +4,30 @@ from overlay.constants import DB_HOST, DB_PORT, DB_NAME
 
 
 class Querier:
-    def __init__(self, mongo_url: str, db_name: str):
-        self.db_connection = pymongo.MongoClient(mongo_url)
-        self.db = self.db_connection[db_name]
 
-    def query(self, collection_name: str, gis_join: str):
+    def __init__(self, mongo_uri: str, db_name: str):
+        self.mongo_uri = mongo_uri
+        self.db_name = db_name
+        self.db_connection = pymongo.MongoClient(self.mongo_uri)
+        self.db = self.db_connection[self.db_name]
+
+    # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
+    def spatial_query(self, collection_name: str, spatial_key: str, spatial_value: str, features: list, label: str):
         collection = self.db[collection_name]
-        client_query = {"GISJOIN": gis_join}
-        query_results = list(collection.find(client_query))
-        return query_results
+
+        # Build projection
+        projection = {"_id": 0}
+        for feature in features:
+            projection[feature] = 1
+        projection[label] = 1
+
+        return collection.find({spatial_key: spatial_value}, projection)
+
+    def close(self):
+        self.db_connection.close()
+
+    def __repr__(self):
+        return f"Querier: mongo_uri={self.mongo_uri}, db_name={self.db_name}"
 
 
 if __name__ == "__main__":
