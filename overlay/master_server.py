@@ -158,12 +158,12 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
 
 
     # Iterate over all the worker jobs created for this job and create asyncio tasks for them
+    loop = asyncio.new_event_loop()
     tasks = []
     for worker_hostname, worker_job in job.worker_jobs.items():
         if len(worker_job.gis_joins) > 0:
             tasks.append(asyncio.create_task(run_worker_job(worker_job, request)))
 
-    loop = asyncio.new_event_loop()
     responses = loop.run_until_complete(asyncio.gather(*tasks))
     loop.close()
 
