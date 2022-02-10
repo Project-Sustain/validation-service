@@ -15,6 +15,10 @@ def validate_model(models_dir, job_id, model_type, documents, feature_fields, la
     features_df = pd.DataFrame(list(documents))
     info(f"Loaded Pandas DataFrame from MongoDB, raw data:\n{features_df}")
 
+    if len(features_df.index) == 0:
+        error("DataFrame is empty! Returning None")
+        return None
+
     # Normalize features, if requested
     if normalize:
         features_df = normalize_dataframe(features_df)

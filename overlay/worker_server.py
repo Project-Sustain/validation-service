@@ -55,6 +55,8 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         metrics = []  # list of proto ValidationMetric objects
 
         for gis_join in request.gis_joins:
+
+            info(f"Launching validation job for GISJOIN {gis_join}")
             documents = self.querier.spatial_query(
                 request.collection, request.gis_join_key, gis_join, request.feature_fields, request.label_field
             )
@@ -71,10 +73,16 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                 True
             )
 
-            metrics.append(validation_pb2.ValidationMetric(
-                gis_join=gis_join,
-                loss=loss
-            ))
+            if loss is None:
+                metrics.append(validation_pb2.ValidationMetric(
+                    gis_join=gis_join,
+                    loss=loss
+                ))
+            else:
+                metrics.append(validation_pb2.ValidationMetric(
+                    gis_join=gis_join,
+                    loss=loss
+                ))
 
         return validation_pb2.ValidationJobResponse(
             id=request.id,
