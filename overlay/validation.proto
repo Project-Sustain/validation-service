@@ -38,17 +38,18 @@ service Worker {
 // Worker job request for a set of GISJOINs, and a model to validate
 message ValidationJobRequest {
   string id = 1;
-  string model_framework = 2;
-  string model_type = 3;
-  string database = 4;
-  string collection = 5;
-  string gis_join_key = 6;
-  repeated string feature_fields = 10;
-  string label_field = 7;
-  bool normalize_inputs = 8;
-  string validation_metric = 9;
-  repeated string gis_joins = 11;
-  ModelFile model_file = 12;
+  string job_mode = 2;
+  string model_framework = 3;
+  string model_type = 4;
+  string database = 5;
+  string collection = 6;
+  string gis_join_key = 7;
+  repeated string feature_fields = 8;
+  string label_field = 9;
+  bool normalize_inputs = 10;
+  string validation_metric = 11;
+  repeated string gis_joins = 12;
+  ModelFile model_file = 13;
 }
 
 message ValidationJobResponse {

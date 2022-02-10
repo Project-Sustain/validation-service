@@ -72,6 +72,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 stub = validation_pb2_grpc.WorkerStub(channel)
                 response = stub.BeginValidationJob(ValidationJobRequest(
                     id=worker_job.job_id,
+                    job_mode=request.job_mode,
                     model_framework=request.model_framework,
                     model_type=request.model_type,
                     database=request.database,
@@ -89,7 +90,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
     return responses
 
 
-def launch_worker_jobs_concurrently(job: JobMetadata, request: ValidationJobRequest) -> list:
+def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
 
     # Define worker job function to be run in the thread pool
@@ -100,6 +101,7 @@ def launch_worker_jobs_concurrently(job: JobMetadata, request: ValidationJobRequ
             stub = validation_pb2_grpc.WorkerStub(channel)
             response: ValidationJobResponse = stub.BeginValidationJob(ValidationJobRequest(
                 id=_worker_job.job_id,
+                job_mode=request.job_mode,
                 model_framework=_request.model_framework,
                 model_type=_request.model_type,
                 database=_request.database,
@@ -129,18 +131,17 @@ def launch_worker_jobs_concurrently(job: JobMetadata, request: ValidationJobRequ
     return responses
 
 
-async def launch_worker_jobs(job: JobMetadata, request: ValidationJobRequest, job_results: list):
-    jobs_to_launch = []
+def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
 
     # Define async function to launch worker job
-    async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest,
-                             _job_results: list) -> None:
+    async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
         info("Launching async run_worker_job()...")
         _worker = _worker_job.worker
         async with grpc.aio.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
             response = await stub.BeginValidationJob(ValidationJobRequest(
                 id=_worker_job.job_id,
+                job_mode=request.job_mode,
                 model_framework=_request.model_framework,
                 model_type=_request.model_type,
                 database=_request.database,
@@ -153,15 +154,19 @@ async def launch_worker_jobs(job: JobMetadata, request: ValidationJobRequest, jo
                 gis_joins=_worker_job.gis_joins,
                 model_file=_request.model_file
             ))
-            info(f"Response received: {response}")
-            _job_results.append(response)
+            return response
 
-    # Iterate over all the worker jobs created for this job and create asyncio jobs for them
+
+    # Iterate over all the worker jobs created for this job and create asyncio tasks for them
+    tasks = []
     for worker_hostname, worker_job in job.worker_jobs.items():
         if len(worker_job.gis_joins) > 0:
-            jobs_to_launch.append(asyncio.create_task(run_worker_job(worker_job, request, job_results)))
+            tasks.append(asyncio.create_task(run_worker_job(worker_job, request)))
 
-    await asyncio.gather(*jobs_to_launch)
+    loop = asyncio.get_event_loop()
+    responses = loop.run_until_complete(asyncio.gather(*tasks))
+
+    return list(responses)
 
 
 class Master(validation_pb2_grpc.MasterServicer):
@@ -211,7 +216,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             return WorkerRegistrationResponse(success=False)
 
     def SubmitValidationJob(self, request, context):
-        info(f"SubmitValidationJob request for GISJOINs {request.gis_joins}")
+        info(f"SubmitValidationJob request for GISJOINs: {request.gis_joins}")
         job_id = generate_job_id()  # Random UUID for the job
         job = JobMetadata(job_id, request.gis_joins)
         info(f"Created job id {job_id}")
@@ -231,9 +236,16 @@ class Master(validation_pb2_grpc.MasterServicer):
         for worker_hostname, worker_job in job.worker_jobs.items():
             info(f"{worker_hostname}: {worker_job}")
 
-        # Submit jobs with asyncio and collect results
-        # validation_job_responses = launch_worker_jobs_synchronously(job, request)
-        validation_job_responses = launch_worker_jobs_concurrently(job, request)
+        if request.job_mode == "multithreaded":
+            info("Launching jobs in multithreaded mode")
+            validation_job_responses = launch_worker_jobs_multithreaded(job, request)
+        elif request.job_mode == "asynchronous":
+            info("Launching jobs in asynchronous mode")
+            validation_job_responses = launch_worker_jobs_asynchronously(job, request)
+        else:
+            info("Launching jobs in synchronous mode")
+            validation_job_responses = launch_worker_jobs_synchronously(job, request)
+
         all_validation_metrics = []
 
         for response in validation_job_responses:

@@ -1,4 +1,5 @@
 {
+  "job_mode": "synchronous",
   "model_framework": "tensorflow",
   "model_type": "Linear Regression",
   "database": "sustaindb",

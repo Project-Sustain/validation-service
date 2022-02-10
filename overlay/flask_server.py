@@ -78,6 +78,7 @@ def validation():
             info(validation_request["model_framework"])
 
             validation_grpc_request = validation_pb2.ValidationJobRequest(
+                job_mode=validation_request["job_mode"],
                 model_framework=validation_request["model_framework"],
                 model_type=validation_request["model_type"],
                 database=validation_request["database"],
