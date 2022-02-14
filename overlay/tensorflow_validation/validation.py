@@ -30,8 +30,6 @@ class TensorflowValidator:
         self.label_field = label_field
         self.validation_metric = validation_metric
         self.normalize = normalize
-        self.querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
-        self.model = self.load_tf_model()
 
     def load_tf_model(self):
         # Load Tensorflow model from disk
@@ -41,19 +39,22 @@ class TensorflowValidator:
         model.summary()
         return model
 
-    def validate_gis_joins(self, gis_joins: list) -> list:
+    def validate_gis_joins_synchronous(self, gis_joins: list) -> list:
+        querier: Querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
+        model: tf.keras.Model = self.load_tf_model()
+
         metrics = []  # list of proto ValidationMetric objects
         current = 1
         for gis_join in gis_joins:
             info(f"Launching validation job for GISJOIN {gis_join}, [{current}/{len(gis_joins)}]")
-            loss = self.validate_gis_join(gis_join)
+            loss = self.validate_gis_join(gis_join, querier, model, False)
             metrics.append(ValidationMetric(
                 gis_join=gis_join,
                 loss=loss
             ))
             current += 1
 
-        self.querier.close()  # Close querier now that we are done using it
+        querier.close()  # Close querier now that we are done using it
         return metrics
 
     def validate_gis_joins_multithreaded(self, gis_joins: list) -> list:
@@ -63,8 +64,11 @@ class TensorflowValidator:
         executors_list = []
         with ThreadPoolExecutor(max_workers=10) as executor:
             for gis_join in gis_joins:
+                querier: Querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
+                model: tf.keras.Model = self.load_tf_model()
+
                 info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
-                executors_list.append(executor.submit(self.validate_gis_join, gis_join))
+                executors_list.append(executor.submit(self.validate_gis_join, gis_join, querier, model, True))
 
         # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
         for future in as_completed(executors_list):
@@ -78,32 +82,43 @@ class TensorflowValidator:
 
         return metrics
 
-    def validate_gis_join(self, gis_join: str) -> float:
+    def validate_gis_join(self, gis_join: str, querier: Querier, model: tf.keras.Model, is_concurrent: bool) -> float:
         # Query MongoDB for documents matching GISJOIN
-        documents = self.querier.spatial_query(
+        documents = querier.spatial_query(
             self.collection, self.gis_join_key, gis_join, self.feature_fields, self.label_field
         )
 
         # Load MongoDB Documents into Pandas DataFrame
         features_df = pd.DataFrame(list(documents))
-        info(f"Loaded Pandas DataFrame from MongoDB, raw data:\n{features_df}")
+        if is_concurrent:
+            info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+        else:
+            info(f"Loaded Pandas DataFrame from MongoDB, raw data:\n{features_df}")
 
         if len(features_df.index) == 0:
-            error("DataFrame is empty! Returning None")
+            error("DataFrame is empty! Returning -1.0 for loss")
             return -1.0
 
         # Normalize features, if requested
         if self.normalize:
             features_df = normalize_dataframe(features_df)
-            info(f"Pandas DataFrame after normalization:\n{features_df}")
+            if is_concurrent:
+                info(f"Normalized Pandas DataFrame")
+            else:
+                info(f"Pandas DataFrame after normalization:\n{features_df}")
 
         # Pop the label column off into its own DataFrame
         label_df = features_df.pop(self.label_field)
 
         # Load model from disk
-        validation_results = self.model.evaluate(features_df, label_df, batch_size=128, return_dict=True)
+        validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True)
         info(f"Model validation results: {validation_results}")
+
+        if is_concurrent:
+            querier.close()
+
         return validation_results['loss']
+
 
 
 # Normalizes all the columns of a Pandas DataFrame using sklearn's Min-Max Feature Scaling.
