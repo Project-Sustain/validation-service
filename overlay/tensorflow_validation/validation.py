@@ -37,12 +37,13 @@ class TensorflowValidator:
         self.sample_rate = sample_rate
         info(f"TensorflowValidator(): limit={self.limit}, sample_rate={self.sample_rate}")
 
-    def load_tf_model(self):
+    def load_tf_model(self, verbose=False):
         # Load Tensorflow model from disk
         model_path = f"{self.models_dir}/{self.job_id}"
         info(f"Loading Tensorflow model from {model_path}")
         model = tf.keras.models.load_model(model_path)
-        model.summary()
+        if verbose:
+            model.summary()
         return model
 
     def validate_gis_joins_synchronous(self, gis_joins: list) -> list:
