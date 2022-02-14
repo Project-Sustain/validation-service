@@ -87,7 +87,7 @@ def validation():
                 label_field=validation_request["label_field"],
                 feature_fields=validation_request["feature_fields"],
                 normalize_inputs=validation_request["normalize_inputs"],
-                limit=validation_request["normalize_inputs"],
+                limit=validation_request["limit"],
                 sample_rate=validation_request["sample_rate"],
                 validation_metric=validation_request["validation_metric"],
                 gis_joins=validation_request["gis_joins"],
