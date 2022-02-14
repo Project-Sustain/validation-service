@@ -2,6 +2,7 @@ import tensorflow as tf
 import pandas as pd
 from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from overlay.validation_pb2 import ValidationMetric
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME
@@ -46,24 +47,38 @@ class TensorflowValidator:
         for gis_join in gis_joins:
             info(f"Launching validation job for GISJOIN {gis_join}, [{current}/{len(gis_joins)}]")
             loss = self.validate_gis_join(gis_join)
-
-            if loss is None:
-                metrics.append(ValidationMetric(
-                    gis_join=gis_join,
-                    loss=-1.0
-                ))
-            else:
-                metrics.append(ValidationMetric(
-                    gis_join=gis_join,
-                    loss=loss
-                ))
-
+            metrics.append(ValidationMetric(
+                gis_join=gis_join,
+                loss=loss
+            ))
             current += 1
 
         self.querier.close()  # Close querier now that we are done using it
         return metrics
 
-    def validate_gis_join(self, gis_join: str):
+    def validate_gis_joins_multithreaded(self, gis_joins: list) -> list:
+        metrics = []  # list of proto ValidationMetric objects
+
+        # Iterate over all gis_joins and submit them for validation to the thread pool executor
+        executors_list = []
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            for gis_join in gis_joins:
+                info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
+                executors_list.append(executor.submit(self.validate_gis_join, gis_join))
+
+        # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
+        for future in as_completed(executors_list):
+            info(future)
+            loss = future.result()
+
+            metrics.append(ValidationMetric(
+                gis_join=gis_join,
+                loss=loss
+            ))
+
+        return metrics
+
+    def validate_gis_join(self, gis_join: str) -> float:
         # Query MongoDB for documents matching GISJOIN
         documents = self.querier.spatial_query(
             self.collection, self.gis_join_key, gis_join, self.feature_fields, self.label_field
@@ -75,7 +90,7 @@ class TensorflowValidator:
 
         if len(features_df.index) == 0:
             error("DataFrame is empty! Returning None")
-            return None
+            return -1.0
 
         # Normalize features, if requested
         if self.normalize:

@@ -66,7 +66,8 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             True  # normalize
         )
 
-        metrics = tf_validator.validate_gis_joins(request.gis_joins)  # list of proto ValidationMetric objects
+        metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
+        # metrics = tf_validator.validate_gis_joins(request.gis_joins)  # list of proto ValidationMetric objects
 
         return validation_pb2.ValidationJobResponse(
             id=request.id,
