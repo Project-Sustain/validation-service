@@ -1,4 +1,3 @@
-import pymongo
 import tensorflow as tf
 import pandas as pd
 from logging import info, error
