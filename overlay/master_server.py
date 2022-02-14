@@ -10,6 +10,7 @@ import grpc
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.db import shards, locality
+from overlay.db.shards import ShardMetadata
 from overlay.validation_pb2 import WorkerRegistrationResponse, ValidationJobResponse, ValidationJobRequest
 
 
@@ -53,7 +54,13 @@ def generate_job_id() -> str:
     return uuid.uuid4().hex
 
 
-def get_or_create_worker_job(worker, job_id):
+def get_worker_job(worker: WorkerMetadata, job_id: str):
+    if job_id in worker.jobs:
+        return worker.jobs[job_id]
+    return None
+
+
+def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMetadata:
     if job_id not in worker.jobs:
         info(f"Creating job for worker={worker.hostname}, job={job_id}")
         worker.jobs[job_id] = WorkerJobMetadata(job_id, worker)
@@ -175,7 +182,7 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
 
 class Master(validation_pb2_grpc.MasterServicer):
 
-    def __init__(self, gis_join_locations, shard_metadata, local_testing=False):
+    def __init__(self, gis_join_locations: dict, shard_metadata: dict, local_testing=False):
         super(Master, self).__init__()
         self.tracked_workers = {}  # Mapping of { hostname -> WorkerMetadata }
         self.tracked_jobs = []  # List of JobMetadata
@@ -187,11 +194,23 @@ class Master(validation_pb2_grpc.MasterServicer):
     def is_worker_registered(self, hostname):
         return hostname in self.tracked_workers
 
-    def choose_worker_from_shard(self, shard):
+    def choose_worker_from_shard(self, shard: ShardMetadata, job_id: str) -> WorkerMetadata:
+
+        # Find registered hostname in shard with the least current jobs
+        min_gis_joins = 9999999
+        selected_worker = None
         for worker_host in shard.shard_servers:
             if self.is_worker_registered(worker_host):
-                return self.tracked_workers[worker_host]
-        return None
+                worker_job = get_worker_job(self.tracked_workers[worker_host], job_id)
+                if worker_job is None:
+                    info(f"Worker {worker_host} currently has no job, defaulting to it for next GISJOIN in job={job_id}")
+                    return self.tracked_workers[worker_host]
+                elif len(worker_job.gis_joins) < min_gis_joins:
+                    min_gis_joins = len(worker_job.gis_joins)
+                    selected_worker = self.tracked_workers[worker_host]
+
+        info(f"Selecting {selected_worker.hostname} for next GISJOIN in job={job_id}")
+        return selected_worker
 
     def RegisterWorker(self, request, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
@@ -227,7 +246,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         for gis_join in request.gis_joins:
             shard_hosting_gis_join = self.gis_join_locations[gis_join]
-            worker = self.choose_worker_from_shard(shard_hosting_gis_join)
+            worker = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
             if worker is None:
                 error(f"Unable to find registered worker for GISJOIN {gis_join}")
                 continue
