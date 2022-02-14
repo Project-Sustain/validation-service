@@ -8,7 +8,7 @@ class Querier:
     def __init__(self, mongo_uri: str, db_name: str):
         self.mongo_uri = mongo_uri
         self.db_name = db_name
-        self.db_connection = pymongo.MongoClient(self.mongo_uri)
+        self.db_connection = pymongo.MongoClient(self.mongo_uri, readPreference="nearest")
         self.db = self.db_connection[self.db_name]
 
     # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
