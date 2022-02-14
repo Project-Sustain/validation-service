@@ -1,6 +1,5 @@
 import pymongo
-
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from pymongo import cursor
 
 
 class Querier:
@@ -12,7 +11,9 @@ class Querier:
         self.db = self.db_connection[self.db_name]
 
     # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
-    def spatial_query(self, collection_name: str, spatial_key: str, spatial_value: str, features: list, label: str):
+    def spatial_query(self, collection_name: str, spatial_key: str, spatial_value: str, features: list, label: str) \
+            -> cursor.Cursor:
+
         collection = self.db[collection_name]
 
         # Build projection
@@ -31,6 +32,7 @@ class Querier:
 
 
 if __name__ == "__main__":
-    sustaindb = Querier(f'{DB_HOST}:{DB_PORT}', DB_NAME)
-    results = sustaindb.query("county_median_age", "G0100150")
-    print(results)
+    pass
+    # sustaindb = Querier(f'{DB_HOST}:{DB_PORT}', DB_NAME)
+    # results = sustaindb.query("county_median_age", "G0100150")
+    # print(results)
