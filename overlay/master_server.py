@@ -88,6 +88,8 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                     feature_fields=request.feature_fields,
                     label_field=request.label_field,
                     normalize_inputs=request.normalize_inputs,
+                    limit=request.limit,
+                    sample_rate=request.sample_rate,
                     validation_metric=request.validation_metric,
                     gis_joins=worker_job.gis_joins,
                     model_file=request.model_file

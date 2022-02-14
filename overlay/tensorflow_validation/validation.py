@@ -20,7 +20,10 @@ class TensorflowValidator:
                  feature_fields: list,
                  label_field: str,
                  validation_metric: str,
-                 normalize: bool):
+                 normalize: bool,
+                 limit: int,
+                 sample_rate: float):
+
         self.job_id = job_id
         self.models_dir = models_dir
         self.model_type = model_type
@@ -30,6 +33,8 @@ class TensorflowValidator:
         self.label_field = label_field
         self.validation_metric = validation_metric
         self.normalize = normalize
+        self.limit = limit
+        self.sample_rate = sample_rate
 
     def load_tf_model(self):
         # Load Tensorflow model from disk
@@ -85,7 +90,13 @@ class TensorflowValidator:
     def validate_gis_join(self, gis_join: str, querier: Querier, model: tf.keras.Model, is_concurrent: bool) -> float:
         # Query MongoDB for documents matching GISJOIN
         documents = querier.spatial_query(
-            self.collection, self.gis_join_key, gis_join, self.feature_fields, self.label_field
+            self.collection,
+            self.gis_join_key,
+            gis_join,
+            self.feature_fields,
+            self.label_field,
+            self.limit,
+            self.sample_rate
         )
 
         # Load MongoDB Documents into Pandas DataFrame
@@ -110,8 +121,8 @@ class TensorflowValidator:
         # Pop the label column off into its own DataFrame
         label_df = features_df.pop(self.label_field)
 
-        # Load model from disk
-        validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True)
+        # Evaluate model
+        validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
         info(f"Model validation results: {validation_results}")
 
         if is_concurrent:

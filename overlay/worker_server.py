@@ -63,7 +63,9 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             request.feature_fields,
             request.label_field,
             request.validation_metric,
-            True  # normalize
+            True,  # normalize
+            request.limit,
+            request.sample_rate
         )
 
         metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)

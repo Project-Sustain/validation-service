@@ -47,9 +47,11 @@ message ValidationJobRequest {
   repeated string feature_fields = 8;
   string label_field = 9;
   bool normalize_inputs = 10;
-  string validation_metric = 11;
-  repeated string gis_joins = 12;
-  ModelFile model_file = 13;
+  int32 limit = 11;
+  double sample_rate = 12;
+  string validation_metric = 13;
+  repeated string gis_joins = 14;
+  ModelFile model_file = 15;
 }
 
 message ValidationJobResponse {

@@ -1,5 +1,6 @@
 import pymongo
 from pymongo import cursor
+from logging import info
 
 
 class Querier:
@@ -11,10 +12,21 @@ class Querier:
         self.db = self.db_connection[self.db_name]
 
     # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
-    def spatial_query(self, collection_name: str, spatial_key: str, spatial_value: str, features: list, label: str) \
-            -> cursor.Cursor:
+    def spatial_query(self,
+                      collection_name: str,
+                      spatial_key: str,
+                      spatial_value: str,
+                      features: list,
+                      label: str,
+                      limit=0,
+                      sample_rate=0.0) -> cursor.Cursor:
 
         collection = self.db[collection_name]
+        query = {spatial_key: spatial_value}
+
+        if sample_rate > 0.0:
+            info(f"Sampling GISJOIN {spatial_value} documents with a rate of {sample_rate}")
+            query["$sampleRate"] = sample_rate
 
         # Build projection
         projection = {"_id": 0}
@@ -22,7 +34,11 @@ class Querier:
             projection[feature] = 1
         projection[label] = 1
 
-        return collection.find({spatial_key: spatial_value}, projection)
+        if limit > 0:
+            info(f"Limiting GISJOIN {spatial_value} query to {limit} records")
+            return collection.find(query, projection).limit(limit)
+        else:
+            return collection.find(query, projection)  # Just find all that match
 
     def close(self):
         self.db_connection.close()

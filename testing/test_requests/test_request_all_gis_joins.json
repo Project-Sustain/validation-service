@@ -11,6 +11,8 @@
   ],
   "label_field": "TEMPERATURE_AT_SURFACE_KELVIN",
   "normalize_inputs": true,
+  "limit": 0,
+  "sample_rate": 0.0,
   "validation_metric": "RMSE",
   "gis_joins": [
     "G5600170",
