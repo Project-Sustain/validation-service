@@ -42,8 +42,9 @@ class TensorflowValidator:
 
     def validate_gis_joins(self, gis_joins: list) -> list:
         metrics = []  # list of proto ValidationMetric objects
+        current = 1
         for gis_join in gis_joins:
-            info(f"Launching validation job for GISJOIN {gis_join}")
+            info(f"Launching validation job for GISJOIN {gis_join}, [{current}/{len(gis_joins)}]")
             loss = self.validate_gis_join(gis_join)
 
             if loss is None:
@@ -56,6 +57,8 @@ class TensorflowValidator:
                     gis_join=gis_join,
                     loss=loss
                 ))
+
+            current += 1
 
         self.querier.close()  # Close querier now that we are done using it
         return metrics
