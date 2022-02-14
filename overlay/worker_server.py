@@ -54,6 +54,8 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         zip_file = zipfile.ZipFile(io.BytesIO(request.model_file.data))
         zip_file.extractall(model_dir)
 
+        info(f"BeginValidationJob: limit={request.limit}, sample_rate={request.sample_rate}")
+
         tf_validator: TensorflowValidator = TensorflowValidator(
             request.id,
             self.saved_models_path,

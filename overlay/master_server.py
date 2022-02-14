@@ -69,6 +69,7 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
 
 def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
+    info(f"limit={request.limit}, sample_rate={request.sample_rate}")
 
     # Iterate over all the worker jobs created for this job and launch them serially
     for worker_hostname, worker_job in job.worker_jobs.items():
@@ -101,6 +102,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
 
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
+    info(f"limit={request.limit}, sample_rate={request.sample_rate}")
 
     # Define worker job function to be run in the thread pool
     def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
@@ -143,6 +145,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
 
 
 def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
+    info(f"limit={request.limit}, sample_rate={request.sample_rate}")
 
     # Define async function to launch worker job
     async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:

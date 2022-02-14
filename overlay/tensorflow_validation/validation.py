@@ -35,6 +35,7 @@ class TensorflowValidator:
         self.normalize = normalize
         self.limit = limit
         self.sample_rate = sample_rate
+        info(f"TensorflowValidator(): limit={self.limit}, sample_rate={self.sample_rate}")
 
     def load_tf_model(self):
         # Load Tensorflow model from disk
