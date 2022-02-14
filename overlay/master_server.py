@@ -119,6 +119,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 feature_fields=_request.feature_fields,
                 label_field=_request.label_field,
                 normalize_inputs=_request.normalize_inputs,
+                limit=request.limit,
+                sample_rate=request.sample_rate,
                 validation_metric=_request.validation_metric,
                 gis_joins=_worker_job.gis_joins,
                 model_file=_request.model_file
@@ -159,6 +161,8 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
                 feature_fields=_request.feature_fields,
                 label_field=_request.label_field,
                 normalize_inputs=_request.normalize_inputs,
+                limit=request.limit,
+                sample_rate=request.sample_rate,
                 validation_metric=_request.validation_metric,
                 gis_joins=_worker_job.gis_joins,
                 model_file=_request.model_file
