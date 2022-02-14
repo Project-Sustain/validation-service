@@ -89,6 +89,8 @@ class TensorflowValidator:
 
     def validate_gis_join(self, gis_join: str, querier: Querier, model: tf.keras.Model, is_concurrent: bool) -> float:
         # Query MongoDB for documents matching GISJOIN
+        info(f"Using limit={self.limit}, and sample_rate={self.sample_rate}")
+
         documents = querier.spatial_query(
             self.collection,
             self.gis_join_key,

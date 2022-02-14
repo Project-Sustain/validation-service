@@ -18,8 +18,8 @@ class Querier:
                       spatial_value: str,
                       features: list,
                       label: str,
-                      limit=0,
-                      sample_rate=0.0) -> cursor.Cursor:
+                      limit: int,
+                      sample_rate: float) -> cursor.Cursor:
 
         collection = self.db[collection_name]
         query = {spatial_key: spatial_value}
