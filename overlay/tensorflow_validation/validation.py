@@ -135,7 +135,6 @@ class TensorflowValidator:
         return validation_results['loss']
 
 
-
 # Normalizes all the columns of a Pandas DataFrame using sklearn's Min-Max Feature Scaling.
 def normalize_dataframe(dataframe):
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(dataframe)

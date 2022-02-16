@@ -6,12 +6,11 @@ from flask import Flask, request
 from http import HTTPStatus
 from pprint import pprint
 from logging import info
+from google.protobuf.json_format import MessageToJson
 
-from werkzeug.utils import secure_filename
-
-from . import filereader
-from . import validation_pb2
-from . import validation_pb2_grpc
+from overlay import filereader
+from overlay import validation_pb2_grpc
+from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFile
 
 
 UPLOAD_DIR = './uploads'
@@ -69,7 +68,7 @@ def validation():
 
         with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
             stub = validation_pb2_grpc.MasterStub(channel)
-            model_file = validation_pb2.ModelFile(
+            model_file = ModelFile(
                 type="zip",
                 md5_hash=md5_hash,
                 data=file_bytes
@@ -77,7 +76,7 @@ def validation():
 
             info(validation_request["model_framework"])
 
-            validation_grpc_request = validation_pb2.ValidationJobRequest(
+            validation_grpc_request = ValidationJobRequest(
                 job_mode=validation_request["job_mode"],
                 model_framework=validation_request["model_framework"],
                 model_type=validation_request["model_type"],
@@ -97,4 +96,8 @@ def validation():
             validation_grpc_response = stub.SubmitValidationJob(validation_grpc_request)
             info(f"Validation Response received: {validation_grpc_response}")
 
-    return f"ValidationJobResponse: {validation_grpc_response}", HTTPStatus.OK
+    return build_json_response(validation_grpc_response), HTTPStatus.OK
+
+
+def build_json_response(validation_grpc_response: ValidationJobResponse) -> str:
+    return MessageToJson(validation_grpc_response, preserving_proto_field_name=True)
