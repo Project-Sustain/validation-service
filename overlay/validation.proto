@@ -5,13 +5,16 @@ syntax = "proto3";
 service Master {
 
   // Allows streamed uploading of a .zip model to the Master
-  rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
+  rpc UploadFile(ModelFile) returns (UploadStatus) {}
 
   // Submits a validation job to the cluster
   rpc SubmitValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
 
   // Registers a Worker to track
   rpc RegisterWorker (WorkerRegistrationRequest) returns (WorkerRegistrationResponse) {}
+
+  // De-registers a Worker from tracking
+  rpc DeregisterWorker (WorkerRegistrationRequest) returns (WorkerRegistrationResponse) {}
 }
 
 // Worker registration request that gets sent to the master, to be tracked
@@ -28,47 +31,44 @@ message WorkerRegistrationResponse {
 // Worker service definition
 service Worker {
 
-  // Allows streamed uploading of a .zip model to the Worker
-  rpc UploadFile(stream FileChunk) returns (UploadStatus) {}
-
   // Registers a Worker to track via heartbeats
-  rpc BeginValidationJob(ValidationJobRequest) returns (WorkerJobResponse) {}
+  rpc BeginValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
 message ValidationJobRequest {
   string id = 1;
-  string model_framework = 2;
-  string model_type = 3;
-  string database = 4;
-  string collection = 5;
-  string label_field = 6;
-  string validation_metric = 7;
+  string job_mode = 2;
+  string model_framework = 3;
+  string model_type = 4;
+  string database = 5;
+  string collection = 6;
+  string gis_join_key = 7;
   repeated string feature_fields = 8;
-  repeated string gis_joins = 9;
+  string label_field = 9;
+  bool normalize_inputs = 10;
+  int32 limit = 11;
+  double sample_rate = 12;
+  string validation_metric = 13;
+  repeated string gis_joins = 14;
+  ModelFile model_file = 15;
 }
 
 message ValidationJobResponse {
-  string message = 1;
-}
-
-enum WorkerJobStatusCode {
-  WORKER_JOB_STATUS_CODE_UNKNOWN = 0;
-  WORKER_JOB_STATUS_CODE_OK = 1;
-  WORKER_JOB_STATUS_CODE_ERROR = 2;
-  WORKER_JOB_STATUS_CODE_FAILED = 3;
-}
-
-// Worker job request for a set of GISJOINs, and a model to validate
-message WorkerJobResponse {
   string id = 1;
-  string error_message = 2;
-  WorkerJobStatusCode worker_job_status_code = 3;
+  repeated ValidationMetric metrics = 2;
 }
 
-message FileChunk {
-  string id = 1;
-  bytes data = 2;
+message ValidationMetric {
+  string gis_join = 1;
+  double loss = 2;
+  double accuracy = 3;
+}
+
+message ModelFile {
+  string type = 1;
+  string md5_hash = 2;
+  bytes data = 3;
 }
 
 enum UploadStatusCode {
