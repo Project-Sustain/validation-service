@@ -40,7 +40,7 @@ message ValidationJobRequest {
   string id = 1;
   string job_mode = 2;
   string model_framework = 3;
-  string model_type = 4;
+  string model_category = 4;
   string database = 5;
   string collection = 6;
   string gis_join_key = 7;

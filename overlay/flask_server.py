@@ -79,7 +79,7 @@ def validation():
             validation_grpc_request = ValidationJobRequest(
                 job_mode=validation_request["job_mode"],
                 model_framework=validation_request["model_framework"],
-                model_type=validation_request["model_type"],
+                model_category=validation_request["model_category"],
                 database=validation_request["database"],
                 collection=validation_request["collection"],
                 gis_join_key=validation_request["gis_join_key"],

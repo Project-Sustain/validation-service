@@ -7,7 +7,7 @@
       "PyTorch"
     ]
   },
-  "model_types": {
+  "model_categories": {
     "description": "Supported categories of models to be evaluated",
     "values": [
       "Regression"
@@ -67,10 +67,13 @@
           "VEGETATION_SURFACE_PERCENT",
           "ALBEDO_PERCENT",
           "TOTAL_CLOUD_COVER_PERCENT"
+        ],
+        "model_categories_supported": [
+          "Regression"
         ]
       },
       {
-        "name": "noaa_nam",
+        "name": "county_stats",
         "features": [
           "total_population",
           "median_household_income",
@@ -80,6 +83,9 @@
           "total_population",
           "median_household_income",
           "median_age"
+        ],
+        "model_categories_supported": [
+          "Regression"
         ]
       }
     ]

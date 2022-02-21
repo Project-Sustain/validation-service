@@ -59,7 +59,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         tf_validator: TensorflowValidator = TensorflowValidator(
             request.id,
             self.saved_models_path,
-            request.model_type,
+            request.model_category,
             request.collection,
             request.gis_join_key,
             request.feature_fields,
