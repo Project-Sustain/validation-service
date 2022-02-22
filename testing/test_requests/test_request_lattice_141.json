@@ -1,7 +1,7 @@
 {
   "job_mode": "synchronous",
-  "model_framework": "tensorflow",
-  "model_type": "Linear Regression",
+  "model_framework": "Tensorflow",
+  "model_type": "Regression",
   "mongo_host": "localhost",
   "mongo_port": 27018,
   "read_config": {
