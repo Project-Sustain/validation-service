@@ -40,16 +40,21 @@ message ValidationJobRequest {
   string id = 1;
   string job_mode = 2;
   string model_framework = 3;
-  string model_type = 4;
-  string database = 5;
-  string collection = 6;
-  string gis_join_key = 7;
-  repeated string feature_fields = 8;
-  string label_field = 9;
-  bool normalize_inputs = 10;
-  string validation_metric = 11;
-  repeated string gis_joins = 12;
-  ModelFile model_file = 13;
+  string model_category = 4;
+  string mongo_host = 5;
+  int32 mongo_port = 6;
+  MongoReadConfig read_config = 7;
+  string database = 8;
+  string collection = 9;
+  string gis_join_key = 10;
+  repeated string feature_fields = 11;
+  string label_field = 12;
+  bool normalize_inputs = 13;
+  int32 limit = 14;
+  double sample_rate = 15;
+  string validation_metric = 16;
+  repeated string gis_joins = 17;
+  ModelFile model_file = 18;
 }
 
 message ValidationJobResponse {
@@ -79,4 +84,9 @@ message UploadStatus {
   string message = 1;
   string file_hash = 2;
   UploadStatusCode upload_status_code = 3;
+}
+
+message MongoReadConfig {
+  string read_preference = 1;
+  string read_concern = 2;
 }

@@ -13,7 +13,7 @@ from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.db.querier import Querier
-from overlay.tensorflow_validation import validation as tf_validation
+from overlay.tensorflow_validation.validation import TensorflowValidator
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
@@ -26,8 +26,9 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.port = port
         self.jobs = []
         self.saved_models_path = MODELS_DIR
-        self.querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
         self.is_registered = False
+
+        self.querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
 
         # Register ourselves with the master
         with grpc.insecure_channel(f"{master_hostname}:{master_port}") as channel:
@@ -49,40 +50,28 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         info(f"Received BeginValidationJob Request: {request}")
         model_dir = f"{self.saved_models_path}/{request.id}"
         os.mkdir(model_dir)
+        info(f"Extracting model to {model_dir}")
         zip_file = zipfile.ZipFile(io.BytesIO(request.model_file.data))
         zip_file.extractall(model_dir)
 
-        metrics = []  # list of proto ValidationMetric objects
+        info(f"BeginValidationJob: limit={request.limit}, sample_rate={request.sample_rate}")
 
-        for gis_join in request.gis_joins:
+        tf_validator: TensorflowValidator = TensorflowValidator(
+            request.id,
+            self.saved_models_path,
+            request.model_category,
+            request.collection,
+            request.gis_join_key,
+            request.feature_fields,
+            request.label_field,
+            request.validation_metric,
+            True,  # normalize
+            request.limit,
+            request.sample_rate
+        )
 
-            info(f"Launching validation job for GISJOIN {gis_join}")
-            documents = self.querier.spatial_query(
-                request.collection, request.gis_join_key, gis_join, request.feature_fields, request.label_field
-            )
-
-            # Calculate loss of model
-            loss = tf_validation.validate_model(
-                f"{self.saved_models_path}",
-                request.id,
-                request.model_type,
-                documents,
-                request.feature_fields,
-                request.label_field,
-                request.validation_metric,
-                True
-            )
-
-            if loss is None:
-                metrics.append(validation_pb2.ValidationMetric(
-                    gis_join=gis_join,
-                    loss=loss
-                ))
-            else:
-                metrics.append(validation_pb2.ValidationMetric(
-                    gis_join=gis_join,
-                    loss=loss
-                ))
+        metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
+        # metrics = tf_validator.validate_gis_joins(request.gis_joins)  # list of proto ValidationMetric objects
 
         return validation_pb2.ValidationJobResponse(
             id=request.id,

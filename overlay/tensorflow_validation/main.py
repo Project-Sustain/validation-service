@@ -30,36 +30,32 @@ BATCH_SIZE = 32
 def main():
     print("tensorflow version: {}".format(tf.__version__))
 
-    m = 2
-
-    features = ['PRESSURE_AT_SURFACE_PASCAL', 'RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT']
-    label = 'TEMPERATURE_AT_SURFACE_KELVIN'
-    projection = {
-        "_id": 0,
-    }
-    for feature in features:
-        projection[feature] = 1
-    projection[label] = 1
-
-    pprint(projection)
-
-    client = MongoClient(URI)
-    database = client[DATABASE]
-    collection = database[COLLECTION]
-    documents = collection.find({'COUNTY_GISJOIN': 'G2000010'}, projection)
-
-    validation.validate_model(
-        "saved_model",
-        "my_model",
+    tf_validator = validation.TensorflowValidator(
+        "test_request_id"
+        "/tmp/validation-service/saved_models",
         "Linear Regression",
-        documents,
-        features,
-        label,
+        "noaa_nam",
+        "COUNTY_GISJOIN",
+        ["PRESSURE_AT_SURFACE_PASCAL", "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"],
+        "TEMPERATURE_AT_SURFACE_KELVIN",
         "RMSE",
-        True
+        True,  # normalize
+        0,
+        0.0
     )
 
-    client.close()
+    tf_validator.validate_gis_joins_synchronous(
+        [
+            "G2000190",
+            "G2000090",
+            "G2000670",
+            "G2000610",
+            "G2000250",
+            "G2000070",
+            "G2000030",
+            "G2000470"
+        ]
+    )
 
 
 if __name__ == '__main__':

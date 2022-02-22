@@ -6,12 +6,11 @@ from flask import Flask, request
 from http import HTTPStatus
 from pprint import pprint
 from logging import info
+from google.protobuf.json_format import MessageToJson
 
-from werkzeug.utils import secure_filename
-
-from . import filereader
-from . import validation_pb2
-from . import validation_pb2_grpc
+from overlay import filereader
+from overlay import validation_pb2_grpc
+from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFile, MongoReadConfig
 
 
 UPLOAD_DIR = './uploads'
@@ -69,24 +68,35 @@ def validation():
 
         with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
             stub = validation_pb2_grpc.MasterStub(channel)
-            model_file = validation_pb2.ModelFile(
+            model_file = ModelFile(
                 type="zip",
                 md5_hash=md5_hash,
                 data=file_bytes
             )
 
-            info(validation_request["model_framework"])
 
-            validation_grpc_request = validation_pb2.ValidationJobRequest(
+
+
+
+            validation_grpc_request = ValidationJobRequest(
                 job_mode=validation_request["job_mode"],
                 model_framework=validation_request["model_framework"],
                 model_type=validation_request["model_type"],
+                mongo_host=validation_request["mongo_host"],
+                mongo_port=validation_request["mongo_port"],
+                read_config=MongoReadConfig(
+                    read_preference=validation_request["read_config"]["read_preference"],
+                    read_concern=validation_request["read_config"]["read_concern"]
+                ),
+                model_category=validation_request["model_category"],
                 database=validation_request["database"],
                 collection=validation_request["collection"],
                 gis_join_key=validation_request["gis_join_key"],
                 label_field=validation_request["label_field"],
                 feature_fields=validation_request["feature_fields"],
                 normalize_inputs=validation_request["normalize_inputs"],
+                limit=validation_request["limit"],
+                sample_rate=validation_request["sample_rate"],
                 validation_metric=validation_request["validation_metric"],
                 gis_joins=validation_request["gis_joins"],
                 model_file=model_file
@@ -95,4 +105,8 @@ def validation():
             validation_grpc_response = stub.SubmitValidationJob(validation_grpc_request)
             info(f"Validation Response received: {validation_grpc_response}")
 
-    return f"ValidationJobResponse: {validation_grpc_response}", HTTPStatus.OK
+    return build_json_response(validation_grpc_response), HTTPStatus.OK
+
+
+def build_json_response(validation_grpc_response: ValidationJobResponse) -> str:
+    return MessageToJson(validation_grpc_response, preserving_proto_field_name=True)
