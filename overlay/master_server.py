@@ -11,7 +11,7 @@ from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.db import shards, locality
 from overlay.db.shards import ShardMetadata
-from overlay.validation_pb2 import WorkerRegistrationResponse, ValidationJobResponse, ValidationJobRequest
+from overlay.validation_pb2 import WorkerRegistrationResponse, ValidationJobResponse, ValidationJobRequest, MongoReadConfig
 
 
 class JobMetadata:
@@ -82,6 +82,13 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                     id=worker_job.job_id,
                     job_mode=request.job_mode,
                     model_framework=request.model_framework,
+                    model_type=request.model_type,
+                    mongo_host=request.mongo_host,
+                    mongo_port=request.mongo_port,
+                    read_config=MongoReadConfig(
+                        read_preference=request.read_config.read_preference,
+                        read_concern=request.read_config.read_concern,
+                    ),
                     model_category=request.model_category,
                     database=request.database,
                     collection=request.collection,

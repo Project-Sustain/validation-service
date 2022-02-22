@@ -10,7 +10,7 @@ from google.protobuf.json_format import MessageToJson
 
 from overlay import filereader
 from overlay import validation_pb2_grpc
-from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFile
+from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFile, MongoReadConfig
 
 
 UPLOAD_DIR = './uploads'
@@ -74,11 +74,20 @@ def validation():
                 data=file_bytes
             )
 
-            info(validation_request["model_framework"])
+
+
+
 
             validation_grpc_request = ValidationJobRequest(
                 job_mode=validation_request["job_mode"],
                 model_framework=validation_request["model_framework"],
+                model_type=validation_request["model_type"],
+                mongo_host=validation_request["mongo_host"],
+                mongo_port=validation_request["mongo_port"],
+                read_config=MongoReadConfig(
+                    read_preference=validation_request["read_config"]["read_preference"],
+                    read_concern=validation_request["read_config"]["read_concern"]
+                ),
                 model_category=validation_request["model_category"],
                 database=validation_request["database"],
                 collection=validation_request["collection"],

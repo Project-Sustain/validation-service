@@ -1,14 +1,24 @@
 import pymongo
-from pymongo import cursor
+from pymongo import cursor, ReadPreference
 from logging import info
+
+from overlay.db import locality
 
 
 class Querier:
 
-    def __init__(self, mongo_uri: str, db_name: str):
-        self.mongo_uri = mongo_uri
+    def __init__(self,
+                 mongo_host: str = "localhost",
+                 mongo_port: int = 27018,
+                 db_name: str = "sustaindb",
+                 read_preference: str = "nearest",
+                 read_concern: str = "local"):
+        self.mongo_uri = f"mongodb://{mongo_host}:{mongo_port}"
+        self.replica_set_status = locality.get_replica_set_status()
         self.db_name = db_name
-        self.db_connection = pymongo.MongoClient(self.mongo_uri, readPreference="nearest")
+        self.read_preference = read_preference
+        self.read_concern = read_concern
+        self.db_connection = pymongo.MongoClient(self.mongo_uri, readPreference=self.read_preference)
         self.db = self.db_connection[self.db_name]
 
     # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
@@ -22,6 +32,11 @@ class Querier:
                       sample_rate: float) -> cursor.Cursor:
 
         collection = self.db[collection_name]
+        if self.read_preference == "inferred":
+            info("\"inferred\" read preference specified by request, using ")
+            preference: ReadPreference = inferred_read_preference_from_rs_status(self.read_preference)
+            collection = collection.with_options(read_preference=preference)
+
         query = {spatial_key: spatial_value}
 
         if sample_rate > 0.0:
@@ -45,6 +60,15 @@ class Querier:
 
     def __repr__(self):
         return f"Querier: mongo_uri={self.mongo_uri}, db_name={self.db_name}"
+
+
+def inferred_read_preference_from_rs_status(status: str = "PRIMARY") -> ReadPreference:
+    if status == "PRIMARY":
+        return ReadPreference.PRIMARY_PREFERRED
+    elif status == "SECONDARY":
+        return ReadPreference.SECONDARY_PREFERRED
+    else:
+        return ReadPreference.NEAREST
 
 
 if __name__ == "__main__":

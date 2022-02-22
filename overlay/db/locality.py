@@ -1,6 +1,7 @@
 import sys
 import json
 import os
+import socket
 from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
 from logging import info
@@ -112,3 +113,22 @@ def save_gis_join_chunk_locations(shard_metadata: dict) -> None:
 
 def gis_join_chunk_locations_file_exists() -> bool:
     return os.path.exists(GIS_JOIN_CHUNK_LOCATION_FILE)
+
+
+def get_hostname():
+    return socket.gethostname()
+
+
+# Returns one of ["SECONDARY", "PRIMARY", "NOT_FOUND"]
+def get_replica_set_status() -> str:
+    client = MongoClient("mongodb://localhost:27017")
+    repl_set_status = client.admin.command("replSetGetStatus")
+    for member in repl_set_status["members"]:
+        member_name = member["name"]
+        member_host = member_name.split(":")[0]  # 'name': 'lattice-132:27017'
+        if member_host == get_hostname():
+            client.close()
+            return member["stateStr"]
+
+    client.close()
+    return "NOT_FOUND"

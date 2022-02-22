@@ -2,6 +2,12 @@
   "job_mode": "synchronous",
   "model_framework": "tensorflow",
   "model_type": "Linear Regression",
+  "mongo_host": "localhost",
+  "mongo_port": 27018,
+  "read_config": {
+    "read_preference": "primary",
+    "read_concern": "local"
+  },
   "database": "sustaindb",
   "collection": "noaa_nam",
   "gis_join_key": "COUNTY_GISJOIN",
@@ -13,7 +19,7 @@
   "normalize_inputs": true,
   "limit": 0,
   "sample_rate": 0.0,
-  "validation_metric": "RMSE",
+  "validation_metric": "loss",
   "gis_joins": [
     "G2000190",
     "G2000090",
@@ -23,7 +29,6 @@
     "G2000070",
     "G2000030",
     "G2000470",
-
     "G3500570",
     "G3500510",
     "G3500250",

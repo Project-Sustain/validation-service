@@ -4,8 +4,7 @@ from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from overlay.validation_pb2 import ValidationMetric
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.validation_pb2 import ValidationMetric, MongoReadConfig
 from overlay.db.querier import Querier
 
 
@@ -15,6 +14,9 @@ class TensorflowValidator:
                  job_id: str,
                  models_dir: str,
                  model_type: str,
+                 mongo_host: str,
+                 mongo_port: int,
+                 read_config: MongoReadConfig,
                  collection: str,
                  gis_join_key: str,
                  feature_fields: list,
@@ -27,6 +29,9 @@ class TensorflowValidator:
         self.job_id = job_id
         self.models_dir = models_dir
         self.model_type = model_type
+        self.mongo_host = mongo_host
+        self.mongo_port = mongo_port
+        self.read_config = read_config
         self.collection = collection
         self.gis_join_key = gis_join_key
         self.feature_fields = feature_fields
@@ -35,7 +40,6 @@ class TensorflowValidator:
         self.normalize = normalize
         self.limit = limit
         self.sample_rate = sample_rate
-        info(f"TensorflowValidator(): limit={self.limit}, sample_rate={self.sample_rate}")
 
     def load_tf_model(self, verbose=False):
         # Load Tensorflow model from disk
@@ -47,7 +51,7 @@ class TensorflowValidator:
         return model
 
     def validate_gis_joins_synchronous(self, gis_joins: list) -> list:
-        querier: Querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
+        querier: Querier = Querier(mongo_host=self.mongo_host, mongo_port=self.mongo_port)
         model: tf.keras.Model = self.load_tf_model()
 
         metrics = []  # list of proto ValidationMetric objects
@@ -71,7 +75,7 @@ class TensorflowValidator:
         executors_list = []
         with ThreadPoolExecutor(max_workers=10) as executor:
             for gis_join in gis_joins:
-                querier: Querier = Querier(f"mongodb://{DB_HOST}:{DB_PORT}", DB_NAME)
+                querier: Querier = Querier(mongo_host=self.mongo_host, mongo_port=self.mongo_port)
                 model: tf.keras.Model = self.load_tf_model()
 
                 info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
