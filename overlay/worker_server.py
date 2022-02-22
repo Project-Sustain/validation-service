@@ -61,11 +61,11 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             tf_validator: TensorflowValidator = TensorflowValidator(request)
             metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
             # metrics = tf_validator.validate_gis_joins(request.gis_joins)  # list of proto ValidationMetric objects
-
         elif request.model_framework == "Scikit-Learn":
             skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
-
-
+            metrics = skl_validator.validate_gis_joins_synchronous(request.gis_joins)
+        else:
+            metrics = None
 
         return validation_pb2.ValidationJobResponse(
             id=request.id,
