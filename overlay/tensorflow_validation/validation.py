@@ -4,46 +4,32 @@ from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from overlay.validation_pb2 import ValidationMetric, MongoReadConfig
+from overlay.validation_pb2 import ValidationMetric, MongoReadConfig, ValidationJobRequest
 from overlay.db.querier import Querier
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 
 
 class TensorflowValidator:
 
-    def __init__(self,
-                 job_id: str,
-                 models_dir: str,
-                 model_type: str,
-                 mongo_host: str,
-                 mongo_port: int,
-                 read_config: MongoReadConfig,
-                 collection: str,
-                 gis_join_key: str,
-                 feature_fields: list,
-                 label_field: str,
-                 validation_metric: str,
-                 normalize: bool,
-                 limit: int,
-                 sample_rate: float):
-
-        self.job_id = job_id
-        self.models_dir = models_dir
-        self.model_type = model_type
-        self.mongo_host = mongo_host
-        self.mongo_port = mongo_port
-        self.read_config = read_config
-        self.collection = collection
-        self.gis_join_key = gis_join_key
-        self.feature_fields = feature_fields
-        self.label_field = label_field
-        self.validation_metric = validation_metric
-        self.normalize = normalize
-        self.limit = limit
-        self.sample_rate = sample_rate
+    def __init__(self, request: ValidationJobRequest):
+        self.job_id = request.job_id
+        self.model_type = request.model_category
+        self.mongo_host = request.mongo_host
+        self.mongo_port = request.mongo_port
+        self.read_config = request.read_config
+        self.database = request.database
+        self.collection = request.collection
+        self.gis_join_key = request.gis_join_key
+        self.feature_fields = request.feature_fields
+        self.label_field = request.label_field
+        self.validation_metric = request.validation_metric
+        self.normalize = request.normalize
+        self.limit = request.limit
+        self.sample_rate = request.sample_rate
 
     def load_tf_model(self, verbose=False):
         # Load Tensorflow model from disk
-        model_path = f"{self.models_dir}/{self.job_id}"
+        model_path = f"{MODELS_DIR}/{self.job_id}"
         info(f"Loading Tensorflow model from {model_path}")
         model = tf.keras.models.load_model(model_path)
         if verbose:
@@ -51,7 +37,13 @@ class TensorflowValidator:
         return model
 
     def validate_gis_joins_synchronous(self, gis_joins: list) -> list:
-        querier: Querier = Querier(mongo_host=self.mongo_host, mongo_port=self.mongo_port)
+        querier: Querier = Querier(
+            mongo_host=self.mongo_host,
+            mongo_port=self.mongo_port,
+            db_name=self.database,
+            read_preference=self.read_config.read_preference,
+            read_concern=self.read_config.read_concern
+        )
         model: tf.keras.Model = self.load_tf_model()
 
         metrics = []  # list of proto ValidationMetric objects
@@ -133,6 +125,7 @@ class TensorflowValidator:
         validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
         info(f"Model validation results: {validation_results}")
 
+        # If the MongoDB driver connection is local to this thread/function, close it when done using it
         if is_concurrent:
             querier.close()
 
