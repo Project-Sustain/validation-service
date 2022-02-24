@@ -10,7 +10,7 @@ def main():
         models_dir="/tmp/validation-service/saved_models",
         model_type="Linear Regression",
         collection="noaa_nam",
-        gis_join_key="COUNTY_GISJOIN",
+        gis_join_key="GISJOIN",
         feature_fields=["PRESSURE_AT_SURFACE_PASCAL", "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"],
         label_field="TEMPERATURE_AT_SURFACE_KELVIN",
         validation_metric="RMSE",

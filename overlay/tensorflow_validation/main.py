@@ -35,7 +35,7 @@ def main():
         "/tmp/validation-service/saved_models",
         "Linear Regression",
         "noaa_nam",
-        "COUNTY_GISJOIN",
+        "GISJOIN",
         ["PRESSURE_AT_SURFACE_PASCAL", "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"],
         "TEMPERATURE_AT_SURFACE_KELVIN",
         "RMSE",

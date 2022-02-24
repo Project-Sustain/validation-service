@@ -46,7 +46,7 @@ def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     counter = 0
     bar = ProgressBar(maxval=len(county_gis_joins), widgets=widgets).start()
     for gis_join in county_gis_joins:
-        explained_query = collection.find({"COUNTY_GISJOIN": gis_join}).explain()
+        explained_query = collection.find({"GISJOIN": gis_join}).explain()
         winning_plan = explained_query["queryPlanner"]["winningPlan"]
         shards = winning_plan["shards"]
 
