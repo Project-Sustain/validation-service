@@ -14,7 +14,7 @@ from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest
 
 class ScikitLearnValidator:
     def __init__(self, request: ValidationJobRequest):
-        self.job_id = request.job_id
+        self.job_id = request.id
         self.model_type = request.model_category
         self.mongo_host = request.mongo_host
         self.mongo_port = request.mongo_port
