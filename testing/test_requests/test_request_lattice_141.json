@@ -1,7 +1,7 @@
 {
   "job_mode": "synchronous",
   "model_framework": "Tensorflow",
-  "model_type": "Regression",
+  "model_category": "Regression",
   "mongo_host": "localhost",
   "mongo_port": 27018,
   "read_config": {
@@ -21,13 +21,28 @@
   "sample_rate": 0.0,
   "validation_metric": "loss",
   "gis_joins": [
-    "G2000190",
-    "G2000090",
-    "G2000670",
-    "G2000610",
-    "G2000250",
-    "G2000070",
-    "G2000030",
-    "G2000470"
+    "G3500570",
+    "G3500170",
+    "G4200450",
+    "G4201090",
+    "G4200430",
+    "G4200470",
+    "G4201110",
+    "G3900230",
+    "G3900210",
+    "G3901310",
+    "G3900250",
+    "G3901290",
+    "G3900190",
+    "G3901330",
+    "G4900350",
+    "G4900530",
+    "G4900330",
+    "G3800290",
+    "G3800250",
+    "G3800550",
+    "G3800950",
+    "G2000730",
+    "G2000210"
   ]
 }
