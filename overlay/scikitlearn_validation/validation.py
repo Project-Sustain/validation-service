@@ -25,7 +25,7 @@ class ScikitLearnValidator:
         self.feature_fields = request.feature_fields
         self.label_field = request.label_field
         self.validation_metric = request.validation_metric
-        self.normalize = request.normalize
+        self.normalize = request.normalize_inputs
         self.limit = request.limit
         self.sample_rate = request.sample_rate
         info(f"ScikitLearnValidator(): limit={self.limit}, sample_rate={self.sample_rate}")
