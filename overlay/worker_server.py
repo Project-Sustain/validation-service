@@ -29,8 +29,6 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.saved_models_path = MODELS_DIR
         self.is_registered = False
 
-        self.querier = Querier(mongo_host=self.mongo_host, mongo_port=self.mongo_port, )
-
         # Register ourselves with the master
         with grpc.insecure_channel(f"{master_hostname}:{master_port}") as channel:
             stub = validation_pb2_grpc.MasterStub(channel)
