@@ -3,10 +3,10 @@ Flask
 grpcio
 grpcio-tools
 pymongo
+sklearn
 python-dotenv
 asyncio
 progressbar
 pandas
 numpy
-scikit-learn
 tensorflow

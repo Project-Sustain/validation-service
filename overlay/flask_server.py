@@ -74,10 +74,6 @@ def validation():
                 data=file_bytes
             )
 
-
-
-
-
             validation_grpc_request = ValidationJobRequest(
                 job_mode=validation_request["job_mode"],
                 model_framework=validation_request["model_framework"],
