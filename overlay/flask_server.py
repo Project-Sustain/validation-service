@@ -33,9 +33,9 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/')
-def hello():
-    return 'Hello, World!'
+@app.route('/validation_service', methods=['GET'])
+def default_route():
+    return 'Welcome to the Sustain Validation Service'
 
 
 @app.route('/validation', methods=['POST'])
