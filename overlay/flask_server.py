@@ -38,7 +38,7 @@ def default_route():
     return 'Welcome to the Sustain Validation Service'
 
 
-@app.route('/validation', methods=['POST'])
+@app.route('/validation_service/submit_validation_job', methods=['POST'])
 def validation():
     validation_request_str = request.form["request"]
     if validation_request_str == '':
