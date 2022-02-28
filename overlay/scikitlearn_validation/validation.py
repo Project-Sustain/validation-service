@@ -1,4 +1,5 @@
 import pickle
+import os
 from logging import info, error
 
 import pandas as pd
@@ -33,6 +34,12 @@ class ScikitLearnValidator:
     def load_sklearn_model(self, verbose=False):
         # Load ScikitLearn model from disk
         model_path = f"{MODELS_DIR}/{self.job_id}"
+
+        # pick the first file. only one file (pickled object) is supposed to be in the directory.
+        file_name = os.listdir(model_path)[0]
+
+        model_path += f'/{file_name}'
+
         info(f"Loading ScikitLearn model from {model_path}")
         model = pickle.load(open(model_path, 'rb'))
         # TODO: use verbose
