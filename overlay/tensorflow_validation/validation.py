@@ -12,7 +12,7 @@ from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 class TensorflowValidator:
 
     def __init__(self, request: ValidationJobRequest):
-        self.job_id = request.job_id
+        self.job_id = request.id
         self.model_type = request.model_category
         self.mongo_host = request.mongo_host
         self.mongo_port = request.mongo_port
@@ -23,7 +23,7 @@ class TensorflowValidator:
         self.feature_fields = request.feature_fields
         self.label_field = request.label_field
         self.validation_metric = request.validation_metric
-        self.normalize = request.normalize
+        self.normalize = request.normalize_inputs
         self.limit = request.limit
         self.sample_rate = request.sample_rate
 
