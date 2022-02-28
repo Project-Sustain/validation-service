@@ -8,6 +8,9 @@ function print_usage {
 
 MASTER_PORT=50051
 
+MASTER_PROCESSES=$(ps -aux | grep "[o]verlay --master")
+[ "$MASTER_PROCESSES" != "" ] && echo -e "Found master processes running!\n$MASTER_PROCESSES\nPlease kill first before starting." && exit 1
+
 if [[ $# -ge 1 ]]; then
   [[ $1 == "-h" ]]  && print_usage && exit 0
   MASTER_PORT=$1
