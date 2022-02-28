@@ -4,6 +4,7 @@ from logging import info, error
 
 import pandas as pd
 from pandas import DataFrame
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -123,8 +124,8 @@ class ScikitLearnValidator:
         label_df = features_df.pop(self.label_field)
 
         # evaluate model
-        X_test = features_df.get(0)
-        y_test = label_df
+        X_test = np.array(features_df.get(0)).reshape(-1, 1)
+        y_test = np.array(label_df).reshape(-1, 1)
 
         score = model.score(X_test, y_test)
         info(f"Model validation results: {score}")
