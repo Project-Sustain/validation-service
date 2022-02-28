@@ -10,5 +10,5 @@ function print_usage {
 BENCHMARK_NAME=$1
 echo "$BENCHMARK_NAME" > ".benchmark_name"
 
-MON_ID=$(omni start | grep "started monitor with id" | awk '{ print $6 }')
+MON_ID=$(omni start | grep "started monitor with id" | awk '{ print $6 }' | sed -e "s/'//g")
 echo "$MON_ID" > ".mon_id"
