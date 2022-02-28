@@ -123,7 +123,7 @@ class ScikitLearnValidator:
         label_df = features_df.pop(self.label_field)
 
         # evaluate model
-        X_test = features_df
+        X_test = features_df.get(0)
         y_test = label_df
 
         score = model.score(X_test, y_test)
