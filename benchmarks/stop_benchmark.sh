@@ -3,11 +3,14 @@
 BENCHMARK_NAME=$1
 export BENCHMARK_NAME
 
-[[ -z "$BENCHMARK_NAME" ]] && echo "BENCHMARK_NAME not set!" && exit 1
-[[ -z "$MON_ID" ]] && echo "MON_ID not set!" && exit 1
+[[ -f ".benchmark_name" ]] || (echo "Benchmark name not set!" ; exit 1)
+[[ -f ".mon_id" ]] || (echo "MON_ID not set!" ; exit 1)
 
-echo -e "Stopping BENCHMARK_NAME=$BENCHMARK_NAME with MON_ID=$MON_ID..."
-omni stop $MON_ID
+BENCHMARK_NAME=$(cat ".benchmark_name")
+MON_ID=$(cat ".mon_id")
+
+echo -e "Stopping benchmark $BENCHMARK_NAME with monitor id $MON_ID..."
+omni stop "$MON_ID"
 
 echo -e "Collecting..."
-omni collect $MON_ID "./$BENCHMARK_NAME"
+omni collect "$MON_ID" "./$BENCHMARK_NAME"

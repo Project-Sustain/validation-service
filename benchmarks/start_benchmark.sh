@@ -8,9 +8,7 @@ function print_usage {
 [[ $# -eq 1 ]] || (print_usage; exit 1)
 
 BENCHMARK_NAME=$1
-export BENCHMARK_NAME
+echo "$BENCHMARK_NAME" > ".benchmark_name"
 
 MON_ID=$(omni start | grep "started monitor with id" | awk '{ print $6 }')
-echo "MON_ID=$MON_ID"
-
-export MON_ID
+echo "$MON_ID" > ".mon_id"
