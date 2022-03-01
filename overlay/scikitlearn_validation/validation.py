@@ -124,8 +124,8 @@ class ScikitLearnValidator:
         label_df = features_df.pop(self.label_field)
 
         # evaluate model
-        X_test = np.array(features_df.get(0)).reshape(-1, 1)
-        y_test = np.array(label_df).reshape(-1, 1)
+        X_test = features_df
+        y_test = label_df
 
         score = model.score(X_test, y_test)
         info(f"Model validation results: {score}")
