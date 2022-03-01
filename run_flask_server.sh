@@ -7,6 +7,9 @@ function print_usage {
 
 if [[ $# -eq 2 ]]; then
 
+  FLASK_PROCESSES=$(ps -aux | grep "[o]verlay --flaskserver")
+  [ "$FLASK_PROCESSES" != "" ] && echo -e "Found flaskserver processes running!\n$FLASK_PROCESSES\nPlease kill first before starting." && exit 1
+
   MASTER_URI=$1
   FLASK_PORT=$2
   python3.8 -m overlay --flaskserver --master_uri="$MASTER_URI" --port="$FLASK_PORT"
