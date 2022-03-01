@@ -109,8 +109,11 @@ class ScikitLearnValidator:
         )
 
         # Load MongoDB Documents into Pandas DataFrame
-        features_df: DataFrame = pd.DataFrame(list(documents))
-        # TODO: use is_concurrent
+        features_df = pd.DataFrame(list(documents))
+        if is_concurrent:
+            info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+        else:
+            info(f"Loaded Pandas DataFrame from MongoDB, raw data:\n{features_df}")
 
         if len(features_df.index) == 0:
             error("DataFrame is empty! Returning -1.0 for loss")
@@ -119,6 +122,10 @@ class ScikitLearnValidator:
         # Normalize features, if requested
         if self.normalize:
             features_df = normalize_dataframe(features_df)
+            if is_concurrent:
+                info(f"Normalized Pandas DataFrame")
+            else:
+                info(f"Pandas DataFrame after normalization:\n{features_df}")
 
         # Pop the label column off into its own DataFrame
         label_df = features_df.pop(self.label_field)
