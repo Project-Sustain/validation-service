@@ -148,3 +148,7 @@ testing/worker/saved_models/*
 
 # Cached GISJOIN info
 overlay/resources/gis_join_chunk_locations.json*
+
+# Benchmarking monitor IDs
+*.benchmark_name
+*.mon_id
