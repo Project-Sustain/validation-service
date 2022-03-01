@@ -102,7 +102,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -138,8 +137,6 @@ uploads/*.zip
 client/validation-app/package-lock.json
 client/validation-app/node_modules/
 
-# env
-env.sh
 # Logs
 log.txt
 
