@@ -51,7 +51,7 @@ class ScikitLearnValidator:
             if model_type == "LinearRegression":
                 info(f"Model Description: Coefficients: {model.coef_}, Intercept: {model.intercept_}")
             elif model_type == "GradientBoostingRegressor":
-                info(f"Model Description: feature_importances: {model.feature_importances_},"
+                info(f"Model Description(feature_importances: {model.feature_importances_},"
                      f"oob_improvement: {model.oob_improvement_},"
                      f"train_score: {model.train_score_},"
                      f"loss: {model.losee_},"
@@ -59,8 +59,20 @@ class ScikitLearnValidator:
                      f"estimators: {model.estimators_},"
                      f"n_classes: {model.n_clases_},"
                      f"n_estimators: {model.n_estimators_},"
-                     f"n_features: {model.n_featurse_},"
-                     f"max_features: {model.max_features_}")
+                     f"n_features: {model.n_features_},"
+                     f"max_features: {model.max_features_})")
+            elif model_type == "SVR":
+                info(f"Model Description(class_weight: {model.class_weight_},"
+                     f"coef: {model.coef_},"
+                     f"dual_coef: {model.dual_coef_},"
+                     f"fit_status: {model.fit_status_},"
+                     f"intercept: {model.intercept_},"
+                     f"n_support: {model.n_support_},"
+                     f"shape_fit: {model.shape_fit_},"
+                     f"support: {model.support_},"
+                     f"support_vectors_: {model.support_vectors_})")
+            else:
+                error(f"Unsupported model type: {model_type}")
 
         return model
 
