@@ -86,7 +86,6 @@ def validation():
                 ),
                 database=validation_request["database"],
                 collection=validation_request["collection"],
-                gis_join_key=validation_request["gis_join_key"],
                 label_field=validation_request["label_field"],
                 feature_fields=validation_request["feature_fields"],
                 normalize_inputs=validation_request["normalize_inputs"],

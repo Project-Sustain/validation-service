@@ -19,7 +19,6 @@ class TensorflowValidator:
         self.read_config = request.read_config
         self.database = request.database
         self.collection = request.collection
-        self.gis_join_key = request.gis_join_key
         self.feature_fields = request.feature_fields
         self.label_field = request.label_field
         self.validation_metric = request.validation_metric
@@ -91,7 +90,6 @@ class TensorflowValidator:
 
         documents = querier.spatial_query(
             self.collection,
-            self.gis_join_key,
             gis_join,
             self.feature_fields,
             self.label_field,
