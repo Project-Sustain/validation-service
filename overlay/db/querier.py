@@ -30,8 +30,7 @@ class Querier:
     # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
     def spatial_query(self,
                       collection_name: str,
-                      spatial_key: str,
-                      spatial_value: str,
+                      gis_join: str,
                       features: list,
                       label: str,
                       limit: int,
@@ -46,10 +45,10 @@ class Querier:
                 preference: ReadPreference = ReadPreference.PRIMARY
             collection = collection.with_options(read_preference=preference)
 
-        query = {spatial_key: spatial_value}
+        query = {"GISJOIN": gis_join}
 
         if sample_rate > 0.0:
-            info(f"Sampling GISJOIN {spatial_value} documents with a rate of {sample_rate}")
+            info(f"Sampling GISJOIN {gis_join} documents with a rate of {sample_rate}")
             query["$sampleRate"] = sample_rate
 
         # Build projection
@@ -59,7 +58,7 @@ class Querier:
         projection[label] = 1
 
         if limit > 0:
-            info(f"Limiting GISJOIN {spatial_value} query to {limit} records")
+            info(f"Limiting GISJOIN {gis_join} query to {limit} records")
             return collection.find(query, projection).limit(limit)
         else:
             return collection.find(query, projection)  # Just find all that match

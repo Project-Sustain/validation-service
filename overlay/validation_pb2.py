@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xa9\x03\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08job_mode\x18\x02 \x01(\t\x12\x17\n\x0fmodel_framework\x18\x03 \x01(\t\x12\x16\n\x0emodel_category\x18\x04 \x01(\t\x12\x12\n\nmongo_host\x18\x05 \x01(\t\x12\x12\n\nmongo_port\x18\x06 \x01(\x05\x12%\n\x0bread_config\x18\x07 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\x08 \x01(\t\x12\x12\n\ncollection\x18\t \x01(\t\x12\x14\n\x0cgis_join_key\x18\n \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x0b \x03(\t\x12\x13\n\x0blabel_field\x18\x0c \x01(\t\x12\x18\n\x10normalize_inputs\x18\r \x01(\x08\x12\r\n\x05limit\x18\x0e \x01(\x05\x12\x13\n\x0bsample_rate\x18\x0f \x01(\x01\x12\x19\n\x11validation_metric\x18\x10 \x01(\t\x12\x11\n\tgis_joins\x18\x11 \x03(\t\x12\x1e\n\nmodel_file\x18\x12 \x01(\x0b\x32\n.ModelFile\"G\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x07metrics\x18\x02 \x03(\x0b\x32\x11.ValidationMetric\"D\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\"9\n\tModelFile\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32O\n\x06Worker\x12\x45\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x93\x03\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x10\n\x08job_mode\x18\x02 \x01(\t\x12\x17\n\x0fmodel_framework\x18\x03 \x01(\t\x12\x16\n\x0emodel_category\x18\x04 \x01(\t\x12\x12\n\nmongo_host\x18\x05 \x01(\t\x12\x12\n\nmongo_port\x18\x06 \x01(\x05\x12%\n\x0bread_config\x18\x07 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\x08 \x01(\t\x12\x12\n\ncollection\x18\t \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\n \x03(\t\x12\x13\n\x0blabel_field\x18\x0b \x01(\t\x12\x18\n\x10normalize_inputs\x18\x0c \x01(\x08\x12\r\n\x05limit\x18\r \x01(\x05\x12\x13\n\x0bsample_rate\x18\x0e \x01(\x01\x12\x19\n\x11validation_metric\x18\x0f \x01(\t\x12\x11\n\tgis_joins\x18\x10 \x03(\t\x12\x1e\n\nmodel_file\x18\x11 \x01(\x0b\x32\n.ModelFile\"G\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\"\n\x07metrics\x18\x02 \x03(\x0b\x32\x11.ValidationMetric\"D\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\"9\n\tModelFile\x12\x0c\n\x04type\x18\x01 \x01(\t\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32O\n\x06Worker\x12\x45\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x62\x06proto3'
 )
 
 _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
@@ -48,8 +48,8 @@ _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=923,
-  serialized_end=1031,
+  serialized_start=901,
+  serialized_end=1009,
 )
 _sym_db.RegisterEnumDescriptor(_UPLOADSTATUSCODE)
 
@@ -203,64 +203,57 @@ _VALIDATIONJOBREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='gis_join_key', full_name='ValidationJobRequest.gis_join_key', index=9,
-      number=10, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='feature_fields', full_name='ValidationJobRequest.feature_fields', index=10,
-      number=11, type=9, cpp_type=9, label=3,
+      name='feature_fields', full_name='ValidationJobRequest.feature_fields', index=9,
+      number=10, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='label_field', full_name='ValidationJobRequest.label_field', index=11,
-      number=12, type=9, cpp_type=9, label=1,
+      name='label_field', full_name='ValidationJobRequest.label_field', index=10,
+      number=11, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='normalize_inputs', full_name='ValidationJobRequest.normalize_inputs', index=12,
-      number=13, type=8, cpp_type=7, label=1,
+      name='normalize_inputs', full_name='ValidationJobRequest.normalize_inputs', index=11,
+      number=12, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='limit', full_name='ValidationJobRequest.limit', index=13,
-      number=14, type=5, cpp_type=1, label=1,
+      name='limit', full_name='ValidationJobRequest.limit', index=12,
+      number=13, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='sample_rate', full_name='ValidationJobRequest.sample_rate', index=14,
-      number=15, type=1, cpp_type=5, label=1,
+      name='sample_rate', full_name='ValidationJobRequest.sample_rate', index=13,
+      number=14, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='validation_metric', full_name='ValidationJobRequest.validation_metric', index=15,
-      number=16, type=9, cpp_type=9, label=1,
+      name='validation_metric', full_name='ValidationJobRequest.validation_metric', index=14,
+      number=15, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='gis_joins', full_name='ValidationJobRequest.gis_joins', index=16,
-      number=17, type=9, cpp_type=9, label=3,
+      name='gis_joins', full_name='ValidationJobRequest.gis_joins', index=15,
+      number=16, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='model_file', full_name='ValidationJobRequest.model_file', index=17,
-      number=18, type=11, cpp_type=10, label=1,
+      name='model_file', full_name='ValidationJobRequest.model_file', index=16,
+      number=17, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -278,7 +271,7 @@ _VALIDATIONJOBREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=129,
-  serialized_end=554,
+  serialized_end=532,
 )
 
 
@@ -316,8 +309,8 @@ _VALIDATIONJOBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=556,
-  serialized_end=627,
+  serialized_start=534,
+  serialized_end=605,
 )
 
 
@@ -362,8 +355,8 @@ _VALIDATIONMETRIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=629,
-  serialized_end=697,
+  serialized_start=607,
+  serialized_end=675,
 )
 
 
@@ -408,8 +401,8 @@ _MODELFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=699,
-  serialized_end=756,
+  serialized_start=677,
+  serialized_end=734,
 )
 
 
@@ -454,8 +447,8 @@ _UPLOADSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=758,
-  serialized_end=855,
+  serialized_start=736,
+  serialized_end=833,
 )
 
 
@@ -493,8 +486,8 @@ _MONGOREADCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=857,
-  serialized_end=921,
+  serialized_start=835,
+  serialized_end=899,
 )
 
 _VALIDATIONJOBREQUEST.fields_by_name['read_config'].message_type = _MONGOREADCONFIG
@@ -577,8 +570,8 @@ _MASTER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1034,
-  serialized_end=1313,
+  serialized_start=1012,
+  serialized_end=1291,
   methods=[
   _descriptor.MethodDescriptor(
     name='UploadFile',
@@ -633,8 +626,8 @@ _WORKER = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1315,
-  serialized_end=1394,
+  serialized_start=1293,
+  serialized_end=1372,
   methods=[
   _descriptor.MethodDescriptor(
     name='BeginValidationJob',
