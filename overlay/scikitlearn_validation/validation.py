@@ -32,7 +32,7 @@ class ScikitLearnValidator:
         self.sample_rate = request.sample_rate
         info(f"ScikitLearnValidator(): limit={self.limit}, sample_rate={self.sample_rate}")
 
-    def load_sklearn_model(self, verbose=False):
+    def load_sklearn_model(self, verbose=True):
         # Load ScikitLearn model from disk
         model_path = f"{MODELS_DIR}/{self.job_id}"
 
@@ -41,9 +41,27 @@ class ScikitLearnValidator:
 
         model_path += f'/{file_name}'
 
-        info(f"Loading ScikitLearn model from {model_path}")
         model = pickle.load(open(model_path, 'rb'))
-        # TODO: use verbose
+
+        info(f"Loading ScikitLearn model from {model_path}")
+
+        if verbose:
+            model_type = type(model).__name__
+            info(f"Model type (from binary): {model_type}")
+            if model_type == "LinearRegression":
+                info(f"Model Description: Coefficients: {model.coef_}, Intercept: {model.intercept_}")
+            elif model_type == "GradientBoostingRegressor":
+                info(f"Model Description: feature_importances: {model.feature_importances_},"
+                     f"oob_improvement: {model.oob_improvement_},"
+                     f"train_score: {model.train_score_},"
+                     f"loss: {model.losee_},"
+                     f"init_: {model.init_},"
+                     f"estimators: {model.estimators_},"
+                     f"n_classes: {model.n_clases_},"
+                     f"n_estimators: {model.n_estimators_},"
+                     f"n_features: {model.n_featurse_},"
+                     f"max_features: {model.max_features_}")
+
         return model
 
     def validate_gis_joins_synchronous(self, gis_joins: list) -> list:
