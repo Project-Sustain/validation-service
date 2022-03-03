@@ -53,10 +53,10 @@ class ScikitLearnValidator:
                 info(f"Model Description(feature_importances: {model.feature_importances_},"
                      f"oob_improvement: {model.oob_improvement_},"
                      f"train_score: {model.train_score_},"
-                     f"loss: {model.losee_},"
+                     f"loss: {model.loss_},"
                      f"init_: {model.init_},"
                      f"estimators: {model.estimators_},"
-                     f"n_classes: {model.n_clases_},"
+                     f"n_classes: {model.n_classes_},"
                      f"n_estimators: {model.n_estimators_},"
                      f"n_features: {model.n_features_},"
                      f"max_features: {model.max_features_})")
