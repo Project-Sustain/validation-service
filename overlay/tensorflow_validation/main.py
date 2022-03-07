@@ -81,11 +81,11 @@ def main():
     # model.save("my_model.h5")
 
     extracted_zip = in_memory_zip()
-    pprint(extracted_zip)
-    # h5_bytes = extracted_zip["my_model.h5"]
-    # with h5py.File(h5_bytes, 'r') as h5_file:
-    #     model = tf.keras.models.load_model(h5_file)
-    #     model.summary()
+    h5_bytes = extracted_zip["my_model.h5"]
+    h5_file = h5py.File(h5_bytes)
+
+    model = tf.keras.models.load_model(h5_file)
+    model.summary()
 
     #new_model = tf.keras.models.load_model(extracted_zip['my_model.h5'])
 
