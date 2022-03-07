@@ -26,7 +26,7 @@ class TensorflowValidator:
         self.limit = request.limit
         self.sample_rate = request.sample_rate
 
-    def load_tf_model(self, verbose=False):
+    def load_tf_model(self, verbose=False) -> tf.keras.Model:
         # Load Tensorflow model from disk
         model_path = f"{MODELS_DIR}/{self.job_id}"
         info(f"Loading Tensorflow model from {model_path}")
@@ -60,6 +60,12 @@ class TensorflowValidator:
         return metrics
 
     def validate_gis_joins_multithreaded(self, gis_joins: list) -> list:
+
+        model: tf.keras.Model = None
+        copy_model: bool = True
+        if copy_model:
+            model = self.load_tf_model()
+
         metrics = []  # list of proto ValidationMetric objects
 
         # Iterate over all gis_joins and submit them for validation to the thread pool executor
@@ -67,7 +73,11 @@ class TensorflowValidator:
         with ThreadPoolExecutor(max_workers=10) as executor:
             for gis_join in gis_joins:
                 querier: Querier = Querier(mongo_host=self.mongo_host, mongo_port=self.mongo_port)
-                model: tf.keras.Model = self.load_tf_model()
+
+                if copy_model:
+                    print()
+                else:
+                    model = self.load_tf_model()
 
                 info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
                 executors_list.append(executor.submit(self.validate_gis_join, gis_join, querier, model, True))
