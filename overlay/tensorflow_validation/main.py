@@ -66,6 +66,9 @@ def main():
     validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
     info(f"Model validation results: {validation_results}")
 
+    cloned_model: tf.keras.Model = tf.keras.models.clone_model(model, input_tensors=None, clone_function=None)
+    validation_results = cloned_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
+    info(f"Cloned Model validation results: {validation_results}")
 
 
 if __name__ == '__main__':
