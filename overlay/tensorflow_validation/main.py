@@ -8,6 +8,7 @@ from pprint import pprint
 from pymongo import MongoClient
 from sklearn.preprocessing import MinMaxScaler
 import logging
+import h5py
 from logging import info, error
 
 # MongoDB Stuff
@@ -80,9 +81,14 @@ def main():
     # model.save("my_model.h5")
 
     extracted_zip = in_memory_zip()
-    new_model = tf.keras.models.load_model(extracted_zip['my_model.h5'])
+    h5_bytes = extracted_zip["my_model.h5"]
+    with h5py.File(h5_bytes, 'r') as h5_file:
+        model = tf.keras.models.load_model(h5_file)
+        model.summary()
 
-    new_model.summary()
+    #new_model = tf.keras.models.load_model(extracted_zip['my_model.h5'])
+
+    #new_model.summary()
 
     #
     # model: tf.keras.Model = tf.keras.models.load_model(extracted_zip)
