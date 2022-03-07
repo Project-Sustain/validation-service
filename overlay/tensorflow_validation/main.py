@@ -3,6 +3,7 @@
 import io
 import zipfile
 import tensorflow as tf
+import tempfile
 import pandas as pd
 from pprint import pprint
 from pymongo import MongoClient
@@ -81,11 +82,15 @@ def main():
     # model.save("my_model.h5")
 
     extracted_zip = in_memory_zip()
+    temp = tempfile.TemporaryFile()
     h5_bytes = extracted_zip["my_model.h5"]
-    h5_file = h5py.File(h5_bytes)
+    temp.write(h5_bytes)
 
-    model = tf.keras.models.load_model(h5_file)
-    model.summary()
+    with h5py.File(temp, 'r') as h5file:
+        model = tf.keras.models.load_model(h5file)
+        model.summary()
+
+
 
     #new_model = tf.keras.models.load_model(extracted_zip['my_model.h5'])
 
