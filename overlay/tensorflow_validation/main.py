@@ -19,7 +19,7 @@ from logging import info, error
 import validation
 
 # MongoDB Stuff
-from overlay.db.querier import Querier
+from ..db.querier import Querier
 
 MODEL_PATH = "../../testing/test_models/tensorflow/my_model.zip"
 URI = "mongodb://lattice-100:27018/"
