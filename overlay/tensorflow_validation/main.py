@@ -46,7 +46,7 @@ def create_and_train_model(features_df, label_df) -> tf.keras.Model:
 
 
 def in_memory_zip():
-    in_file = open("../../testing/test_models/tensorflow/my_model.zip", "rb")
+    in_file = open("./my_model.zip", "rb")
     data = in_file.read()
     in_file.close()
 
@@ -75,15 +75,16 @@ def main():
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop(LABEL_FIELD)
 
-    model: tf.keras.Model = create_and_train_model(features_df, label_df)
+    # model: tf.keras.Model = create_and_train_model(features_df, label_df)
 
-    model.save("my_model.h5")
+    # model.save("my_model.h5")
 
-    new_model = tf.keras.models.load_model('my_model.h5')
+    extracted_zip = in_memory_zip()
+    new_model = tf.keras.models.load_model(extracted_zip['my_model.h5'])
 
     new_model.summary()
 
-    # extracted_zip = in_memory_zip()
+    #
     # model: tf.keras.Model = tf.keras.models.load_model(extracted_zip)
     #
     # validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
