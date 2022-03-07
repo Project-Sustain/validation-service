@@ -1,19 +1,10 @@
 #!/bin/python3
 
-import numpy
 import tensorflow as tf
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import os
-import pandas
-import time
 from pprint import pprint
-#from sklearn.model_selection import train_test_split
-#from tensorflow.keras import layers
-#from tensorflow.keras.layers.experimental import preprocessing
 from pymongo import MongoClient
-from sklearn.preprocessing import normalize, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 import logging
 from logging import info, error
 
@@ -37,7 +28,7 @@ EPOCHS = 3
 BATCH_SIZE = 32
 
 
-def create_and_train_model(features_df, label_df):
+def create_and_train_model(features_df, label_df) -> tf.keras.Model:
     model = tf.keras.Sequential()
     model.add(tf.keras.Input(shape=(2,)))
     model.add(tf.keras.layers.Dense(units=1, activation='relu'))
@@ -49,12 +40,12 @@ def create_and_train_model(features_df, label_df):
     hist['epoch'] = history.epoch
     pprint(hist)
 
+    return model
+
 
 def main():
     logging.basicConfig(level=logging.INFO)
     print("tensorflow version: {}".format(tf.__version__))
-
-
 
     # Load in data
     client = MongoClient(URI)
@@ -70,10 +61,11 @@ def main():
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop(LABEL_FIELD)
 
-    create_and_train_model(features_df, label_df)
+    model: tf.keras.Model = create_and_train_model(features_df, label_df)
 
-    # validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
-    # info(f"Model validation results: {validation_results}")
+    validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
+    info(f"Model validation results: {validation_results}")
+
 
 
 if __name__ == '__main__':
