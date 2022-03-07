@@ -79,6 +79,10 @@ def main():
 
     model.save("my_model.h5")
 
+    new_model = tf.keras.models.load_model('my_model.h5')
+
+    new_model.summary()
+
     # extracted_zip = in_memory_zip()
     # model: tf.keras.Model = tf.keras.models.load_model(extracted_zip)
     #
