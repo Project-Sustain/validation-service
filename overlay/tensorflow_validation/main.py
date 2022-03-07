@@ -1,4 +1,5 @@
 #!/bin/python3
+
 import numpy
 import tensorflow as tf
 import numpy as np
@@ -16,10 +17,7 @@ from sklearn.preprocessing import normalize, MinMaxScaler
 import logging
 from logging import info, error
 
-import validation
-
 # MongoDB Stuff
-from ..db.querier import Querier
 
 MODEL_PATH = "../../testing/test_models/tensorflow/my_model.zip"
 URI = "mongodb://lattice-100:27018/"
@@ -35,14 +33,6 @@ def main():
     logging.basicConfig(level=logging.INFO)
     print("tensorflow version: {}".format(tf.__version__))
 
-    querier: Querier = Querier(
-        mongo_host="lattice-100",
-        mongo_port=27018,
-        db_name=DATABASE,
-        read_preference="nearest",
-        read_concern="available"
-    )
-
     info(f"Loading Tensorflow model from {MODEL_PATH}")
     model: tf.keras.Model = tf.keras.models.load_model(MODEL_PATH)
     model.summary()
@@ -55,13 +45,10 @@ def main():
     ]
     label_field = "TEMPERATURE_AT_SURFACE_KELVIN"
 
-    documents = querier.spatial_query(
-        COLLECTION,
-        gis_join,
-        feature_fields,
-        label_field,
-        0,
-        0.0
+    db_connection = MongoClient(URI)
+    documents = db_connection["sustaindb"]["noaa_nam"].find(
+        {"GISJOIN": gis_join},
+        {"_id": 0, "PRESSURE_AT_SURFACE_PASCAL": 1, "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT": 1, "TEMPERATURE_AT_SURFACE_KELVIN": 1}
     )
 
     features_df = pd.DataFrame(list(documents))
@@ -72,8 +59,6 @@ def main():
     label_df = features_df.pop(label_field)
     validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
     info(f"Model validation results: {validation_results}")
-
-    querier.close()  # Close querier now that we are done using it
 
 
 if __name__ == '__main__':
