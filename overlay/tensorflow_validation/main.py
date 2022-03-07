@@ -1,5 +1,7 @@
 #!/bin/python3
 
+import io
+import zipfile
 import tensorflow as tf
 import pandas as pd
 from pprint import pprint
@@ -43,8 +45,20 @@ def create_and_train_model(features_df, label_df) -> tf.keras.Model:
     return model
 
 
+def in_memory_zip():
+    in_file = open("../../testing/test_models/tensorflow/my_model.zip", "rb")
+    data = in_file.read()
+    in_file.close()
+
+    zip_file = zipfile.ZipFile(io.BytesIO(data))
+
+    extracted_contents = {name: zip_file.read(name) for name in zip_file.namelist()}
+    return extracted_contents
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
+
     print("tensorflow version: {}".format(tf.__version__))
 
     # Load in data
@@ -61,15 +75,18 @@ def main():
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop(LABEL_FIELD)
 
-    model: tf.keras.Model = create_and_train_model(features_df, label_df)
+    # model: tf.keras.Model = create_and_train_model(features_df, label_df)
+
+    extracted_zip = in_memory_zip()
+    model: tf.keras.Model = tf.keras.models.load_model(extracted_zip)
 
     validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
     info(f"Model validation results: {validation_results}")
 
-    cloned_model: tf.keras.Model = tf.keras.models.clone_model(model)
-    cloned_model.compile(loss=model.metrics_names['loss'])
-    validation_results = cloned_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
-    info(f"Cloned Model validation results: {validation_results}")
+    # cloned_model: tf.keras.Model = tf.keras.models.clone_model(model)
+    # cloned_model.compile(loss=model.metrics_names['loss'])
+    # validation_results = cloned_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
+    # info(f"Cloned Model validation results: {validation_results}")
 
 
 if __name__ == '__main__':
