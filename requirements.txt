@@ -11,3 +11,5 @@ numpy
 tensorflow
 scikit-learn
 jupyterlab
+pyyaml
+h5py

@@ -75,13 +75,15 @@ def main():
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop(LABEL_FIELD)
 
-    # model: tf.keras.Model = create_and_train_model(features_df, label_df)
+    model: tf.keras.Model = create_and_train_model(features_df, label_df)
 
-    extracted_zip = in_memory_zip()
-    model: tf.keras.Model = tf.keras.models.load_model(extracted_zip)
+    model.save("my_model.h5")
 
-    validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
-    info(f"Model validation results: {validation_results}")
+    # extracted_zip = in_memory_zip()
+    # model: tf.keras.Model = tf.keras.models.load_model(extracted_zip)
+    #
+    # validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
+    # info(f"Model validation results: {validation_results}")
 
     # cloned_model: tf.keras.Model = tf.keras.models.clone_model(model)
     # cloned_model.compile(loss=model.metrics_names['loss'])
