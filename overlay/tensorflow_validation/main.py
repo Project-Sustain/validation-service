@@ -10,6 +10,7 @@ from pymongo import MongoClient
 from sklearn.preprocessing import MinMaxScaler
 import logging
 import h5py
+from memory_tempfile import MemoryTempfile
 from logging import info, error
 
 # MongoDB Stuff
@@ -82,7 +83,8 @@ def main():
     # model.save("my_model.h5")
 
     extracted_zip = in_memory_zip()
-    temp = tempfile.TemporaryFile()
+    mem_temp = MemoryTempfile()
+    temp = mem_temp.TemporaryFile()
     h5_bytes = extracted_zip["my_model.h5"]
     temp.write(h5_bytes)
 

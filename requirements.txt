@@ -13,3 +13,4 @@ scikit-learn
 jupyterlab
 pyyaml
 h5py
+memory-tempfile
