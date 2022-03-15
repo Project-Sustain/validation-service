@@ -7,6 +7,7 @@ from http import HTTPStatus
 from pprint import pprint
 from logging import info
 from google.protobuf.json_format import MessageToJson, Parse, ParseDict
+from werkzeug.datastructures import FileStorage
 
 from overlay import filereader
 from overlay import validation_pb2_grpc
@@ -51,7 +52,7 @@ def validation():
     if 'file' not in request.files:
         return 'No file included in request', HTTPStatus.BAD_REQUEST
 
-    file = request.files['file']
+    file: FileStorage = request.files['file']
 
     # If the user does not select a file, the browser submits an
     # empty file without a filename.
@@ -67,14 +68,14 @@ def validation():
         info(f"Uploaded file of size {len(file_bytes)} bytes, and hash: {md5_hash}")
 
         with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
-            stub = validation_pb2_grpc.MasterStub(channel)
-            model_file = ModelFile(
+            stub: validation_pb2_grpc.MasterStub = validation_pb2_grpc.MasterStub(channel)
+            model_file: ModelFile = ModelFile(
                 type="zip",
                 md5_hash=md5_hash,
                 data=file_bytes
             )
             validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
-            validation_grpc_request.model_file = model_file
+            validation_grpc_request.model_file.extend(model_file)
 
             # validation_grpc_request = ValidationJobRequest(
             #     job_mode=validation_request["job_mode"],
