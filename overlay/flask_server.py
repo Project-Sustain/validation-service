@@ -73,11 +73,7 @@ def validation():
                 md5_hash=md5_hash,
                 data=file_bytes
             )
-
-            info("JSON DUMPS()")
-            pprint(json.dumps(validation_request_str))
-
-            validation_grpc_request: ValidationJobRequest = Parse(json.dumps(validation_request_str), ValidationJobRequest())
+            validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
             validation_grpc_request.model_file = model_file
 
             # validation_grpc_request = ValidationJobRequest(
