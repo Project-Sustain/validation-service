@@ -16,9 +16,12 @@
     "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
   ],
   "label_field": "TEMPERATURE_AT_SURFACE_KELVIN",
+  "normalize_inputs": true,
   "validation_budget": {
     "budget_type": "STATIC_BUDGET",
     "static_budget": {
+      "total_limit": 0,
+      "strata_limit": 0,
       "sample_rate": 1.0
     }
   },
