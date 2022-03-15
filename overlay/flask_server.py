@@ -75,7 +75,12 @@ def validation():
                 data=file_bytes
             )
             validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
-            validation_grpc_request["model_file"] = model_file
+
+            validation_grpc_request.model_file.type = "zip"
+            validation_grpc_request.model_file.md5_hash = md5_hash
+            validation_grpc_request.model_file.data = file_bytes
+
+            # validation_grpc_request["model_file"] = model_file
 
             # validation_grpc_request = ValidationJobRequest(
             #     job_mode=validation_request["job_mode"],
