@@ -1,7 +1,7 @@
 {
   "job_mode": "ASYNCHRONOUS",
-  "model_framework": "Tensorflow",
-  "model_category": "Regression",
+  "model_framework": "TENSORFLOW",
+  "model_category": "REGRESSION",
   "mongo_host": "localhost",
   "mongo_port": 27018,
   "read_config": {
