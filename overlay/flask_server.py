@@ -41,11 +41,11 @@ def default_route():
 
 @app.route('/validation_service/submit_validation_job', methods=['POST'])
 def validation():
-    validation_request_str = request.form["request"]
+    validation_request_str: str = request.form["request"]
     if validation_request_str == '':
         return 'Empty request submitted', HTTPStatus.BAD_REQUEST
 
-    validation_request = json.loads(validation_request_str)
+    validation_request: dict = json.loads(validation_request_str)
     pprint(validation_request)
 
     # Check if the POST request has the file part
@@ -60,11 +60,11 @@ def validation():
         return 'Empty file submitted', HTTPStatus.BAD_REQUEST
 
     if file and allowed_file(file.filename):
-        file_bytes = file.read()
+        file_bytes: bytes = file.read()
 
         hasher = hashlib.md5()
         hasher.update(file_bytes)
-        md5_hash = hasher.hexdigest()
+        md5_hash: str = hasher.hexdigest()
         info(f"Uploaded file of size {len(file_bytes)} bytes, and hash: {md5_hash}")
 
         with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
@@ -75,7 +75,7 @@ def validation():
                 data=file_bytes
             )
             validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
-            validation_grpc_request.model_file.extend(model_file)
+            # validation_grpc_request.model_file = model_file
 
             # validation_grpc_request = ValidationJobRequest(
             #     job_mode=validation_request["job_mode"],
