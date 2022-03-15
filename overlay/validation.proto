@@ -38,26 +38,29 @@ service Worker {
 // Worker job request for a set of GISJOINs, and a model to validate
 message ValidationJobRequest {
   string id = 1;
-  JobMode job_mode = 2;
-  ModelFramework model_framework = 3;
-  ModelCategory model_category = 4;
-  string mongo_host = 5;
-  int32 mongo_port = 6;
-  MongoReadConfig read_config = 7;
-  string database = 8;
-  string collection = 9;
-  repeated string feature_fields = 10;
-  string label_field = 11;
-  bool normalize_inputs = 12;
-  ValidationBudget validation_budget = 13;
-  string validation_metric = 14;
-  repeated string gis_joins = 15;
-  ModelFile model_file = 16;
+  JobMode master_job_mode = 2;
+  JobMode worker_job_mode = 3;
+  ModelFramework model_framework = 4;
+  ModelCategory model_category = 5;
+  string mongo_host = 6;
+  int32 mongo_port = 7;
+  MongoReadConfig read_config = 8;
+  string database = 9;
+  string collection = 10;
+  repeated string feature_fields = 11;
+  string label_field = 12;
+  bool normalize_inputs = 13;
+  ValidationBudget validation_budget = 14;
+  string validation_metric = 15;
+  repeated string gis_joins = 16;
+  ModelFile model_file = 17;
 }
 
 message ValidationJobResponse {
   string id = 1;
-  repeated ValidationMetric metrics = 2;
+  bool ok = 2;
+  string error_msg = 3;
+  repeated ValidationMetric metrics = 4;
 }
 
 message ValidationMetric {

@@ -11,7 +11,8 @@ from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.db import shards, locality
 from overlay.db.shards import ShardMetadata
-from overlay.validation_pb2 import WorkerRegistrationResponse, ValidationJobResponse, ValidationJobRequest, MongoReadConfig
+from overlay.validation_pb2 import WorkerRegistrationResponse, ValidationJobResponse, ValidationJobRequest, \
+    MongoReadConfig, JobMode, BudgetType, ValidationBudget
 
 
 class JobMetadata:
@@ -163,28 +164,35 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
         _worker = _worker_job.worker
         async with grpc.aio.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
-            response = await stub.BeginValidationJob(ValidationJobRequest(
-                id=_worker_job.job_id,
-                job_mode=_request.job_mode,
-                model_framework=_request.model_framework,
-                model_category=_request.model_category,
-                mongo_host=_request.mongo_host,
-                mongo_port=_request.mongo_port,
-                read_config=MongoReadConfig(
-                    read_preference=_request.read_config.read_preference,
-                    read_concern=_request.read_config.read_concern,
-                ),
-                database=_request.database,
-                collection=_request.collection,
-                feature_fields=_request.feature_fields,
-                label_field=_request.label_field,
-                normalize_inputs=_request.normalize_inputs,
-                limit=_request.limit,
-                sample_rate=_request.sample_rate,
-                validation_metric=_request.validation_metric,
-                gis_joins=_worker_job.gis_joins,
-                model_file=_request.model_file
-            ))
+            request_copy = ValidationJobRequest()
+            request_copy.CopyFrom(_request)
+            request_copy.id = _worker_job.job_id
+
+            response = await stub.BeginValidationJob(request_copy)
+
+            # response = await stub.BeginValidationJob(
+            #     ValidationJobRequest(
+            #     id=_worker_job.job_id,
+            #     job_mode=_request.job_mode,
+            #     model_framework=_request.model_framework,
+            #     model_category=_request.model_category,
+            #     mongo_host=_request.mongo_host,
+            #     mongo_port=_request.mongo_port,
+            #     read_config=MongoReadConfig(
+            #         read_preference=_request.read_config.read_preference,
+            #         read_concern=_request.read_config.read_concern,
+            #     ),
+            #     database=_request.database,
+            #     collection=_request.collection,
+            #     feature_fields=_request.feature_fields,
+            #     label_field=_request.label_field,
+            #     normalize_inputs=_request.normalize_inputs,
+            #     limit=_request.limit,
+            #     sample_rate=_request.sample_rate,
+            #     validation_metric=_request.validation_metric,
+            #     gis_joins=_worker_job.gis_joins,
+            #     model_file=_request.model_file
+            # ))
             return response
 
 
@@ -268,6 +276,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         job = JobMetadata(job_id, request.gis_joins)
         info(f"Created job id {job_id}")
 
+        # Find and select workers with GISJOINs local to them
         for gis_join in request.gis_joins:
             shard_hosting_gis_join = self.gis_join_locations[gis_join]
             worker = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
@@ -280,21 +289,39 @@ class Master(validation_pb2_grpc.MasterServicer):
             worker_job.gis_joins.append(gis_join)
             job.worker_jobs[worker.hostname] = worker_job
 
+        # Log selected workers
         for worker_hostname, worker_job in job.worker_jobs.items():
             info(f"{worker_hostname}: {worker_job}")
 
-        if request.job_mode == "multithreaded":
-            info("Launching jobs in multithreaded mode")
+        # Validation budget inference
+        if request.validation_budget.budget_type == BudgetType.STATIC_BUDGET:
+            static_budget: ValidationBudget = request.validation_budget.static_budget
+            if static_budget.total_limit > 0:
+                if static_budget.total_limit > len(request.gis_joins):
+                    static_budget.strata_limit = static_budget.total_limit // len(request.gis_joins)
+                else:
+                    info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
+                    static_budget.strata_limit = 1
+        elif request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+            error("Incremental variance budget not yet implemented!")
+            return ValidationJobResponse(id=job_id, metrics=[])
+        else:
+            error(f"Unknown budget type {request.validation_budget.budget_type}!")
+            return ValidationJobResponse(id=job_id, metrics=[])
+
+        # Select strategy for submitting the job from the master
+        if request.master_job_mode == JobMode.MULTITHREADED:
+            info("Launching jobs in multi-threaded mode")
             validation_job_responses = launch_worker_jobs_multithreaded(job, request)
-        elif request.job_mode == "asynchronous":
+        elif request.master_job_mode == JobMode.ASYNCHRONOUS:
             info("Launching jobs in asynchronous mode")
             validation_job_responses = launch_worker_jobs_asynchronously(job, request)
         else:
             info("Launching jobs in synchronous mode")
             validation_job_responses = launch_worker_jobs_synchronously(job, request)
 
+        # Gather all the responses
         all_validation_metrics = []
-
         for response in validation_job_responses:
             for validation_metric in response.metrics:
                 all_validation_metrics.append(validation_metric)

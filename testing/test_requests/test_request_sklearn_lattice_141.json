@@ -1,5 +1,6 @@
 {
-  "job_mode": "ASYNCHRONOUS",
+  "master_job_mode": "ASYNCHRONOUS",
+  "worker_job_mode": "SYNCHRONOUS",
   "model_framework": "SCIKIT_LEARN",
   "model_category": "REGRESSION",
   "mongo_host": "localhost",
