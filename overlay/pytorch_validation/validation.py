@@ -31,7 +31,12 @@ class PyTorchValidator:
         info(f"Loading PyTorch model from {model_path}")
 
         model = torch.load(model_path)
-        # TODO: print model summary
+        if verbose:
+            model_description = f'{model}\nParameters:\n'
+            for param in model.parameters():
+                model_description = f'{param}\n'
+
+            info(f"Model :{model_description}")
 
         return model
 
