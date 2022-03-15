@@ -70,7 +70,6 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
 
 def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
-    info(f"limit={request.limit}, sample_rate={request.sample_rate}")
 
     # Iterate over all the worker jobs created for this job and launch them serially
     for worker_hostname, worker_job in job.worker_jobs.items():
@@ -79,36 +78,17 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
             worker = worker_job.worker
             with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
                 stub = validation_pb2_grpc.WorkerStub(channel)
-                response = stub.BeginValidationJob(ValidationJobRequest(
-                    id=worker_job.job_id,
-                    job_mode=request.job_mode,
-                    model_framework=request.model_framework,
-                    model_category=request.model_category,
-                    mongo_host=request.mongo_host,
-                    mongo_port=request.mongo_port,
-                    read_config=MongoReadConfig(
-                        read_preference=request.read_config.read_preference,
-                        read_concern=request.read_config.read_concern,
-                    ),
-                    database=request.database,
-                    collection=request.collection,
-                    feature_fields=request.feature_fields,
-                    label_field=request.label_field,
-                    normalize_inputs=request.normalize_inputs,
-                    limit=request.limit,
-                    sample_rate=request.sample_rate,
-                    validation_metric=request.validation_metric,
-                    gis_joins=worker_job.gis_joins,
-                    model_file=request.model_file
-                ))
-                responses.append(response)
+                request_copy = ValidationJobRequest()
+                request_copy.CopyFrom(request)
+                request_copy.id = worker_job.job_id
+
+                responses.append(stub.BeginValidationJob(request_copy))
 
     return responses
 
 
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
-    info(f"limit={request.limit}, sample_rate={request.sample_rate}")
 
     # Define worker job function to be run in the thread pool
     def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
@@ -116,29 +96,11 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
         _worker = _worker_job.worker
         with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
-            response: ValidationJobResponse = stub.BeginValidationJob(ValidationJobRequest(
-                id=_worker_job.job_id,
-                job_mode=_request.job_mode,
-                model_framework=_request.model_framework,
-                model_category=_request.model_category,
-                mongo_host=request.mongo_host,
-                mongo_port=request.mongo_port,
-                read_config=MongoReadConfig(
-                    read_preference=request.read_config.read_preference,
-                    read_concern=request.read_config.read_concern,
-                ),
-                database=_request.database,
-                collection=_request.collection,
-                feature_fields=_request.feature_fields,
-                label_field=_request.label_field,
-                normalize_inputs=_request.normalize_inputs,
-                limit=_request.limit,
-                sample_rate=_request.sample_rate,
-                validation_metric=_request.validation_metric,
-                gis_joins=_worker_job.gis_joins,
-                model_file=_request.model_file
-            ))
-            return response
+            request_copy = ValidationJobRequest()
+            request_copy.CopyFrom(_request)
+            request_copy.id = _worker_job.job_id
+
+            return await stub.BeginValidationJob(request_copy)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
@@ -167,33 +129,7 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
             request_copy.CopyFrom(_request)
             request_copy.id = _worker_job.job_id
 
-            response = await stub.BeginValidationJob(request_copy)
-
-            # response = await stub.BeginValidationJob(
-            #     ValidationJobRequest(
-            #     id=_worker_job.job_id,
-            #     job_mode=_request.job_mode,
-            #     model_framework=_request.model_framework,
-            #     model_category=_request.model_category,
-            #     mongo_host=_request.mongo_host,
-            #     mongo_port=_request.mongo_port,
-            #     read_config=MongoReadConfig(
-            #         read_preference=_request.read_config.read_preference,
-            #         read_concern=_request.read_config.read_concern,
-            #     ),
-            #     database=_request.database,
-            #     collection=_request.collection,
-            #     feature_fields=_request.feature_fields,
-            #     label_field=_request.label_field,
-            #     normalize_inputs=_request.normalize_inputs,
-            #     limit=_request.limit,
-            #     sample_rate=_request.sample_rate,
-            #     validation_metric=_request.validation_metric,
-            #     gis_joins=_worker_job.gis_joins,
-            #     model_file=_request.model_file
-            # ))
-            return response
-
+            return await stub.BeginValidationJob(request_copy)
 
     # Iterate over all the worker jobs created for this job and create asyncio tasks for them
     loop = asyncio.new_event_loop()
