@@ -156,7 +156,6 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
 
 
 def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
-    info(f"limit={request.limit}, sample_rate={request.sample_rate}")
 
     # Define async function to launch worker job
     async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
