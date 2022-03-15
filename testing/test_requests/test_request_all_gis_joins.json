@@ -1,7 +1,7 @@
 {
-  "job_mode": "asynchronous",
-  "model_framework": "Tensorflow",
-  "model_type": "Regression",
+  "job_mode": "ASYNCHRONOUS",
+  "model_framework": "TENSORFLOW",
+  "model_type": "REGRESSION",
   "mongo_host": "localhost",
   "mongo_port": 27018,
   "read_config": {
@@ -16,6 +16,12 @@
   ],
   "label_field": "TEMPERATURE_AT_SURFACE_KELVIN",
   "normalize_inputs": true,
+  "validation_budget": {
+    "budget_type": "STATIC_BUDGET",
+    "static_budget": {
+      "sample_rate": 1.0
+    }
+  },
   "limit": 0,
   "sample_rate": 0.0,
   "validation_metric": "loss",
