@@ -75,7 +75,7 @@ def validation():
                 data=file_bytes
             )
             validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
-            # validation_grpc_request.model_file = model_file
+            validation_grpc_request["model_file"] = model_file
 
             # validation_grpc_request = ValidationJobRequest(
             #     job_mode=validation_request["job_mode"],
