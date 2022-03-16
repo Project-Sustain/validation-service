@@ -11,3 +11,4 @@ numpy
 tensorflow
 scikit-learn
 jupyterlab
+torch

@@ -16,6 +16,7 @@ from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.db.querier import Querier
 from overlay.tensorflow_validation.validation import TensorflowValidator
 from overlay.scikitlearn_validation.validation import ScikitLearnValidator
+from overlay.pytorch_validation.validation import PyTorchValidator
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
@@ -73,11 +74,24 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
+            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
             if request.worker_job_mode == JobMode.SYNCHRONOUS:
-                skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
                 metrics = skl_validator.validate_gis_joins_synchronous(request.gis_joins)
+            elif request.worker_job_mode == JobMode.MULTITHREADED:
+                metrics = skl_validator.validate_gis_joins_multithreaded(request.gis_joins)
             else:
                 err_msg = f"{request.worker_job_mode} job mode not implemented for Scikit-Learn validation!"
+                error(err_msg)
+                return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
+
+        elif request.model_framework == ModelFramework.PYTORCH:
+            pytorch_validator: PyTorchValidator = PyTorchValidator(request)
+            if request.worker_job_mode == JobMode.SYNCHRONOUS:
+                metrics = pytorch_validator.validate_gis_joins_synchronous(request.gis_joins)
+            elif request.worker_job_mode == JobMode.MULTITHREADED:
+                metrics = pytorch_validator.validate_gis_joins_multithreaded(request.gis_joins)
+            else:
+                err_msg = f"{request.worker_job_mode} job mode not implemented for PyTorch validation!"
                 error(err_msg)
                 return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
 
@@ -116,7 +130,6 @@ def make_models_dir_if_not_exists() -> None:
 
 
 def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> None:
-
     if MODELS_DIR == "":
         error("MODELS_DIR environment variable must be set!")
         exit(1)
@@ -132,6 +145,7 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> No
     # Set up Ctrl-C signal handling
     def call_shutdown(signum, frame):
         shutdown_gracefully(worker)
+
     signal.signal(signal.SIGINT, call_shutdown)
 
     validation_pb2_grpc.add_WorkerServicer_to_server(worker, server)
