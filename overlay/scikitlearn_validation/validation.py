@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.db.querier import Querier
 from overlay.tensorflow_validation.validation import normalize_dataframe
-from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest
+from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget
 
 
 class ScikitLearnValidator:
@@ -27,9 +27,7 @@ class ScikitLearnValidator:
         self.label_field = request.label_field
         self.validation_metric = request.validation_metric
         self.normalize = request.normalize_inputs
-        self.limit = request.limit
-        self.sample_rate = request.sample_rate
-        info(f"ScikitLearnValidator(): limit={self.limit}, sample_rate={self.sample_rate}")
+        self.validation_budget = request.validation_budget
 
     def load_sklearn_model(self, verbose=True):
         # Load ScikitLearn model from disk
@@ -125,47 +123,58 @@ class ScikitLearnValidator:
         return metrics
 
     def validate_gis_join(self, gis_join: str, querier: Querier, model, is_concurrent: bool) -> float:
-        info(f"Using limit={self.limit}, and sample_rate={self.sample_rate}")
 
-        documents = querier.spatial_query(
-            self.collection,
-            gis_join,
-            self.feature_fields,
-            self.label_field,
-            self.limit,
-            self.sample_rate
-        )
+        if self.validation_budget.budget_type == BudgetType.STATIC_BUDGET:
+            budget: StaticBudget = self.validation_budget.static_budget
+            limit: int = budget.strata_limit
+            sample_rate: float = budget.sample_rate
 
-        # Load MongoDB Documents into Pandas DataFrame
-        features_df = pd.DataFrame(list(documents))
-        if is_concurrent:
-            info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
-        else:
-            info(f"Loaded Pandas DataFrame from MongoDB, raw data:\n{features_df}")
+            documents = querier.spatial_query(
+                self.collection,
+                gis_join,
+                self.feature_fields,
+                self.label_field,
+                limit,
+                sample_rate
+            )
 
-        if len(features_df.index) == 0:
-            error("DataFrame is empty! Returning -1.0 for loss")
-            return -1.0
-
-        # Normalize features, if requested
-        if self.normalize:
-            features_df = normalize_dataframe(features_df)
+            # Load MongoDB Documents into Pandas DataFrame
+            features_df = pd.DataFrame(list(documents))
             if is_concurrent:
-                info(f"Normalized Pandas DataFrame")
+                info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
             else:
-                info(f"Pandas DataFrame after normalization:\n{features_df}")
+                info(f"Loaded Pandas DataFrame from MongoDB, raw data:\n{features_df}")
 
-        # Pop the label column off into its own DataFrame
-        label_df = features_df.pop(self.label_field)
+            if len(features_df.index) == 0:
+                error("DataFrame is empty! Returning -1.0 for loss")
+                return -1.0
 
-        # evaluate model
-        X_test = features_df
-        y_test = label_df
+            # Normalize features, if requested
+            if self.normalize:
+                features_df = normalize_dataframe(features_df)
+                if is_concurrent:
+                    info(f"Normalized Pandas DataFrame")
+                else:
+                    info(f"Pandas DataFrame after normalization:\n{features_df}")
 
-        score = model.score(X_test, y_test)
-        info(f"Model validation results: {score}")
+            # Pop the label column off into its own DataFrame
+            label_df = features_df.pop(self.label_field)
 
-        if is_concurrent:
-            querier.close()
+            # evaluate model
+            X_test = features_df
+            y_test = label_df
 
-        return score
+            score = model.score(X_test, y_test)
+            info(f"Model validation results: {score}")
+
+            if is_concurrent:
+                querier.close()
+
+            return score
+
+        elif self.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+            error("Incremental variance budgeting not yet implemented!")
+            return 0.0
+        else:
+            error(f"Unrecognized budget type '{self.validation_budget.budget_type}'")
+            return 0.0
