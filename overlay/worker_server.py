@@ -10,7 +10,8 @@ import socket
 
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
-from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse
+from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
+    ValidationJobResponse
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.db.querier import Querier
 from overlay.tensorflow_validation.validation import TensorflowValidator
@@ -53,19 +54,35 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         zip_file = zipfile.ZipFile(io.BytesIO(request.model_file.data))
         zip_file.extractall(model_dir)
 
-        info(f"BeginValidationJob: limit={request.limit}, sample_rate={request.sample_rate}")
+        info(f"BeginValidationJob: validation_budget={request.validation_budget}")
 
-        if request.model_framework == "Tensorflow":
+        metrics = None
+
+        # Select model framework, then job mode
+        if request.model_framework == ModelFramework.TENSORFLOW:
+
             tf_validator: TensorflowValidator = TensorflowValidator(request)
-            metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
-            # metrics = tf_validator.validate_gis_joins(request.gis_joins)  # list of proto ValidationMetric objects
-        elif request.model_framework == "Scikit-Learn":
-            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
-            metrics = skl_validator.validate_gis_joins_synchronous(request.gis_joins)
-        else:
-            metrics = None
+            if request.worker_job_mode == JobMode.MULTITHREADED:
+                metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
+            elif request.worker_job_mode == JobMode.SYNCHRONOUS:
+                metrics = tf_validator.validate_gis_joins_synchronous(request.gis_joins)
+            else:
+                err_msg = f"{request.worker_job_mode} job mode not implemented for Tensorflow validation!"
+                error(err_msg)
+                return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
 
-        return validation_pb2.ValidationJobResponse(
+        elif request.model_framework == ModelFramework.SCIKIT_LEARN:
+
+            if request.worker_job_mode == JobMode.SYNCHRONOUS:
+                skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
+                metrics = skl_validator.validate_gis_joins_synchronous(request.gis_joins)
+            else:
+                err_msg = f"{request.worker_job_mode} job mode not implemented for Scikit-Learn validation!"
+                error(err_msg)
+                return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
+
+        # Create and return response from aggregated metrics
+        return ValidationJobResponse(
             id=request.id,
             metrics=metrics
         )
