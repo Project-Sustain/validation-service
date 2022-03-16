@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xf2\x03\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12!\n\x0fmaster_job_mode\x18\x02 \x01(\x0e\x32\x08.JobMode\x12!\n\x0fworker_job_mode\x18\x03 \x01(\x0e\x32\x08.JobMode\x12(\n\x0fmodel_framework\x18\x04 \x01(\x0e\x32\x0f.ModelFramework\x12&\n\x0emodel_category\x18\x05 \x01(\x0e\x32\x0e.ModelCategory\x12\x12\n\nmongo_host\x18\x06 \x01(\t\x12\x12\n\nmongo_port\x18\x07 \x01(\x05\x12%\n\x0bread_config\x18\x08 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\t \x01(\t\x12\x12\n\ncollection\x18\n \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x0b \x03(\t\x12\x13\n\x0blabel_field\x18\x0c \x01(\t\x12\x18\n\x10normalize_inputs\x18\r \x01(\x08\x12,\n\x11validation_budget\x18\x0e \x01(\x0b\x32\x11.ValidationBudget\x12\x19\n\x11validation_metric\x18\x0f \x01(\t\x12\x11\n\tgis_joins\x18\x10 \x03(\t\x12\x1e\n\nmodel_file\x18\x11 \x01(\x0b\x32\n.ModelFile\"f\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\n\n\x02ok\x18\x02 \x01(\x08\x12\x11\n\terror_msg\x18\x03 \x01(\t\x12\"\n\x07metrics\x18\x04 \x03(\x0b\x32\x11.ValidationMetric\"D\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\"I\n\tModelFile\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.ModelFileType\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t\"\x8f\x01\n\x10ValidationBudget\x12 \n\x0b\x62udget_type\x18\x01 \x01(\x0e\x32\x0b.BudgetType\x12$\n\rstatic_budget\x18\x02 \x01(\x0b\x32\r.StaticBudget\x12\x33\n\x0fvariance_budget\x18\x03 \x01(\x0b\x32\x1a.IncrementalVarianceBudget\"7\n\x19IncrementalVarianceBudget\x12\x1a\n\x12initial_allocation\x18\x01 \x01(\x03\"N\n\x0cStaticBudget\x12\x13\n\x0btotal_limit\x18\x01 \x01(\x03\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02*@\n\nBudgetType\x12\x11\n\rSTATIC_BUDGET\x10\x00\x12\x1f\n\x1bINCREMENTAL_VARIANCE_BUDGET\x10\x01*?\n\x07JobMode\x12\x0f\n\x0bSYNCHRONOUS\x10\x00\x12\x10\n\x0c\x41SYNCHRONOUS\x10\x01\x12\x11\n\rMULTITHREADED\x10\x02*?\n\x0eModelFramework\x12\x0e\n\nTENSORFLOW\x10\x00\x12\x10\n\x0cSCIKIT_LEARN\x10\x01\x12\x0b\n\x07PYTORCH\x10\x02*\x1f\n\rModelCategory\x12\x0e\n\nREGRESSION\x10\x00*r\n\rModelFileType\x12\x17\n\x13SCIKIT_LEARN_PICKLE\x10\x00\x12\x13\n\x0fTENSORFLOW_HDF5\x10\x01\x12\x1e\n\x1aTENSORFLOW_SAVED_MODEL_ZIP\x10\x02\x12\x13\n\x0fPYTORCH_ZIPFILE\x10\x03\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32O\n\x06Worker\x12\x45\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xf2\x03\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12!\n\x0fmaster_job_mode\x18\x02 \x01(\x0e\x32\x08.JobMode\x12!\n\x0fworker_job_mode\x18\x03 \x01(\x0e\x32\x08.JobMode\x12(\n\x0fmodel_framework\x18\x04 \x01(\x0e\x32\x0f.ModelFramework\x12&\n\x0emodel_category\x18\x05 \x01(\x0e\x32\x0e.ModelCategory\x12\x12\n\nmongo_host\x18\x06 \x01(\t\x12\x12\n\nmongo_port\x18\x07 \x01(\x05\x12%\n\x0bread_config\x18\x08 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\t \x01(\t\x12\x12\n\ncollection\x18\n \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x0b \x03(\t\x12\x13\n\x0blabel_field\x18\x0c \x01(\t\x12\x18\n\x10normalize_inputs\x18\r \x01(\x08\x12,\n\x11validation_budget\x18\x0e \x01(\x0b\x32\x11.ValidationBudget\x12\x19\n\x11validation_metric\x18\x0f \x01(\t\x12\x11\n\tgis_joins\x18\x10 \x03(\t\x12\x1e\n\nmodel_file\x18\x11 \x01(\x0b\x32\n.ModelFile\"f\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\n\n\x02ok\x18\x02 \x01(\x08\x12\x11\n\terror_msg\x18\x03 \x01(\t\x12\"\n\x07metrics\x18\x04 \x03(\x0b\x32\x11.ValidationMetric\"D\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\"I\n\tModelFile\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.ModelFileType\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t\"\x8f\x01\n\x10ValidationBudget\x12 \n\x0b\x62udget_type\x18\x01 \x01(\x0e\x32\x0b.BudgetType\x12$\n\rstatic_budget\x18\x02 \x01(\x0b\x32\r.StaticBudget\x12\x33\n\x0fvariance_budget\x18\x03 \x01(\x0b\x32\x1a.IncrementalVarianceBudget\"7\n\x19IncrementalVarianceBudget\x12\x1a\n\x12initial_allocation\x18\x01 \x01(\x03\"N\n\x0cStaticBudget\x12\x13\n\x0btotal_limit\x18\x01 \x01(\x03\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02*@\n\nBudgetType\x12\x11\n\rSTATIC_BUDGET\x10\x00\x12\x1f\n\x1bINCREMENTAL_VARIANCE_BUDGET\x10\x01*?\n\x07JobMode\x12\x0f\n\x0bSYNCHRONOUS\x10\x00\x12\x10\n\x0c\x41SYNCHRONOUS\x10\x01\x12\x11\n\rMULTITHREADED\x10\x02*?\n\x0eModelFramework\x12\x0e\n\nTENSORFLOW\x10\x00\x12\x10\n\x0cSCIKIT_LEARN\x10\x01\x12\x0b\n\x07PYTORCH\x10\x02*\x1f\n\rModelCategory\x12\x0e\n\nREGRESSION\x10\x00*\x8f\x01\n\rModelFileType\x12\x1b\n\x17UNKNOWN_MODEL_FILE_TYPE\x10\x00\x12\x17\n\x13SCIKIT_LEARN_PICKLE\x10\x01\x12\x13\n\x0fTENSORFLOW_HDF5\x10\x02\x12\x1e\n\x1aTENSORFLOW_SAVED_MODEL_ZIP\x10\x03\x12\x13\n\x0fPYTORCH_ZIPFILE\x10\x04\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32O\n\x06Worker\x12\x45\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x62\x06proto3'
 )
 
 _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
@@ -171,30 +171,35 @@ _MODELFILETYPE = _descriptor.EnumDescriptor(
   create_key=_descriptor._internal_create_key,
   values=[
     _descriptor.EnumValueDescriptor(
-      name='SCIKIT_LEARN_PICKLE', index=0, number=0,
+      name='UNKNOWN_MODEL_FILE_TYPE', index=0, number=0,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='TENSORFLOW_HDF5', index=1, number=1,
+      name='SCIKIT_LEARN_PICKLE', index=1, number=1,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='TENSORFLOW_SAVED_MODEL_ZIP', index=2, number=2,
+      name='TENSORFLOW_HDF5', index=2, number=2,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='PYTORCH_ZIPFILE', index=3, number=3,
+      name='TENSORFLOW_SAVED_MODEL_ZIP', index=3, number=3,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='PYTORCH_ZIPFILE', index=4, number=4,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1665,
-  serialized_end=1779,
+  serialized_start=1666,
+  serialized_end=1809,
 )
 _sym_db.RegisterEnumDescriptor(_MODELFILETYPE)
 
@@ -211,10 +216,11 @@ TENSORFLOW = 0
 SCIKIT_LEARN = 1
 PYTORCH = 2
 REGRESSION = 0
-SCIKIT_LEARN_PICKLE = 0
-TENSORFLOW_HDF5 = 1
-TENSORFLOW_SAVED_MODEL_ZIP = 2
-PYTORCH_ZIPFILE = 3
+UNKNOWN_MODEL_FILE_TYPE = 0
+SCIKIT_LEARN_PICKLE = 1
+TENSORFLOW_HDF5 = 2
+TENSORFLOW_SAVED_MODEL_ZIP = 3
+PYTORCH_ZIPFILE = 4
 
 
 
@@ -904,8 +910,8 @@ _MASTER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1782,
-  serialized_end=2061,
+  serialized_start=1812,
+  serialized_end=2091,
   methods=[
   _descriptor.MethodDescriptor(
     name='UploadFile',
@@ -960,8 +966,8 @@ _WORKER = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2063,
-  serialized_end=2142,
+  serialized_start=2093,
+  serialized_end=2172,
   methods=[
   _descriptor.MethodDescriptor(
     name='BeginValidationJob',
