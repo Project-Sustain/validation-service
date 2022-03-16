@@ -102,6 +102,11 @@ class TensorflowValidator:
 
             # Load MongoDB Documents into Pandas DataFrame
             features_df = pd.DataFrame(list(documents))
+
+            # If the MongoDB driver connection is local to this thread/function, close it when done using it
+            if is_concurrent:
+                querier.close()
+
             if is_concurrent:
                 info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
             else:
@@ -125,10 +130,6 @@ class TensorflowValidator:
             # Evaluate model
             validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
             info(f"Model validation results: {validation_results}")
-
-            # If the MongoDB driver connection is local to this thread/function, close it when done using it
-            if is_concurrent:
-                querier.close()
 
             return validation_results['loss']
 
