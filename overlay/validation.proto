@@ -70,7 +70,7 @@ message ValidationMetric {
 }
 
 message ModelFile {
-  string type = 1;
+  ModelFileType type = 1;
   string md5_hash = 2;
   bytes data = 3;
 }
@@ -129,4 +129,12 @@ enum ModelFramework {
 
 enum ModelCategory {
   REGRESSION = 0;
+}
+
+enum ModelFileType {
+  UNKNOWN_MODEL_FILE_TYPE = 0;
+  SCIKIT_LEARN_PICKLE = 1;
+  TENSORFLOW_HDF5 = 2;
+  TENSORFLOW_SAVED_MODEL_ZIP = 3;
+  PYTORCH_ZIPFILE = 4;
 }

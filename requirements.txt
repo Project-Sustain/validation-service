@@ -12,3 +12,5 @@ tensorflow
 scikit-learn
 jupyterlab
 torch
+pyyaml
+h5py

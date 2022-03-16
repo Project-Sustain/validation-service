@@ -100,7 +100,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             request_copy.CopyFrom(_request)
             request_copy.id = _worker_job.job_id
 
-            return await stub.BeginValidationJob(request_copy)
+            return stub.BeginValidationJob(request_copy)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []

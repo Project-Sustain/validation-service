@@ -11,7 +11,7 @@ import socket
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
-    ValidationJobResponse
+    ValidationJobRequest, ValidationJobResponse, ModelFile, ModelFileType
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.db.querier import Querier
 from overlay.tensorflow_validation.validation import TensorflowValidator
@@ -47,22 +47,23 @@ class Worker(validation_pb2_grpc.WorkerServicer):
     def __repr__(self):
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
-    def BeginValidationJob(self, request, context):
+    def BeginValidationJob(self, request: ValidationJobRequest, context):
         info(f"Received BeginValidationJob Request: {request}")
-        model_dir = f"{self.saved_models_path}/{request.id}"
-        os.mkdir(model_dir)
-        info(f"Extracting model to {model_dir}")
-        zip_file = zipfile.ZipFile(io.BytesIO(request.model_file.data))
-        zip_file.extractall(model_dir)
-
         info(f"BeginValidationJob: validation_budget={request.validation_budget}")
-
         metrics = None
+
+        # Save model
+        if not self.save_model(request):
+            err_msg = f"Unable to save {str(request.model_framework)} model file with type " \
+                      f"{str(request.model_file.type)}!"
+            error(err_msg)
+            return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
 
         # Select model framework, then job mode
         if request.model_framework == ModelFramework.TENSORFLOW:
 
             tf_validator: TensorflowValidator = TensorflowValidator(request)
+
             if request.worker_job_mode == JobMode.MULTITHREADED:
                 metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
             elif request.worker_job_mode == JobMode.SYNCHRONOUS:
@@ -75,6 +76,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
             skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
+
             if request.worker_job_mode == JobMode.SYNCHRONOUS:
                 metrics = skl_validator.validate_gis_joins_synchronous(request.gis_joins)
             elif request.worker_job_mode == JobMode.MULTITHREADED:
@@ -85,7 +87,9 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                 return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
 
         elif request.model_framework == ModelFramework.PYTORCH:
+
             pytorch_validator: PyTorchValidator = PyTorchValidator(request)
+
             if request.worker_job_mode == JobMode.SYNCHRONOUS:
                 metrics = pytorch_validator.validate_gis_joins_synchronous(request.gis_joins)
             elif request.worker_job_mode == JobMode.MULTITHREADED:
@@ -98,8 +102,56 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         # Create and return response from aggregated metrics
         return ValidationJobResponse(
             id=request.id,
+            ok=True,
             metrics=metrics
         )
+
+    def save_model(self, request: ValidationJobRequest) -> bool:
+        ok = True
+
+        # Make the directory
+        model_dir = f"{self.saved_models_path}/{request.id}"
+        os.mkdir(model_dir)
+        info(f"Created directory {model_dir}")
+
+        file_extension = "pickle"  # Default for Scikit-Learn pickle type
+
+        # Validate the file type with the framework
+        if request.model_framework == ModelFramework.TENSORFLOW:
+
+            # Saved Tensorflow models have to be either SavedModel or HDF5 format:
+            # https://www.tensorflow.org/tutorials/keras/save_and_load#save_the_entire_model
+            if request.model_file.type == ModelFileType.TENSORFLOW_SAVED_MODEL_ZIP:
+                zip_file = zipfile.ZipFile(io.BytesIO(request.model_file.data))
+                zip_file.extractall(model_dir)
+                return ok
+            elif request.model_file.type == ModelFileType.TENSORFLOW_HDF5:
+                file_extension = "h5"
+            else:
+                return not ok
+
+        elif request.model_framework == ModelFramework.SCIKIT_LEARN:
+
+            # Saved Scikit-Learn models have to be in the Pickle format:
+            # https://scikit-learn.org/stable/modules/model_persistence.html
+            if request.model_file.type != ModelFileType.SCIKIT_LEARN_PICKLE:
+                return not ok
+
+        elif request.model_framework == ModelFramework.PYTORCH:
+
+            # Saved PyTorch models have to be in the Pickle zipfile format:
+            # https://pytorch.org/tutorials/beginner/saving_loading_models.html#saving-loading-model-for-inference
+            if request.model_file.type != ModelFileType.PYTORCH_ZIPFILE:
+                return not ok
+            file_extension = "pth"
+
+        # Save the model with appropriate extension
+        model_file_path = f"{model_dir}/{request.id}.{file_extension}"
+        with open(model_file_path, "wb") as binary_file:
+            binary_file.write(request.model_file.data)
+
+        info(f"Finished saving model to {model_file_path}")
+        return ok
 
     def deregister(self):
         if self.is_registered:
