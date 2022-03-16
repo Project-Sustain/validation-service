@@ -102,6 +102,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         # Create and return response from aggregated metrics
         return ValidationJobResponse(
             id=request.id,
+            ok=True,
             metrics=metrics
         )
 
