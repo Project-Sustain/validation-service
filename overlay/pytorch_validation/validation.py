@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 import numpy as np
 import torch
@@ -31,6 +32,12 @@ class PyTorchValidator:
     def load_pytorch_model(self, verbose=True):
         # Load PyTorch model from disk
         model_path = f"{MODELS_DIR}/{self.job_id}"
+
+        # pick the first file. only one file (.pth file/pickled object) is supposed to be in the directory.
+        file_name = os.listdir(model_path)[0]
+
+        model_path += f'/{file_name}'
+
         info(f"Loading PyTorch model from {model_path}")
 
         model = torch.load(model_path)
