@@ -115,7 +115,7 @@ class PyTorchValidator:
                 return -1.0
 
             # Normalize features, if requested
-            if self.request.normalize:
+            if self.request.normalize_inputs:
                 features_df = normalize_dataframe(features_df)
                 if is_concurrent:
                     info(f"Normalized Pandas DataFrame")
