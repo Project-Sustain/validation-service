@@ -132,7 +132,8 @@ enum ModelCategory {
 }
 
 enum ModelFileType {
-  PICKLE = 0;
-  HDF5 = 1;
+  SCIKIT_LEARN_PICKLE = 0;
+  TENSORFLOW_HDF5 = 1;
   TENSORFLOW_SAVED_MODEL_ZIP = 2;
+  PYTORCH_ZIPFILE = 3;
 }

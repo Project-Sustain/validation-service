@@ -1,46 +1,40 @@
+import os
+
 import tensorflow as tf
 import pandas as pd
 from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from overlay.validation_pb2 import ValidationMetric, MongoReadConfig, ValidationJobRequest, BudgetType, StaticBudget
+from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget
 from overlay.db.querier import Querier
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
+from overlay.constants import MODELS_DIR
 
 
 class TensorflowValidator:
 
     def __init__(self, request: ValidationJobRequest):
-        self.job_id = request.id
-        self.model_type = request.model_category
-        self.mongo_host = request.mongo_host
-        self.mongo_port = request.mongo_port
-        self.read_config = request.read_config
-        self.database = request.database
-        self.collection = request.collection
-        self.feature_fields = request.feature_fields
-        self.label_field = request.label_field
-        self.validation_metric = request.validation_metric
-        self.normalize = request.normalize_inputs
-        self.validation_budget = request.validation_budget
+        self.request: ValidationJobRequest = request
 
     def load_tf_model(self, verbose=False):
         # Load Tensorflow model from disk
-        model_path = f"{MODELS_DIR}/{self.job_id}"
+        model_path = f"{MODELS_DIR}/{self.request.id}/"
+        first_entry = os.listdir(model_path)[0]
+        model_path += first_entry
         info(f"Loading Tensorflow model from {model_path}")
         model = tf.keras.models.load_model(model_path)
+
         if verbose:
             model.summary()
         return model
 
     def validate_gis_joins_synchronous(self, gis_joins: list) -> list:
         querier: Querier = Querier(
-            mongo_host=self.mongo_host,
-            mongo_port=self.mongo_port,
-            db_name=self.database,
-            read_preference=self.read_config.read_preference,
-            read_concern=self.read_config.read_concern
+            mongo_host=self.request.mongo_host,
+            mongo_port=self.request.mongo_port,
+            db_name=self.request.database,
+            read_preference=self.request.read_config.read_preference,
+            read_concern=self.request.read_config.read_concern
         )
         model: tf.keras.Model = self.load_tf_model()
 
@@ -65,7 +59,13 @@ class TensorflowValidator:
         executors_list = []
         with ThreadPoolExecutor(max_workers=10) as executor:
             for gis_join in gis_joins:
-                querier: Querier = Querier(mongo_host=self.mongo_host, mongo_port=self.mongo_port)
+                querier: Querier = Querier(
+                    mongo_host=self.request.mongo_host,
+                    mongo_port=self.request.mongo_port,
+                    db_name=self.request.database,
+                    read_preference=self.request.read_config.read_preference,
+                    read_concern=self.request.read_config.read_concern
+                )
                 model: tf.keras.Model = self.load_tf_model()
 
                 info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
@@ -86,16 +86,16 @@ class TensorflowValidator:
     def validate_gis_join(self, gis_join: str, querier: Querier, model: tf.keras.Model, is_concurrent: bool) -> float:
         # Query MongoDB for documents matching GISJOIN
 
-        if self.validation_budget.budget_type == BudgetType.STATIC_BUDGET:
-            budget: StaticBudget = self.validation_budget.static_budget
+        if self.request.validation_budget.budget_type == BudgetType.STATIC_BUDGET:
+            budget: StaticBudget = self.request.validation_budget.static_budget
             limit: int = budget.strata_limit
             sample_rate: float = budget.sample_rate
 
             documents = querier.spatial_query(
-                self.collection,
+                self.request.collection,
                 gis_join,
-                self.feature_fields,
-                self.label_field,
+                self.request.feature_fields,
+                self.request.label_field,
                 limit,
                 sample_rate
             )
@@ -112,7 +112,7 @@ class TensorflowValidator:
                 return -1.0
 
             # Normalize features, if requested
-            if self.normalize:
+            if self.request.normalize:
                 features_df = normalize_dataframe(features_df)
                 if is_concurrent:
                     info(f"Normalized Pandas DataFrame")
@@ -120,7 +120,7 @@ class TensorflowValidator:
                     info(f"Pandas DataFrame after normalization:\n{features_df}")
 
             # Pop the label column off into its own DataFrame
-            label_df = features_df.pop(self.label_field)
+            label_df = features_df.pop(self.request.label_field)
 
             # Evaluate model
             validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
@@ -132,12 +132,12 @@ class TensorflowValidator:
 
             return validation_results['loss']
 
-        elif self.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+        elif self.request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
             error("Incremental variance budgeting not yet implemented!")
             return 0.0
 
         else:
-            error(f"Unrecognized budget type '{self.validation_budget.budget_type}'")
+            error(f"Unrecognized budget type '{self.request.validation_budget.budget_type}'")
             return 0.0
 
 
