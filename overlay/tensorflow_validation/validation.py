@@ -54,20 +54,19 @@ class TensorflowValidator:
 
     def validate_gis_joins_multithreaded(self, gis_joins: list) -> list:
         metrics = []  # list of proto ValidationMetric objects
+        querier: Querier = Querier(
+            mongo_host=self.request.mongo_host,
+            mongo_port=self.request.mongo_port,
+            db_name=self.request.database,
+            read_preference=self.request.read_config.read_preference,
+            read_concern=self.request.read_config.read_concern
+        )
 
         # Iterate over all gis_joins and submit them for validation to the thread pool executor
         executors_list = []
         with ThreadPoolExecutor(max_workers=10) as executor:
             for gis_join in gis_joins:
-                querier: Querier = Querier(
-                    mongo_host=self.request.mongo_host,
-                    mongo_port=self.request.mongo_port,
-                    db_name=self.request.database,
-                    read_preference=self.request.read_config.read_preference,
-                    read_concern=self.request.read_config.read_concern
-                )
                 model: tf.keras.Model = self.load_tf_model()
-
                 info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
                 executors_list.append(executor.submit(self.validate_gis_join, gis_join, querier, model, True))
 
@@ -80,6 +79,8 @@ class TensorflowValidator:
                 gis_join=gis_join,
                 loss=loss
             ))
+
+        querier.close()
 
         return metrics
 
@@ -104,8 +105,8 @@ class TensorflowValidator:
             features_df = pd.DataFrame(list(documents))
 
             # If the MongoDB driver connection is local to this thread/function, close it when done using it
-            if is_concurrent:
-                querier.close()
+            # if is_concurrent:
+            #     querier.close()
 
             if is_concurrent:
                 info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
