@@ -4,7 +4,7 @@ import tensorflow as tf
 import pandas as pd
 from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget
 from overlay.db.querier import Querier
@@ -66,6 +66,40 @@ class TensorflowValidator:
         executors_list = []
         with ThreadPoolExecutor(max_workers=10) as executor:
             for gis_join in gis_joins:
+                model: tf.keras.Model = self.load_tf_model()
+                info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
+                executors_list.append(executor.submit(self.validate_gis_join, gis_join, querier, model, True))
+
+        # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
+        for future in as_completed(executors_list):
+            info(future)
+            loss = future.result()
+
+            metrics.append(ValidationMetric(
+                gis_join=gis_join,
+                loss=loss
+            ))
+
+        querier.close()
+
+        return metrics
+
+    def validate_gis_joins_multiprocessing(self, gis_joins: list) -> list:
+        metrics = []  # list of proto ValidationMetric objects
+
+        querier: Querier = Querier(
+            mongo_host=self.request.mongo_host,
+            mongo_port=self.request.mongo_port,
+            db_name=self.request.database,
+            read_preference=self.request.read_config.read_preference,
+            read_concern=self.request.read_config.read_concern
+        )
+
+        # Iterate over all gis_joins and submit them for validation to the thread pool executor
+        executors_list = []
+        with ProcessPoolExecutor(max_workers=10) as executor:
+            for gis_join in gis_joins:
+
                 model: tf.keras.Model = self.load_tf_model()
                 info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
                 executors_list.append(executor.submit(self.validate_gis_join, gis_join, querier, model, True))

@@ -119,6 +119,7 @@ enum JobMode {
   SYNCHRONOUS = 0;
   ASYNCHRONOUS = 1;
   MULTITHREADED = 2;
+  MULTIPROCESSING = 3;
 }
 
 enum ModelFramework {

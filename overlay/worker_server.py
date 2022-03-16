@@ -68,6 +68,8 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                 metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
             elif request.worker_job_mode == JobMode.SYNCHRONOUS:
                 metrics = tf_validator.validate_gis_joins_synchronous(request.gis_joins)
+            elif request.worker_job_mode == JobMode.MULTIPROCESSING:
+                metrics = tf_validator.validate_gis_joins_multiprocessing(request.gis_joins)
             else:
                 err_msg = f"{request.worker_job_mode} job mode not implemented for Tensorflow validation!"
                 error(err_msg)
