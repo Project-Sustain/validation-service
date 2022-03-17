@@ -68,29 +68,27 @@ BATCH_SIZE = 32
 def train_and_evaluate(model_id: int):
 
     # Pull in data from MongoDB into Pandas DataFrame
-    client = MongoClient(URI)
+    client = MongoClient(URI, connect=False)
     database = client["sustaindb"]
     collection = database["noaa_nam"]
-    match = {"GISJOIN": GIS_JOIN}
-    projection = {"_id": 0, LABEL_FIELD: 1}
-    for feature_field in FEATURE_FIELDS:
-        projection[feature_field] = 1
+    match = {"GISJOIN": "G3500170"}
+    projection = {"_id": 0, "TEMPERATURE_AT_SURFACE_KELVIN": 1, "PRESSURE_AT_SURFACE_PASCAL": 1, "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT": 1}
     documents = collection.find(match, projection)
     features_df = pd.DataFrame(list(documents))
     client.close()
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
-    label_df = features_df.pop(LABEL_FIELD)
+    label_df = features_df.pop("TEMPERATURE_AT_SURFACE_KELVIN")
 
     # Create and train Keras model
     model = tf.keras.Sequential()
     model.add(tf.keras.Input(shape=(2,)))
     model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
     model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
-    model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(LEARNING_RATE))
+    model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(0.001))
     model.summary()
 
-    history = model.fit(features_df, label_df, epochs=EPOCHS, validation_split=0.2)
+    history = model.fit(features_df, label_df, epochs=3, validation_split=0.2)
     hist = pd.DataFrame(history.history)
     hist["epoch"] = history.epoch
     pprint(hist)
