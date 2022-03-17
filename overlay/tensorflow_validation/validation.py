@@ -103,6 +103,11 @@ class TensorflowValidator:
     def validate_gis_joins_multiprocessing(self, gis_joins: list) -> list:
         metrics = []  # list of proto ValidationMetric objects
 
+        # Dealing with Protobuf disgusting "repeated" field type
+        feature_fields = []
+        for feature_field in self.request.feature_fields:
+            feature_fields.append(feature_field)
+
         # Iterate over all gis_joins and submit them for validation to the thread pool executor
         executors_list = []
         with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
@@ -115,7 +120,7 @@ class TensorflowValidator:
                         validate_model,
                         gis_join,
                         self.model_path,
-                        [feature_field for feature_field in self.request.feature_fields.items()],
+                        feature_fields,
                         self.request.label_field,
                         self.request.mongo_host,
                         self.request.mongo_port,
