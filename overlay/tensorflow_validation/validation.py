@@ -3,12 +3,14 @@ import os
 
 import tensorflow as tf
 import pandas as pd
+import socket
 from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, JobMode
 from overlay.db.querier import Querier
+from overlay.profiler import Timer
 from overlay.constants import MODELS_DIR
 
 
@@ -17,6 +19,7 @@ class TensorflowValidator:
     def __init__(self, request: ValidationJobRequest):
         self.request: ValidationJobRequest = request
         self.model_path = self.get_model_path()
+        self.hostname = socket.gethostname()
 
     def get_model_path(self):
         model_path = f"{MODELS_DIR}/{self.request.id}/"
@@ -59,7 +62,7 @@ class TensorflowValidator:
 
             # Make requests serially
             for gis_join in self.request.gis_joins:
-                loss: float = validate_model(
+                result: dict = validate_model(
                     gis_join=gis_join,
                     model_path=self.model_path,
                     feature_fields=feature_fields,
@@ -79,7 +82,11 @@ class TensorflowValidator:
 
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=result["loss"],
+                    hostname=self.hostname,
+                    duration_sec=result["duration"],
+                    ok=result["ok"],
+                    error_msg=result["error_msg"]
                 ))
 
             # Close the shared connection to MongoDB
@@ -87,16 +94,16 @@ class TensorflowValidator:
 
         # Job mode not single-threaded; either multi-thread or multi-processed
         else:
-
-            # Choose executor type
+            # Select either process or thread pool executor type
             executor_type = ProcessPoolExecutor if self.request.worker_job_mode == JobMode.MULTIPROCESSING \
-                else ThreadPoolExecutor
+                or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
 
             executors_list: list = []
             with executor_type(max_workers=10) as executor:
 
                 # Create either a thread or child process object for each GISJOIN validation job
                 for gis_join in self.request.gis_joins:
+
                     info(f"Launching validation job for GISJOIN {gis_join}")
                     executors_list.append(
                         executor.submit(
@@ -115,18 +122,21 @@ class TensorflowValidator:
                             sample_rate,
                             self.request.normalize_inputs,
                             None,
-                            verbose
+                            False  # don't log summaries on concurrent model
                         )
                     )
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
                 info(future)
-                loss = future.result()
-
+                result: dict = future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=result["loss"],
+                    hostname=self.hostname,
+                    duration_sec=result["duration"],
+                    ok=result["ok"],
+                    error_msg=result["error_msg"]
                 ))
 
         return metrics
@@ -150,7 +160,17 @@ def validate_model(
         sample_rate: float,
         normalize_inputs: bool,
         querier: Querier = None,
-        verbose: bool = True) -> float:
+        verbose: bool = True) -> dict:  # Returns the loss, ok status, error message, and duration
+
+    profiler: Timer = Timer()
+    profiler.start()
+
+    result = {
+        "loss": 0.0,
+        "ok": True,
+        "error_msg": "",
+        "duration": 0.0
+    }
 
     # Load Tensorflow model from disk (OS should cache in memory for future loads)
     model: tf.keras.Model = tf.keras.models.load_model(model_path)
@@ -188,8 +208,13 @@ def validate_model(
     info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
     if len(features_df.index) == 0:
-        error("DataFrame is empty! Returning -1.0 for loss")
-        return -1.0
+        error_msg = f"No records found for GISJOIN {gis_join}"
+        error(error_msg)
+        result["loss"] = -1.0
+        result["ok"] = False
+        result["error_msg"] = error_msg
+        result["duration"] = 0.0
+        return result
 
     # Normalize features, if requested
     if normalize_inputs:
@@ -202,8 +227,12 @@ def validate_model(
     # Evaluate model
     validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
     info(f"Model validation results: {validation_results}")
+    profiler.stop()
 
-    return validation_results['loss']
+    # Set result and return
+    result["loss"] = validation_results["loss"]
+    result["duration"] = profiler.elapsed
+    return result
 
 
 # Normalizes all the columns of a Pandas DataFrame using Scikit-Learn Min-Max Feature Scaling.
