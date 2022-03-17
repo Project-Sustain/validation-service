@@ -11,9 +11,8 @@ import socket
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
-    ValidationJobRequest, ValidationJobResponse, ModelFile, ModelFileType
+    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
-from overlay.db.querier import Querier
 from overlay.profiler import Timer
 from overlay.tensorflow_validation.validation import TensorflowValidator
 from overlay.scikitlearn_validation.validation import ScikitLearnValidator
@@ -45,10 +44,10 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             else:
                 error(f"Failed to register worker {self.hostname}:{self.port}: {registration_response}")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
-    def BeginValidationJob(self, request: ValidationJobRequest, context):
+    def BeginValidationJob(self, request: ValidationJobRequest, context) -> WorkerValidationJobResponse:
 
         profiler: Timer = Timer()
         profiler.start()
@@ -62,7 +61,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             err_msg = f"Unable to save {str(request.model_framework)} model file with type " \
                       f"{str(request.model_file.type)}!"
             error(err_msg)
-            return ValidationJobResponse(id=request.id, ok=False, error_msg=err_msg)
+            return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
 
         # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
@@ -81,7 +80,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             else:
                 err_msg = f"{request.worker_job_mode} job mode not implemented for Scikit-Learn validation!"
                 error(err_msg)
-                return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
+                return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
@@ -94,13 +93,15 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             else:
                 err_msg = f"{request.worker_job_mode} job mode not implemented for PyTorch validation!"
                 error(err_msg)
-                return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
+                return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
 
         # Create and return response from aggregated metrics
         profiler.stop()
-        return ValidationJobResponse(
-            id=request.id,
+
+        return WorkerValidationJobResponse(
             ok=True,
+            hostname=self.hostname,
+            duration_sec=profiler.elapsed,
             metrics=metrics
         )
 

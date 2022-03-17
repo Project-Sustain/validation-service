@@ -185,7 +185,7 @@ class WorkerStub(object):
         self.BeginValidationJob = channel.unary_unary(
                 '/Worker/BeginValidationJob',
                 request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
-                response_deserializer=validation__pb2.ValidationJobResponse.FromString,
+                response_deserializer=validation__pb2.WorkerValidationJobResponse.FromString,
                 )
 
 
@@ -206,7 +206,7 @@ def add_WorkerServicer_to_server(servicer, server):
             'BeginValidationJob': grpc.unary_unary_rpc_method_handler(
                     servicer.BeginValidationJob,
                     request_deserializer=validation__pb2.ValidationJobRequest.FromString,
-                    response_serializer=validation__pb2.ValidationJobResponse.SerializeToString,
+                    response_serializer=validation__pb2.WorkerValidationJobResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -232,6 +232,6 @@ class Worker(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/Worker/BeginValidationJob',
             validation__pb2.ValidationJobRequest.SerializeToString,
-            validation__pb2.ValidationJobResponse.FromString,
+            validation__pb2.WorkerValidationJobResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

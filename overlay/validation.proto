@@ -32,7 +32,7 @@ message WorkerRegistrationResponse {
 service Worker {
 
   // Registers a Worker to track via heartbeats
-  rpc BeginValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
+  rpc BeginValidationJob(ValidationJobRequest) returns (WorkerValidationJobResponse) {}
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
@@ -61,17 +61,22 @@ message ValidationJobResponse {
   bool ok = 2;
   string error_msg = 3;
   double duration_sec = 4;
-  repeated ValidationMetric metrics = 5;
+  repeated WorkerValidationJobResponse worker_responses = 5;
+}
+
+message WorkerValidationJobResponse {
+  bool ok = 1;
+  string hostname = 2;
+  repeated ValidationMetric metrics = 3;
 }
 
 message ValidationMetric {
   string gis_join = 1;
   double loss = 2;
   double accuracy = 3;
-  string hostname = 4;
-  double duration_sec = 5;
-  bool ok = 6;
-  string error_msg = 7;
+  double duration_sec = 4;
+  bool ok = 5;
+  string error_msg = 6;
 }
 
 message ModelFile {

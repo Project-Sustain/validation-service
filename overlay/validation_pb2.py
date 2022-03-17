@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xf2\x03\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12!\n\x0fmaster_job_mode\x18\x02 \x01(\x0e\x32\x08.JobMode\x12!\n\x0fworker_job_mode\x18\x03 \x01(\x0e\x32\x08.JobMode\x12(\n\x0fmodel_framework\x18\x04 \x01(\x0e\x32\x0f.ModelFramework\x12&\n\x0emodel_category\x18\x05 \x01(\x0e\x32\x0e.ModelCategory\x12\x12\n\nmongo_host\x18\x06 \x01(\t\x12\x12\n\nmongo_port\x18\x07 \x01(\x05\x12%\n\x0bread_config\x18\x08 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\t \x01(\t\x12\x12\n\ncollection\x18\n \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x0b \x03(\t\x12\x13\n\x0blabel_field\x18\x0c \x01(\t\x12\x18\n\x10normalize_inputs\x18\r \x01(\x08\x12,\n\x11validation_budget\x18\x0e \x01(\x0b\x32\x11.ValidationBudget\x12\x19\n\x11validation_metric\x18\x0f \x01(\t\x12\x11\n\tgis_joins\x18\x10 \x03(\t\x12\x1e\n\nmodel_file\x18\x11 \x01(\x0b\x32\n.ModelFile\"|\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\n\n\x02ok\x18\x02 \x01(\x08\x12\x11\n\terror_msg\x18\x03 \x01(\t\x12\x14\n\x0c\x64uration_sec\x18\x04 \x01(\x01\x12\"\n\x07metrics\x18\x05 \x03(\x0b\x32\x11.ValidationMetric\"\x8b\x01\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\x12\x10\n\x08hostname\x18\x04 \x01(\t\x12\x14\n\x0c\x64uration_sec\x18\x05 \x01(\x01\x12\n\n\x02ok\x18\x06 \x01(\x08\x12\x11\n\terror_msg\x18\x07 \x01(\t\"I\n\tModelFile\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.ModelFileType\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t\"\x8f\x01\n\x10ValidationBudget\x12 \n\x0b\x62udget_type\x18\x01 \x01(\x0e\x32\x0b.BudgetType\x12$\n\rstatic_budget\x18\x02 \x01(\x0b\x32\r.StaticBudget\x12\x33\n\x0fvariance_budget\x18\x03 \x01(\x0b\x32\x1a.IncrementalVarianceBudget\"7\n\x19IncrementalVarianceBudget\x12\x1a\n\x12initial_allocation\x18\x01 \x01(\x03\"N\n\x0cStaticBudget\x12\x13\n\x0btotal_limit\x18\x01 \x01(\x03\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02*T\n\nBudgetType\x12\x12\n\x0e\x44\x45\x46\x41ULT_BUDGET\x10\x00\x12\x11\n\rSTATIC_BUDGET\x10\x01\x12\x1f\n\x1bINCREMENTAL_VARIANCE_BUDGET\x10\x02*j\n\x07JobMode\x12\x14\n\x10\x44\x45\x46\x41ULT_JOB_MODE\x10\x00\x12\x0f\n\x0bSYNCHRONOUS\x10\x01\x12\x10\n\x0c\x41SYNCHRONOUS\x10\x02\x12\x11\n\rMULTITHREADED\x10\x03\x12\x13\n\x0fMULTIPROCESSING\x10\x04*?\n\x0eModelFramework\x12\x0e\n\nTENSORFLOW\x10\x00\x12\x10\n\x0cSCIKIT_LEARN\x10\x01\x12\x0b\n\x07PYTORCH\x10\x02*\x1f\n\rModelCategory\x12\x0e\n\nREGRESSION\x10\x00*\x8f\x01\n\rModelFileType\x12\x1b\n\x17UNKNOWN_MODEL_FILE_TYPE\x10\x00\x12\x17\n\x13SCIKIT_LEARN_PICKLE\x10\x01\x12\x13\n\x0fTENSORFLOW_HDF5\x10\x02\x12\x1e\n\x1aTENSORFLOW_SAVED_MODEL_ZIP\x10\x03\x12\x13\n\x0fPYTORCH_ZIPFILE\x10\x04\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32O\n\x06Worker\x12\x45\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10validation.proto\";\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xf2\x03\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12!\n\x0fmaster_job_mode\x18\x02 \x01(\x0e\x32\x08.JobMode\x12!\n\x0fworker_job_mode\x18\x03 \x01(\x0e\x32\x08.JobMode\x12(\n\x0fmodel_framework\x18\x04 \x01(\x0e\x32\x0f.ModelFramework\x12&\n\x0emodel_category\x18\x05 \x01(\x0e\x32\x0e.ModelCategory\x12\x12\n\nmongo_host\x18\x06 \x01(\t\x12\x12\n\nmongo_port\x18\x07 \x01(\x05\x12%\n\x0bread_config\x18\x08 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\t \x01(\t\x12\x12\n\ncollection\x18\n \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x0b \x03(\t\x12\x13\n\x0blabel_field\x18\x0c \x01(\t\x12\x18\n\x10normalize_inputs\x18\r \x01(\x08\x12,\n\x11validation_budget\x18\x0e \x01(\x0b\x32\x11.ValidationBudget\x12\x19\n\x11validation_metric\x18\x0f \x01(\t\x12\x11\n\tgis_joins\x18\x10 \x03(\t\x12\x1e\n\nmodel_file\x18\x11 \x01(\x0b\x32\n.ModelFile\"\x90\x01\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\n\n\x02ok\x18\x02 \x01(\x08\x12\x11\n\terror_msg\x18\x03 \x01(\t\x12\x14\n\x0c\x64uration_sec\x18\x04 \x01(\x01\x12\x36\n\x10worker_responses\x18\x05 \x03(\x0b\x32\x1c.WorkerValidationJobResponse\"_\n\x1bWorkerValidationJobResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x10\n\x08hostname\x18\x02 \x01(\t\x12\"\n\x07metrics\x18\x03 \x03(\x0b\x32\x11.ValidationMetric\"y\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x0c\n\x04loss\x18\x02 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x03 \x01(\x01\x12\x14\n\x0c\x64uration_sec\x18\x04 \x01(\x01\x12\n\n\x02ok\x18\x05 \x01(\x08\x12\x11\n\terror_msg\x18\x06 \x01(\t\"I\n\tModelFile\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.ModelFileType\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t\"\x8f\x01\n\x10ValidationBudget\x12 \n\x0b\x62udget_type\x18\x01 \x01(\x0e\x32\x0b.BudgetType\x12$\n\rstatic_budget\x18\x02 \x01(\x0b\x32\r.StaticBudget\x12\x33\n\x0fvariance_budget\x18\x03 \x01(\x0b\x32\x1a.IncrementalVarianceBudget\"7\n\x19IncrementalVarianceBudget\x12\x1a\n\x12initial_allocation\x18\x01 \x01(\x03\"N\n\x0cStaticBudget\x12\x13\n\x0btotal_limit\x18\x01 \x01(\x03\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02*T\n\nBudgetType\x12\x12\n\x0e\x44\x45\x46\x41ULT_BUDGET\x10\x00\x12\x11\n\rSTATIC_BUDGET\x10\x01\x12\x1f\n\x1bINCREMENTAL_VARIANCE_BUDGET\x10\x02*j\n\x07JobMode\x12\x14\n\x10\x44\x45\x46\x41ULT_JOB_MODE\x10\x00\x12\x0f\n\x0bSYNCHRONOUS\x10\x01\x12\x10\n\x0c\x41SYNCHRONOUS\x10\x02\x12\x11\n\rMULTITHREADED\x10\x03\x12\x13\n\x0fMULTIPROCESSING\x10\x04*?\n\x0eModelFramework\x12\x0e\n\nTENSORFLOW\x10\x00\x12\x10\n\x0cSCIKIT_LEARN\x10\x01\x12\x0b\n\x07PYTORCH\x10\x02*\x1f\n\rModelCategory\x12\x0e\n\nREGRESSION\x10\x00*\x8f\x01\n\rModelFileType\x12\x1b\n\x17UNKNOWN_MODEL_FILE_TYPE\x10\x00\x12\x17\n\x13SCIKIT_LEARN_PICKLE\x10\x01\x12\x13\n\x0fTENSORFLOW_HDF5\x10\x02\x12\x1e\n\x1aTENSORFLOW_SAVED_MODEL_ZIP\x10\x03\x12\x13\n\x0fPYTORCH_ZIPFILE\x10\x04\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32U\n\x06Worker\x12K\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x1c.WorkerValidationJobResponse\"\x00\x62\x06proto3'
 )
 
 _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
@@ -48,8 +48,8 @@ _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1420,
-  serialized_end=1528,
+  serialized_start=1519,
+  serialized_end=1627,
 )
 _sym_db.RegisterEnumDescriptor(_UPLOADSTATUSCODE)
 
@@ -79,8 +79,8 @@ _BUDGETTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1530,
-  serialized_end=1614,
+  serialized_start=1629,
+  serialized_end=1713,
 )
 _sym_db.RegisterEnumDescriptor(_BUDGETTYPE)
 
@@ -120,8 +120,8 @@ _JOBMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1616,
-  serialized_end=1722,
+  serialized_start=1715,
+  serialized_end=1821,
 )
 _sym_db.RegisterEnumDescriptor(_JOBMODE)
 
@@ -151,8 +151,8 @@ _MODELFRAMEWORK = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1724,
-  serialized_end=1787,
+  serialized_start=1823,
+  serialized_end=1886,
 )
 _sym_db.RegisterEnumDescriptor(_MODELFRAMEWORK)
 
@@ -172,8 +172,8 @@ _MODELCATEGORY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1789,
-  serialized_end=1820,
+  serialized_start=1888,
+  serialized_end=1919,
 )
 _sym_db.RegisterEnumDescriptor(_MODELCATEGORY)
 
@@ -213,8 +213,8 @@ _MODELFILETYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1823,
-  serialized_end=1966,
+  serialized_start=1922,
+  serialized_end=2065,
 )
 _sym_db.RegisterEnumDescriptor(_MODELFILETYPE)
 
@@ -494,7 +494,7 @@ _VALIDATIONJOBRESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='metrics', full_name='ValidationJobResponse.metrics', index=4,
+      name='worker_responses', full_name='ValidationJobResponse.worker_responses', index=4,
       number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -512,8 +512,54 @@ _VALIDATIONJOBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=629,
-  serialized_end=753,
+  serialized_start=630,
+  serialized_end=774,
+)
+
+
+_WORKERVALIDATIONJOBRESPONSE = _descriptor.Descriptor(
+  name='WorkerValidationJobResponse',
+  full_name='WorkerValidationJobResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='ok', full_name='WorkerValidationJobResponse.ok', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hostname', full_name='WorkerValidationJobResponse.hostname', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='metrics', full_name='WorkerValidationJobResponse.metrics', index=2,
+      number=3, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=776,
+  serialized_end=871,
 )
 
 
@@ -547,29 +593,22 @@ _VALIDATIONMETRIC = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='hostname', full_name='ValidationMetric.hostname', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='duration_sec', full_name='ValidationMetric.duration_sec', index=4,
-      number=5, type=1, cpp_type=5, label=1,
+      name='duration_sec', full_name='ValidationMetric.duration_sec', index=3,
+      number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='ok', full_name='ValidationMetric.ok', index=5,
-      number=6, type=8, cpp_type=7, label=1,
+      name='ok', full_name='ValidationMetric.ok', index=4,
+      number=5, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='error_msg', full_name='ValidationMetric.error_msg', index=6,
-      number=7, type=9, cpp_type=9, label=1,
+      name='error_msg', full_name='ValidationMetric.error_msg', index=5,
+      number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -586,8 +625,8 @@ _VALIDATIONMETRIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=756,
-  serialized_end=895,
+  serialized_start=873,
+  serialized_end=994,
 )
 
 
@@ -632,8 +671,8 @@ _MODELFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=897,
-  serialized_end=970,
+  serialized_start=996,
+  serialized_end=1069,
 )
 
 
@@ -678,8 +717,8 @@ _UPLOADSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=972,
-  serialized_end=1069,
+  serialized_start=1071,
+  serialized_end=1168,
 )
 
 
@@ -717,8 +756,8 @@ _MONGOREADCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1071,
-  serialized_end=1135,
+  serialized_start=1170,
+  serialized_end=1234,
 )
 
 
@@ -763,8 +802,8 @@ _VALIDATIONBUDGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1138,
-  serialized_end=1281,
+  serialized_start=1237,
+  serialized_end=1380,
 )
 
 
@@ -795,8 +834,8 @@ _INCREMENTALVARIANCEBUDGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1283,
-  serialized_end=1338,
+  serialized_start=1382,
+  serialized_end=1437,
 )
 
 
@@ -841,8 +880,8 @@ _STATICBUDGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1340,
-  serialized_end=1418,
+  serialized_start=1439,
+  serialized_end=1517,
 )
 
 _VALIDATIONJOBREQUEST.fields_by_name['master_job_mode'].enum_type = _JOBMODE
@@ -852,7 +891,8 @@ _VALIDATIONJOBREQUEST.fields_by_name['model_category'].enum_type = _MODELCATEGOR
 _VALIDATIONJOBREQUEST.fields_by_name['read_config'].message_type = _MONGOREADCONFIG
 _VALIDATIONJOBREQUEST.fields_by_name['validation_budget'].message_type = _VALIDATIONBUDGET
 _VALIDATIONJOBREQUEST.fields_by_name['model_file'].message_type = _MODELFILE
-_VALIDATIONJOBRESPONSE.fields_by_name['metrics'].message_type = _VALIDATIONMETRIC
+_VALIDATIONJOBRESPONSE.fields_by_name['worker_responses'].message_type = _WORKERVALIDATIONJOBRESPONSE
+_WORKERVALIDATIONJOBRESPONSE.fields_by_name['metrics'].message_type = _VALIDATIONMETRIC
 _MODELFILE.fields_by_name['type'].enum_type = _MODELFILETYPE
 _UPLOADSTATUS.fields_by_name['upload_status_code'].enum_type = _UPLOADSTATUSCODE
 _VALIDATIONBUDGET.fields_by_name['budget_type'].enum_type = _BUDGETTYPE
@@ -862,6 +902,7 @@ DESCRIPTOR.message_types_by_name['WorkerRegistrationRequest'] = _WORKERREGISTRAT
 DESCRIPTOR.message_types_by_name['WorkerRegistrationResponse'] = _WORKERREGISTRATIONRESPONSE
 DESCRIPTOR.message_types_by_name['ValidationJobRequest'] = _VALIDATIONJOBREQUEST
 DESCRIPTOR.message_types_by_name['ValidationJobResponse'] = _VALIDATIONJOBRESPONSE
+DESCRIPTOR.message_types_by_name['WorkerValidationJobResponse'] = _WORKERVALIDATIONJOBRESPONSE
 DESCRIPTOR.message_types_by_name['ValidationMetric'] = _VALIDATIONMETRIC
 DESCRIPTOR.message_types_by_name['ModelFile'] = _MODELFILE
 DESCRIPTOR.message_types_by_name['UploadStatus'] = _UPLOADSTATUS
@@ -904,6 +945,13 @@ ValidationJobResponse = _reflection.GeneratedProtocolMessageType('ValidationJobR
   # @@protoc_insertion_point(class_scope:ValidationJobResponse)
   })
 _sym_db.RegisterMessage(ValidationJobResponse)
+
+WorkerValidationJobResponse = _reflection.GeneratedProtocolMessageType('WorkerValidationJobResponse', (_message.Message,), {
+  'DESCRIPTOR' : _WORKERVALIDATIONJOBRESPONSE,
+  '__module__' : 'validation_pb2'
+  # @@protoc_insertion_point(class_scope:WorkerValidationJobResponse)
+  })
+_sym_db.RegisterMessage(WorkerValidationJobResponse)
 
 ValidationMetric = _reflection.GeneratedProtocolMessageType('ValidationMetric', (_message.Message,), {
   'DESCRIPTOR' : _VALIDATIONMETRIC,
@@ -963,8 +1011,8 @@ _MASTER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1969,
-  serialized_end=2248,
+  serialized_start=2068,
+  serialized_end=2347,
   methods=[
   _descriptor.MethodDescriptor(
     name='UploadFile',
@@ -1019,8 +1067,8 @@ _WORKER = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2250,
-  serialized_end=2329,
+  serialized_start=2349,
+  serialized_end=2434,
   methods=[
   _descriptor.MethodDescriptor(
     name='BeginValidationJob',
@@ -1028,7 +1076,7 @@ _WORKER = _descriptor.ServiceDescriptor(
     index=0,
     containing_service=None,
     input_type=_VALIDATIONJOBREQUEST,
-    output_type=_VALIDATIONJOBRESPONSE,
+    output_type=_WORKERVALIDATIONJOBRESPONSE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

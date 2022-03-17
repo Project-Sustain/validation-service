@@ -3,7 +3,6 @@ import os
 
 import tensorflow as tf
 import pandas as pd
-import socket
 from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
@@ -19,7 +18,6 @@ class TensorflowValidator:
     def __init__(self, request: ValidationJobRequest):
         self.request: ValidationJobRequest = request
         self.model_path = self.get_model_path()
-        self.hostname = socket.gethostname()
 
     def get_model_path(self):
         model_path = f"{MODELS_DIR}/{self.request.id}/"
@@ -83,7 +81,6 @@ class TensorflowValidator:
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
                     loss=result["loss"],
-                    hostname=self.hostname,
                     duration_sec=result["duration"],
                     ok=result["ok"],
                     error_msg=result["error_msg"]
@@ -133,7 +130,6 @@ class TensorflowValidator:
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
                     loss=result["loss"],
-                    hostname=self.hostname,
                     duration_sec=result["duration"],
                     ok=result["ok"],
                     error_msg=result["error_msg"]

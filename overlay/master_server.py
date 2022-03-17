@@ -67,6 +67,7 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
     return worker.jobs[job_id]
 
 
+# Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
 
@@ -86,6 +87,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
     return responses
 
 
+# Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
 
@@ -116,6 +118,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     return responses
 
 
+# Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
 
     # Define async function to launch worker job
@@ -264,29 +267,25 @@ class Master(validation_pb2_grpc.MasterServicer):
             info("Launching jobs in synchronous mode")
             validation_job_responses = launch_worker_jobs_synchronously(job, request)
 
-        # Gather all the responses
-        all_validation_metrics = []
+        # Gather all the WorkerValidationJobResponses
+        worker_job_responses = []
+        errors = []
         ok = True
-        problematic_gis_joins = []
-        for response in validation_job_responses:
-            for validation_metric in response.metrics:
-                if not validation_metric.ok:
-                    ok = False
-                    problematic_gis_joins.append(validation_metric.gis_join)
-                all_validation_metrics.append(validation_metric)
-            info(f"Response: {response}")
+        for worker_response in validation_job_responses:
+            if not worker_response.ok:
+                ok = False
+                error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
+                errors.append(error_msg)
+            worker_job_responses.append(worker_response)
 
-        error_msg = ""
-        if len(problematic_gis_joins) > 0:
-            error_msg = f"Encountered problems with the following GISJOINs: {problematic_gis_joins}"
-
+        error_msg = f"errors: {errors}"
         profiler.stop()
         return ValidationJobResponse(
             id=job_id,
             ok=ok,
             error_msg=error_msg,
             duration_sec=profiler.elapsed,
-            metrics=all_validation_metrics
+            worker_responses=worker_job_responses
         )
 
 
