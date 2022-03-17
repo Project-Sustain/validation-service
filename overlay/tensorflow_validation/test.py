@@ -120,6 +120,18 @@ def test_multithreaded():
         future.result()
 
 
+def test_multiprocessed():
+    # Iterate over all gis_joins and submit them for validation to the thread pool executor
+    executors_list = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for i in range(3):
+            executors_list.append(executor.submit(train_and_evaluate, i))
+
+    # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
+    for future in as_completed(executors_list):
+        future.result()
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
     profiler: Timer = Timer()
@@ -134,6 +146,12 @@ def main():
     test_multithreaded()
     profiler.stop()
     info(f"Multi-threaded time elapsed: {profiler.elapsed}")
+    profiler.reset()
+
+    profiler.start()
+    test_multiprocessed()
+    profiler.stop()
+    info(f"Multi-processed time elapsed: {profiler.elapsed}")
     profiler.reset()
 
 
