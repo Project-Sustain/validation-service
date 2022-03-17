@@ -238,11 +238,13 @@ class Master(validation_pb2_grpc.MasterServicer):
                     info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
                     static_budget.strata_limit = 1
         elif request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
-            error("Incremental variance budget not yet implemented!")
-            return ValidationJobResponse(id=job_id, metrics=[])
+            err_msg = "Incremental variance budget not yet implemented!"
+            error(err_msg)
+            return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
         else:
-            error(f"Unknown budget type {request.validation_budget.budget_type}!")
-            return ValidationJobResponse(id=job_id, metrics=[])
+            err_msg = f"Unknown budget type {request.validation_budget.budget_type}!"
+            error(err_msg)
+            return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
 
         # Select strategy for submitting the job from the master
         if request.master_job_mode == JobMode.MULTITHREADED:
@@ -262,7 +264,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                 all_validation_metrics.append(validation_metric)
             info(f"Response: {response}")
 
-        return ValidationJobResponse(id=job_id, metrics=all_validation_metrics)
+        return ValidationJobResponse(id=job_id, ok=True, metrics=all_validation_metrics)
 
 
 def run(master_port=50051, local_testing=False):
