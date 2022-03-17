@@ -65,7 +65,7 @@ EPOCHS = 3
 BATCH_SIZE = 32
 
 
-def test_func_synchronous(model_id: int):
+def train_and_evaluate(model_id: int):
 
     # Pull in data from MongoDB into Pandas DataFrame
     client = MongoClient(URI)
@@ -77,6 +77,7 @@ def test_func_synchronous(model_id: int):
         projection[feature_field] = 1
     documents = collection.find(match, projection)
     features_df = pd.DataFrame(list(documents))
+    client.close()
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop(LABEL_FIELD)
@@ -102,15 +103,38 @@ def test_func_synchronous(model_id: int):
     info(f"Model validation results: {validation_results}")
 
 
+def test_synchronous():
+    for i in range(3):
+        train_and_evaluate(i)
+
+
+def test_multithreaded():
+    # Iterate over all gis_joins and submit them for validation to the thread pool executor
+    executors_list = []
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        for i in range(3):
+            executors_list.append(executor.submit(train_and_evaluate, i))
+
+    # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
+    for future in as_completed(executors_list):
+        future.result()
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
     profiler: Timer = Timer()
 
     profiler.start()
-    for i in range(3):
-        test_func_synchronous(i)
+    test_synchronous()
     profiler.stop()
-    info(f"Time elapsed: {profiler.elapsed}")
+    info(f"Single-threaded time elapsed: {profiler.elapsed}")
+    profiler.reset()
+
+    profiler.start()
+    test_multithreaded()
+    profiler.stop()
+    info(f"Multi-threaded time elapsed: {profiler.elapsed}")
+    profiler.reset()
 
 
 if __name__ == "__main__":
