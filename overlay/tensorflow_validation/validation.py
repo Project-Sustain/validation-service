@@ -17,6 +17,7 @@ class TensorflowValidator:
 
     def __init__(self, request: ValidationJobRequest):
         self.request: ValidationJobRequest = request
+        self.model_path = self.get_model_path()
 
     def load_tf_model(self, verbose=False):
         # Load Tensorflow model from disk
@@ -29,6 +30,12 @@ class TensorflowValidator:
         if verbose:
             model.summary()
         return model
+
+    def get_model_path(self):
+        model_path = f"{MODELS_DIR}/{self.request.id}/"
+        first_entry = os.listdir(model_path)[0]
+        model_path += first_entry
+        return model_path
 
     def validate_gis_joins_synchronous(self, gis_joins: list) -> list:
         querier: Querier = Querier(
@@ -87,21 +94,51 @@ class TensorflowValidator:
         return metrics
 
     # private helper method
-    def _multiprocess_helper(self, gis_join):
+    # def _multiprocess_helper(self, gis_join):
         # info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
-        info(f"Launching validation job for GISJOIN {gis_join}")
-        return test_func(gis_join, self.request.id,
-                         self.request.feature_fields, self.request.label_field)
+        # info(f"Launching validation job for GISJOIN {gis_join}")
+        # return test_func(gis_join, self.request.id,
+        #                  self.request.feature_fields, self.request.label_field)
 
     def validate_gis_joins_multiprocessing(self, gis_joins: list) -> list:
         metrics = []  # list of proto ValidationMetric objects
 
         # Iterate over all gis_joins and submit them for validation to the thread pool executor
-        with concurrent.futures.ProcessPoolExecutor() as executor:
-            results = executor.map(self._multiprocess_helper, gis_joins)
+        executors_list = []
+        with concurrent.futures.ProcessPoolExecutor(max_workers=10) as executor:
+            # results = executor.map(self._multiprocess_helper, gis_joins)
+            for gis_join in gis_joins:
+                info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
+
+                executors_list.append(
+                    executor.submit(
+                        validate_model,
+                        gis_join,
+                        self.model_path,
+                        self.request.feature_fields,
+                        self.request.label_field,
+                        self.request.mongo_host,
+                        self.request.mongo_port,
+                        self.request.read_config.read_preference,
+                        self.request.read_config.read_concern,
+                        self.request.database,
+                        self.request.collection,
+                        self.request.validation_budget.static_budget.strata_limit,
+                        self.request.validation_budget.static_budget.sample_rate
+                    )
+                )
+
 
         # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
-        for loss, gis_join in zip(results, gis_joins):
+        # for loss, gis_join in zip(results, gis_joins):
+        #     metrics.append(ValidationMetric(
+        #         gis_join=gis_join,
+        #         loss=loss
+        #     ))
+        for future in as_completed(executors_list):
+            info(future)
+            loss = future.result()
+
             metrics.append(ValidationMetric(
                 gis_join=gis_join,
                 loss=loss
@@ -174,38 +211,45 @@ def normalize_dataframe(dataframe):
     return pd.DataFrame(scaled, columns=dataframe.columns)
 
 
-def test_func(gis_join: str, job_id: str, feature_fields: list, label_field: str) -> float:
-    # Load Tensorflow model from disk
-    model_path = f"{MODELS_DIR}/{job_id}/"
-    first_entry = os.listdir(model_path)[0]
-    model_path += first_entry
-    info(f"Loading Tensorflow model from {model_path}")
-    model = tf.keras.models.load_model(model_path)
+def validate_model(
+        gis_join: str,
+        model_path: str,
+        feature_fields: list,
+        label_field: str,
+        mongo_host: str,
+        mongo_port: int,
+        read_preference: str,
+        read_concern: str,
+        database: str,
+        collection: str,
+        limit: int,
+        sample_rate: float) -> float:
 
+    # Load Tensorflow model from disk
+    model: tf.keras.Model = tf.keras.models.load_model(model_path)
     model.summary()
 
     querier: Querier = Querier(
-        mongo_host="localhost",
-        mongo_port=27017,
-        db_name="sustaindb",
-        read_preference="nearest",
-        read_concern="available"
+        mongo_host=mongo_host,
+        mongo_port=mongo_port,
+        db_name=database,
+        read_preference=read_preference,
+        read_concern=read_concern
     )
 
     documents = querier.spatial_query(
-        "noaa_nam",
-        gis_join,
-        feature_fields,
-        label_field,
-        0,
-        0.0
+        collection_name=collection,
+        gis_join=gis_join,
+        features=feature_fields,
+        label=label_field,
+        limit=limit,
+        sample_rate=sample_rate
     )
 
     # Load MongoDB Documents into Pandas DataFrame
     features_df = pd.DataFrame(list(documents))
 
     # If the MongoDB driver connection is local to this thread/function, close it when done using it
-    # if is_concurrent:
     querier.close()
 
     info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
