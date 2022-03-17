@@ -1,9 +1,11 @@
+import concurrent.futures
 import os
 
 import tensorflow as tf
 import pandas as pd
 from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
+import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget
@@ -84,21 +86,22 @@ class TensorflowValidator:
 
         return metrics
 
+    # private helper method
+    def _multiprocess_helper(self, gis_join):
+        # info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
+        info(f"Launching validation job for GISJOIN {gis_join}")
+        return test_func(gis_join, self.request.id,
+                         self.request.feature_fields, self.request.label_field)
+
     def validate_gis_joins_multiprocessing(self, gis_joins: list) -> list:
         metrics = []  # list of proto ValidationMetric objects
 
         # Iterate over all gis_joins and submit them for validation to the thread pool executor
-        executors_list = []
-        with ProcessPoolExecutor(max_workers=10) as executor:
-            for gis_join in gis_joins:
-                info(f"Launching validation job for GISJOIN {gis_join}, [concurrent/{len(gis_joins)}]")
-                executors_list.append(executor.submit(test_func, gis_join, self.request.id, self.request.feature_fields, self.request.label_field))
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            results = executor.map(self._multiprocess_helper, gis_joins)
 
         # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
-        for future in as_completed(executors_list):
-            info(future)
-            loss = future.result()
-
+        for loss, gis_join in zip(results, gis_joins):
             metrics.append(ValidationMetric(
                 gis_join=gis_join,
                 loss=loss
@@ -172,7 +175,6 @@ def normalize_dataframe(dataframe):
 
 
 def test_func(gis_join: str, job_id: str, feature_fields: list, label_field: str) -> float:
-
     # Load Tensorflow model from disk
     model_path = f"{MODELS_DIR}/{job_id}/"
     first_entry = os.listdir(model_path)[0]
