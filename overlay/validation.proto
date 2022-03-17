@@ -67,7 +67,8 @@ message ValidationJobResponse {
 message WorkerValidationJobResponse {
   bool ok = 1;
   string hostname = 2;
-  repeated ValidationMetric metrics = 3;
+  double duration_sec = 3;
+  repeated ValidationMetric metrics = 4;
 }
 
 message ValidationMetric {
