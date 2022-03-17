@@ -134,17 +134,17 @@ def main():
     logging.basicConfig(level=logging.INFO)
     profiler: Timer = Timer()
 
-    profiler.start()
-    test_synchronous()
-    profiler.stop()
-    info(f"Single-threaded time elapsed: {profiler.elapsed}")
-    profiler.reset()
-
-    profiler.start()
-    test_multithreaded()
-    profiler.stop()
-    info(f"Multi-threaded time elapsed: {profiler.elapsed}")
-    profiler.reset()
+    # profiler.start()
+    # test_synchronous()
+    # profiler.stop()
+    # info(f"Single-threaded time elapsed: {profiler.elapsed}")
+    # profiler.reset()
+    #
+    # profiler.start()
+    # test_multithreaded()
+    # profiler.stop()
+    # info(f"Multi-threaded time elapsed: {profiler.elapsed}")
+    # profiler.reset()
 
     profiler.start()
     test_multiprocessed()
