@@ -59,21 +59,11 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             error(err_msg)
             return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
 
-        # Select model framework, then job mode
+        # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
 
             tf_validator: TensorflowValidator = TensorflowValidator(request)
-
-            if request.worker_job_mode == JobMode.MULTITHREADED:
-                metrics = tf_validator.validate_gis_joins_multithreaded(request.gis_joins)
-            elif request.worker_job_mode == JobMode.SYNCHRONOUS:
-                metrics = tf_validator.validate_gis_joins_synchronous(request.gis_joins)
-            elif request.worker_job_mode == JobMode.MULTIPROCESSING:
-                metrics = tf_validator.validate_gis_joins_multiprocessing(request.gis_joins)
-            else:
-                err_msg = f"{request.worker_job_mode} job mode not implemented for Tensorflow validation!"
-                error(err_msg)
-                return ValidationJobResponse(id=request.id, ok=False, err_msg=err_msg)
+            metrics = tf_validator.validate_gis_joins()
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
