@@ -115,7 +115,7 @@ class TensorflowValidator:
                         validate_model,
                         gis_join,
                         self.model_path,
-                        self.request.feature_fields,
+                        self.request.feature_fields.copy(),
                         self.request.label_field,
                         self.request.mongo_host,
                         self.request.mongo_port,
