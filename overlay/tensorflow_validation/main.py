@@ -77,7 +77,6 @@ def main():
 
     info(f"Predictions shape: {y_pred.shape}")
     pprint(y_pred)
-    pprint(label_df[LABEL_FIELD].to_numpy())
 
     y_true = np.array(label_df).reshape(-1, 1)
     pprint(tf.keras.metrics.kl_divergence(y_true, y_pred))
