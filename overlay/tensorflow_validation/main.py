@@ -72,9 +72,11 @@ def main():
     loaded_model.summary()
 
     #validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
-    predictions = loaded_model.predict(features_df)
+    predictions = loaded_model.predict(features_df).numpy()
+
+    info(f"Predictions shape: {predictions.shape}")
     pprint(predictions)
-    pprint(label_df)
+    pprint(label_df.shape)
 
 
 
