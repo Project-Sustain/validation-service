@@ -73,7 +73,9 @@ def main():
 
     #validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
     predictions = loaded_model.predict(features_df)
-    info(f"Model validation results: {predictions}")
+    pprint(predictions)
+    pprint(label_df)
+
 
 
 if __name__ == "__main__":
