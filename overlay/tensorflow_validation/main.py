@@ -81,6 +81,9 @@ def main():
     y_true = np.array(label_df).reshape(-1, 1)
     pprint(tf.keras.metrics.kl_divergence(y_true, y_pred))
 
+    absolute_error_variance = np.absolute(y_pred - y_true).var()
+    info(f"Absolute variance error: {absolute_error_variance}")
+
 
 
 if __name__ == "__main__":
