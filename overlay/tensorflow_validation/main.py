@@ -77,7 +77,7 @@ def main():
 
     info(f"Predictions shape: {predictions.shape}")
     pprint(predictions)
-    pprint(label_df.shape)
+    pprint(label_df)
 
 
 
