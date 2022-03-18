@@ -71,8 +71,9 @@ def main():
     loaded_model: tf.keras.Model = tf.keras.models.load_model("my_model.h5")
     loaded_model.summary()
 
-    validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
-    info(f"Model validation results: {validation_results}")
+    #validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
+    predictions = loaded_model.predict(features_df)
+    info(f"Model validation results: {predictions}")
 
 
 if __name__ == "__main__":
