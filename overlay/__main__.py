@@ -84,6 +84,6 @@ def is_valid_master_uri(uri):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format='%(asctime)s - %(message)s',
+    logging.basicConfig(format='%(asctime)s %(levelname): %(message)s',
                         level=logging.INFO, datefmt='%d-%b-%y %H:%M:%S')
     main()
