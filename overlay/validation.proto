@@ -32,7 +32,7 @@ message WorkerRegistrationResponse {
 service Worker {
 
   // Registers a Worker to track via heartbeats
-  rpc BeginValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
+  rpc BeginValidationJob(ValidationJobRequest) returns (WorkerValidationJobResponse) {}
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
@@ -60,6 +60,14 @@ message ValidationJobResponse {
   string id = 1;
   bool ok = 2;
   string error_msg = 3;
+  double duration_sec = 4;
+  repeated WorkerValidationJobResponse worker_responses = 5;
+}
+
+message WorkerValidationJobResponse {
+  bool ok = 1;
+  string hostname = 2;
+  double duration_sec = 3;
   repeated ValidationMetric metrics = 4;
 }
 
@@ -67,6 +75,9 @@ message ValidationMetric {
   string gis_join = 1;
   double loss = 2;
   double accuracy = 3;
+  double duration_sec = 4;
+  bool ok = 5;
+  string error_msg = 6;
 }
 
 message ModelFile {
@@ -111,15 +122,17 @@ enum UploadStatusCode {
 }
 
 enum BudgetType {
-  STATIC_BUDGET = 0;
-  INCREMENTAL_VARIANCE_BUDGET = 1;
+  DEFAULT_BUDGET = 0;
+  STATIC_BUDGET = 1;
+  INCREMENTAL_VARIANCE_BUDGET = 2;
 }
 
 enum JobMode {
-  SYNCHRONOUS = 0;
-  ASYNCHRONOUS = 1;
-  MULTITHREADED = 2;
-  MULTIPROCESSING = 3;
+  DEFAULT_JOB_MODE = 0;
+  SYNCHRONOUS = 1;
+  ASYNCHRONOUS = 2;
+  MULTITHREADED = 3;
+  MULTIPROCESSING = 4;
 }
 
 enum ModelFramework {

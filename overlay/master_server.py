@@ -1,18 +1,17 @@
 import uuid
 import asyncio
 import socket
+import grpc
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import info, error
 
-import grpc
-
-from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.db import shards, locality
 from overlay.db.shards import ShardMetadata
-from overlay.validation_pb2 import WorkerRegistrationResponse, ValidationJobResponse, ValidationJobRequest, \
-    MongoReadConfig, JobMode, BudgetType, ValidationBudget
+from overlay.profiler import Timer
+from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
+    ValidationJobRequest, JobMode, BudgetType, ValidationBudget
 
 
 class JobMetadata:
@@ -68,6 +67,7 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
     return worker.jobs[job_id]
 
 
+# Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
 
@@ -87,6 +87,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
     return responses
 
 
+# Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
 
@@ -117,6 +118,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     return responses
 
 
+# Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
 
     # Define async function to launch worker job
@@ -179,7 +181,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         info(f"Selecting {selected_worker.hostname} for next GISJOIN in job={job_id}")
         return selected_worker
 
-    def RegisterWorker(self, request, context):
+    def RegisterWorker(self, request: WorkerRegistrationRequest, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
         for shard in self.shard_metadata.values():
@@ -205,8 +207,13 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(f"Worker {request.hostname} is not registered, can't remove")
             return WorkerRegistrationResponse(success=False)
 
-    def SubmitValidationJob(self, request, context):
-        info(f"SubmitValidationJob request for GISJOINs: {request.gis_joins}")
+    def SubmitValidationJob(self, request: ValidationJobRequest, context):
+
+        # Time the entire job from start to finish
+        profiler: Timer = Timer()
+        profiler.start()
+
+        info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
         job_id = generate_job_id()  # Random UUID for the job
         job = JobMetadata(job_id, request.gis_joins)
         info(f"Created job id {job_id}")
@@ -229,15 +236,18 @@ class Master(validation_pb2_grpc.MasterServicer):
             info(f"{worker_hostname}: {worker_job}")
 
         # Validation budget inference
-        if request.validation_budget.budget_type == BudgetType.STATIC_BUDGET:
+        budget_type: BudgetType = request.validation_budget.budget_type
+        if budget_type == BudgetType.STATIC_BUDGET:
             static_budget: ValidationBudget = request.validation_budget.static_budget
             if static_budget.total_limit > 0:
+                # Choose an equal limit per GISJOIN/strata that sums to the total budget limit
                 if static_budget.total_limit > len(request.gis_joins):
                     static_budget.strata_limit = static_budget.total_limit // len(request.gis_joins)
                 else:
                     info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
                     static_budget.strata_limit = 1
-        elif request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+
+        elif budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
             err_msg = "Incremental variance budget not yet implemented!"
             error(err_msg)
             return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
@@ -250,21 +260,33 @@ class Master(validation_pb2_grpc.MasterServicer):
         if request.master_job_mode == JobMode.MULTITHREADED:
             info("Launching jobs in multi-threaded mode")
             validation_job_responses = launch_worker_jobs_multithreaded(job, request)
-        elif request.master_job_mode == JobMode.ASYNCHRONOUS:
+        elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
             info("Launching jobs in asynchronous mode")
             validation_job_responses = launch_worker_jobs_asynchronously(job, request)
         else:
             info("Launching jobs in synchronous mode")
             validation_job_responses = launch_worker_jobs_synchronously(job, request)
 
-        # Gather all the responses
-        all_validation_metrics = []
-        for response in validation_job_responses:
-            for validation_metric in response.metrics:
-                all_validation_metrics.append(validation_metric)
-            info(f"Response: {response}")
+        # Gather all the WorkerValidationJobResponses
+        worker_job_responses = []
+        errors = []
+        ok = True
+        for worker_response in validation_job_responses:
+            if not worker_response.ok:
+                ok = False
+                error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
+                errors.append(error_msg)
+            worker_job_responses.append(worker_response)
 
-        return ValidationJobResponse(id=job_id, ok=True, metrics=all_validation_metrics)
+        error_msg = f"errors: {errors}"
+        profiler.stop()
+        return ValidationJobResponse(
+            id=job_id,
+            ok=ok,
+            error_msg=error_msg,
+            duration_sec=profiler.elapsed,
+            worker_responses=worker_job_responses
+        )
 
 
 def run(master_port=50051, local_testing=False):

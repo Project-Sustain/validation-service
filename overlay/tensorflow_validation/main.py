@@ -36,6 +36,7 @@ def create_and_train_model(features_df, label_df) -> tf.keras.Model:
     model.add(tf.keras.Input(shape=(2,)))
     model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
     model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
+    model.add(tf.keras.layers.Dense(units=1, activation="relu", name="third_layer"))
     model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(LEARNING_RATE))
     model.summary()
 
@@ -71,8 +72,18 @@ def main():
     loaded_model: tf.keras.Model = tf.keras.models.load_model("my_model.h5")
     loaded_model.summary()
 
-    validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
-    info(f"Model validation results: {validation_results}")
+    #validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
+    y_pred = loaded_model.predict(features_df)
+
+    info(f"Predictions shape: {y_pred.shape}")
+    pprint(y_pred)
+
+    y_true = np.array(label_df).reshape(-1, 1)
+
+    input_variance = y_true.var()
+    absolute_error_variance = np.absolute(y_pred - y_true).var()
+    info(f"Absolute variance error: {absolute_error_variance}, input variance: {input_variance}")
+
 
 
 if __name__ == "__main__":
