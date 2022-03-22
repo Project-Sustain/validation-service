@@ -72,28 +72,12 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
             skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
-
-            if request.worker_job_mode == JobMode.SYNCHRONOUS:
-                metrics = skl_validator.validate_gis_joins_synchronous(request.gis_joins)
-            elif request.worker_job_mode == JobMode.MULTITHREADED:
-                metrics = skl_validator.validate_gis_joins_multithreaded(request.gis_joins)
-            else:
-                err_msg = f"{request.worker_job_mode} job mode not implemented for Scikit-Learn validation!"
-                error(err_msg)
-                return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
+            metrics = skl_validator.validate_gis_joins(request)
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
             pytorch_validator: PyTorchValidator = PyTorchValidator(request)
-
-            if request.worker_job_mode == JobMode.SYNCHRONOUS:
-                metrics = pytorch_validator.validate_gis_joins_synchronous(request.gis_joins)
-            elif request.worker_job_mode == JobMode.MULTITHREADED:
-                metrics = pytorch_validator.validate_gis_joins_multithreaded(request.gis_joins)
-            else:
-                err_msg = f"{request.worker_job_mode} job mode not implemented for PyTorch validation!"
-                error(err_msg)
-                return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
+            metrics = pytorch_validator.validate_gis_joins(request)
 
         # Create and return response from aggregated metrics
         profiler.stop()
