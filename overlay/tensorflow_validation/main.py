@@ -141,6 +141,15 @@ def main():
     y_true = np.array(label_df).reshape(-1, 1)
     pprint(y_true)
 
+    confusion_matrix = tf.math.confusion_matrix(
+        y_true,
+        y_pred,
+        num_classes=2,
+        weights=None,
+        dtype=tf.dtypes.int32,
+    )
+    pprint(confusion_matrix)
+
     # mse = tf.keras.losses.MeanSquaredError()
     # loss = mse(y_true, y_pred).numpy()
     #
