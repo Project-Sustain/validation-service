@@ -98,7 +98,8 @@ def main():
     info(f"Predictions shape: {y_pred.shape}")
     pprint(y_pred)
 
-    # y_true = np.array(label_df).reshape(-1, 1)
+    y_true = np.array(label_df).reshape(-1, 1)
+    pprint(y_true)
 
     # mse = tf.keras.losses.MeanSquaredError()
     # loss = mse(y_true, y_pred).numpy()
