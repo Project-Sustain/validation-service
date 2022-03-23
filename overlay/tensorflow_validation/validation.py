@@ -224,20 +224,15 @@ def validate_model(
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
-    elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
-        pass
+    else:
+        profiler.stop()
+        error_msg = f"Unsupported loss function {loss_function}"
+        error(error_msg)
+        return -1.0, False, error_msg, profiler.elapsed
 
-
-
-    # Evaluate model
-    validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
-    error(f"Model validation results: {validation_results}")
     profiler.stop()
-
-    # Set result and return
-    # result["loss"] = validation_results["loss"]
-    # result["duration"] = profiler.elapsed
-    return validation_results["loss"], True, "", profiler.elapsed
+    info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
+    return loss, True, "", profiler.elapsed
 
 
 # Normalizes all the columns of a Pandas DataFrame using Scikit-Learn Min-Max Feature Scaling.
