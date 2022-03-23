@@ -219,9 +219,11 @@ def validate_model(
 
     loss: float = 0.0
     if loss_function == "MEAN_SQUARED_ERROR":
-        loss = tf.keras.losses.mean_squared_error(y_true, y_pred)
+        loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
+    elif loss_function == "MEAN_ABSOLUTE_ERROR":
+        pass
 
 
 
