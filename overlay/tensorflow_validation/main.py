@@ -98,8 +98,8 @@ def get_data_for_classification_model() -> (pd.DataFrame, pd.DataFrame):
     features_df_with = pd.DataFrame(list(documents_with))
 
     match_without = {"GISJOIN": GIS_JOIN, CLASSIFICATION_LABEL_FIELD: 0}
-    documents_without = collection.find(match_without, projection)
-    features_df_without = pd.DataFrame(list(documents_without)).limit(features_df_with.shape[0])
+    documents_without = collection.find(match_without, projection).limit(features_df_with.shape[0])
+    features_df_without = pd.DataFrame(list(documents_without))
 
     all_features_df = pd.concat([features_df_with, features_df_without])
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(all_features_df)
