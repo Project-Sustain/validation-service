@@ -86,7 +86,7 @@ def main():
     # loss = np.mean(np.abs(y_true - y_pred), axis=0)
 
     loss = tf.keras.losses.mean_absolute_error(y_true.reshape(1, -1), y_pred.reshape(1, -1))
-    info(f"Loss: {loss}")
+    info(f"Loss: {loss.numpy()}")
 
     # input_variance = y_true.var()
     # absolute_error_variance = np.absolute(y_pred - y_true).var()
