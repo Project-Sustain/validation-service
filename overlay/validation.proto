@@ -56,15 +56,6 @@ message ValidationJobRequest {
   ModelFile model_file = 17;
 }
 
-enum LossFunction {
-  MEAN_SQUARED_ERROR = 0;
-  MEAN_ABSOLUTE_ERROR = 1;
-  ROOT_MEAN_SQUARED_ERROR = 2;
-  NEGATIVE_LOG_LIKELIHOOD_LOSS = 3;
-  CROSS_ENTROPY_LOSS = 4;
-}
-
-
 message ValidationJobResponse {
   string id = 1;
   bool ok = 2;
@@ -160,4 +151,12 @@ enum ModelFileType {
   TENSORFLOW_HDF5 = 2;
   TENSORFLOW_SAVED_MODEL_ZIP = 3;
   PYTORCH_ZIPFILE = 4;
+}
+
+enum LossFunction {
+  MEAN_SQUARED_ERROR = 0;
+  MEAN_ABSOLUTE_ERROR = 1;
+  ROOT_MEAN_SQUARED_ERROR = 2;
+  NEGATIVE_LOG_LIKELIHOOD_LOSS = 3;
+  CROSS_ENTROPY_LOSS = 4;
 }
