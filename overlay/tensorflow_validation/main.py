@@ -82,7 +82,7 @@ def main():
     features_df = pd.DataFrame(list(documents))
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
-    label_df = features_df.pop(LABEL_FIELD)
+    label_df = features_df.pop(CLASSIFICATION_FIELD)
 
     # model: tf.keras.Model = create_and_train_model(features_df, label_df)
     # model.save("my_model.h5")
