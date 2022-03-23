@@ -16,7 +16,7 @@ def main():
         "GISJOIN",
         ["PRESSURE_AT_SURFACE_PASCAL", "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"],
         "TEMPERATURE_AT_SURFACE_KELVIN",
-        "RMSE",
+        "ROOT_MEAN_SQUARED_ERROR",
         True,  # normalize
         0,
         0.0
