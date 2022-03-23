@@ -56,7 +56,7 @@ def create_and_train_classification_model(features_df, label_df) -> tf.keras.Mod
     model = tf.keras.Sequential()
     model.add(tf.keras.Input(shape=(2,)))
     model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
-    model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
+    model.add(tf.keras.layers.Dense(units=2, activation="relu", name="second_layer"))
     model.add(tf.keras.layers.Dense(units=1, activation="sigmoid", name="third_layer"))
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     model.summary()
