@@ -49,7 +49,7 @@ def create_and_train_model(features_df, label_df) -> tf.keras.Model:
     return model
 
 
-def create_and_train_classification_model(features_df, label_df) -> tf.Model:
+def create_and_train_classification_model(features_df, label_df) -> tf.keras.Model:
     model = tf.keras.Sequential()
     model.add(tf.keras.Input(shape=(2,)))
     model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
