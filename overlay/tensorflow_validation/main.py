@@ -83,7 +83,7 @@ def main():
     mse = tf.keras.losses.MeanSquaredError()
     # loss = mse(y_true, y_pred).numpy()
 
-    loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
+    loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
 
     # loss = tf.keras.losses.mean_squared_error(y_true, y_pred)
     info(f"Loss: {loss}")
