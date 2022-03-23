@@ -104,8 +104,7 @@ def get_data_for_classification_model() -> (pd.DataFrame, pd.DataFrame):
     pprint(features_df_without)
 
     all_features_df = pd.concat([features_df_with, features_df_without])
-    scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(all_features_df)
-    all_features_df = pd.DataFrame(scaled, columns=all_features_df.columns)
+
     label_df = all_features_df.pop(CLASSIFICATION_LABEL_FIELD)
 
     return all_features_df, label_df
