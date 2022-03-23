@@ -51,10 +51,19 @@ message ValidationJobRequest {
   string label_field = 12;
   bool normalize_inputs = 13;
   ValidationBudget validation_budget = 14;
-  string validation_metric = 15;
+  LossFunction loss_function = 15;
   repeated string gis_joins = 16;
   ModelFile model_file = 17;
 }
+
+enum LossFunction {
+  MEAN_SQUARED_ERROR = 0;
+  MEAN_ABSOLUTE_ERROR = 1;
+  ROOT_MEAN_SQUARED_ERROR = 2;
+  NEGATIVE_LOG_LIKELIHOOD_LOSS = 3;
+  CROSS_ENTROPY_LOSS = 4;
+}
+
 
 message ValidationJobResponse {
   string id = 1;
