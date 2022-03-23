@@ -3,6 +3,7 @@ import os
 
 import tensorflow as tf
 import pandas as pd
+import numpy as np
 from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
@@ -146,6 +147,7 @@ def validate_model(
         model_path: str,
         feature_fields: list,
         label_field: str,
+        loss_function: str,
         mongo_host: str,
         mongo_port: int,
         read_preference: str,
@@ -160,13 +162,6 @@ def validate_model(
 
     profiler: Timer = Timer()
     profiler.start()
-
-    result = {
-        "loss": 0.0,
-        "ok": True,
-        "error_msg": "",
-        "duration": 0.0
-    }
 
     # Load Tensorflow model from disk (OS should cache in memory for future loads)
     model: tf.keras.Model = tf.keras.models.load_model(model_path)
@@ -206,10 +201,6 @@ def validate_model(
     if len(features_df.index) == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
         error(error_msg)
-        # result["loss"] = -1.0
-        # result["ok"] = False
-        # result["error_msg"] = error_msg
-        # result["duration"] = 0.0
         return -1.0, False, error_msg, 0.0
 
     # Normalize features, if requested
@@ -219,6 +210,22 @@ def validate_model(
 
     # Pop the label column off into its own DataFrame
     label_df = features_df.pop(label_field)
+
+    # Get predictions
+    y_pred = model.predict(features_df)
+
+    # Use labels and predictions to evaluate the model
+    y_true = np.array(label_df).reshape(-1, 1)
+
+    loss: float = 0.0
+    if loss_function == "MEAN_SQUARED_ERROR":
+        mse: tf.keras.losses.MeanSquaredError = tf.keras.losses.MeanSquaredError()
+        loss = mse(y_true, y_pred).numpy()
+    elif loss_function == "MEAN_ABSOLUTE_ERROR":
+        mae: tf.keras.losses.MeanAbsoluteError = tf.keras.losses.MeanAbsoluteError()
+        loss = mae(y_true, y_pred).numpy()
+
+
 
     # Evaluate model
     validation_results = model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=0)
