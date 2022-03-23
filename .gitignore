@@ -102,6 +102,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+.env
 .venv
 env/
 venv/
@@ -145,6 +146,7 @@ testing/master/saved_models/*
 !testing/master/saved_models/README.md
 testing/worker/saved_models/*
 !testing/worker/saved_models/README.md
+overlay/tensorflow_validation/*.h5
 
 # Cached GISJOIN info
 overlay/resources/gis_join_chunk_locations.json*
