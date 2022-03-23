@@ -67,8 +67,8 @@ def main():
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop(LABEL_FIELD)
 
-    model: tf.keras.Model = create_and_train_model(features_df, label_df)
-    model.save("my_model.h5")
+    # model: tf.keras.Model = create_and_train_model(features_df, label_df)
+    # model.save("my_model.h5")
     loaded_model: tf.keras.Model = tf.keras.models.load_model("my_model.h5")
     loaded_model.summary()
 
