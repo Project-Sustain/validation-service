@@ -23,7 +23,8 @@ REGRESSION_FEATURE_FIELDS = [
         "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
 ]
 CLASSIFICATION_FEATURE_FIELDS = [
-
+        "PRESSURE_AT_SURFACE_PASCAL",
+        "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
 ]
 REGRESSION_LABEL_FIELD = "TEMPERATURE_AT_SURFACE_KELVIN"
 CLASSIFICATION_LABEL_FIELD = "CATEGORICAL_RAIN_SURFACE_BINARY"
@@ -101,7 +102,7 @@ def get_data_for_classification_model() -> (pd.DataFrame, pd.DataFrame):
     documents_without = collection.find(match_without, projection).limit(features_df_with.shape[0])
     features_df_without = pd.DataFrame(list(documents_without))
 
-    all_features_df = pd.concat([features_df_with, features_df_without], axis=1, join="outer")
+    all_features_df = features_df_with.append(features_df_without)
     label_df = all_features_df.pop(CLASSIFICATION_LABEL_FIELD)
     pprint(all_features_df)
 
