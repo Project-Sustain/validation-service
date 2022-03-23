@@ -24,6 +24,7 @@ FEATURE_FIELDS = [
         "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
 ]
 LABEL_FIELD = "TEMPERATURE_AT_SURFACE_KELVIN"
+CLASSIFICATION_FIELD = "CATEGORICAL_RAIN_SURFACE_BINARY"
 
 # Modeling Stuff
 LEARNING_RATE = 0.001
@@ -48,6 +49,22 @@ def create_and_train_model(features_df, label_df) -> tf.keras.Model:
     return model
 
 
+def create_and_train_classification_model(features_df, label_df) -> tf.Model:
+    model = tf.keras.Sequential()
+    model.add(tf.keras.Input(shape=(2,)))
+    model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
+    model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
+    model.add(tf.keras.layers.Dense(units=1, name="third_layer"))
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.summary()
+    history = model.fit(features_df, label_df, epochs=EPOCHS, validation_split=0.2)
+    hist = pd.DataFrame(history.history)
+    hist["epoch"] = history.epoch
+    pprint(hist)
+
+    return model
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
 
@@ -58,7 +75,7 @@ def main():
     database = client["sustaindb"]
     collection = database["noaa_nam"]
     match = {"GISJOIN": GIS_JOIN}
-    projection = {"_id": 0, LABEL_FIELD: 1}
+    projection = {"_id": 0, CLASSIFICATION_FIELD: 1}
     for feature_field in FEATURE_FIELDS:
         projection[feature_field] = 1
     documents = collection.find(match, projection)
@@ -69,7 +86,10 @@ def main():
 
     # model: tf.keras.Model = create_and_train_model(features_df, label_df)
     # model.save("my_model.h5")
-    loaded_model: tf.keras.Model = tf.keras.models.load_model("my_model.h5")
+    classification_model: tf.keras.Model = create_and_train_classification_model(features_df, label_df)
+    classification_model.save("my_classification_model.h5")
+
+    loaded_model: tf.keras.Model = tf.keras.models.load_model("my_classification_model.h5")
     loaded_model.summary()
 
     #validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
@@ -78,14 +98,14 @@ def main():
     info(f"Predictions shape: {y_pred.shape}")
     pprint(y_pred)
 
-    y_true = np.array(label_df).reshape(-1, 1)
+    # y_true = np.array(label_df).reshape(-1, 1)
 
-    mse = tf.keras.losses.MeanSquaredError()
+    # mse = tf.keras.losses.MeanSquaredError()
     # loss = mse(y_true, y_pred).numpy()
     #
-    loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
+    # loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
 
-    info(f"Loss: {loss}")
+    # info(f"Loss: {loss}")
 
     # input_variance = y_true.var()
     # absolute_error_variance = np.absolute(y_pred - y_true).var()

@@ -223,6 +223,8 @@ def validate_model(
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
+        loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
+    elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
         pass
 
 
