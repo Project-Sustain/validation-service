@@ -26,7 +26,7 @@
     }
   },
   "sample_rate": 0.0,
-  "validation_metric": "loss",
+  "loss_function": "MEAN_SQUARED_ERROR",
   "gis_joins": [
     "G2000190",
     "G2000090",
