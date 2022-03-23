@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import torch
 import torch.nn as nn
-from logging import info, error
+from logging import info, warning, error
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, BudgetType, JobMode
@@ -64,6 +64,7 @@ class PyTorchValidator:
                     model_path=self.model_path,
                     feature_fields=feature_fields,
                     label_field=self.request.label_field,
+                    loss_function=self.request.loss_function,
                     mongo_host=self.request.mongo_host,
                     mongo_port=self.request.mongo_port,
                     read_preference=self.request.read_config.read_preference,
@@ -105,6 +106,7 @@ class PyTorchValidator:
                             self.model_path,
                             feature_fields,
                             self.request.label_field,
+                            self.request.loss_function,
                             self.request.mongo_host,
                             self.request.mongo_port,
                             self.request.read_config.read_preference,
@@ -137,6 +139,7 @@ def validate_model(
         model_path: str,
         feature_fields: list,
         label_field: str,
+        loss_function: str,
         mongo_host: str,
         mongo_port: int,
         read_preference: str,
@@ -207,8 +210,20 @@ def validate_model(
     n_samples, n_features = X.shape
     info(f'n_samples: {n_samples}, n_features: {n_features}')
 
-    # TODO: select criterion based on request
-    criterion = nn.MSELoss()
+    if loss_function == "MEAN_ABSOLUTE_ERROR":
+        criterion = nn.MSELoss()
+    elif loss_function == "MEAN_SQUARED_ERROR":
+        criterion = nn.L1Loss()
+    elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
+        # TODO: implement RMSE manually, PyTorch does not have an inbuilt RMSE loss function
+        criterion = nn.MSELoss()
+    elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
+        criterion = nn.NLLLoss()
+    elif loss_function == "CROSS_ENTROPY_LOSS":
+        criterion = nn.CrossEntropyLoss()
+    else:
+        warning(f"PyTorch validation: Unknown loss function: {loss_function}")
+        return -1.0
 
     y_predicted = model(X)
     loss = criterion(y_predicted, y)
