@@ -85,7 +85,7 @@ def main():
     #
     loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
 
-    info(f"Loss: {loss.numpy()}")
+    info(f"Loss: {loss}")
 
     # input_variance = y_true.var()
     # absolute_error_variance = np.absolute(y_pred - y_true).var()
