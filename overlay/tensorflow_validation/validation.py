@@ -219,10 +219,8 @@ def validate_model(
 
     loss: float = 0.0
     if loss_function == "MEAN_SQUARED_ERROR":
-        mse: tf.keras.losses.MeanSquaredError = tf.keras.losses.MeanSquaredError()
-        loss = mse(y_true, y_pred).numpy()
-    elif loss_function == "MEAN_ABSOLUTE_ERROR":
-        mae: tf.keras.losses.MeanAbsoluteError = tf.keras.losses.MeanAbsoluteError()
+        loss = tf.keras.losses.mean_squared_error(y_true, y_pred)
+    elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         loss = mae(y_true, y_pred).numpy()
 
 

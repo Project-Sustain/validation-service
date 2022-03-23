@@ -81,7 +81,7 @@ def main():
     y_true = np.array(label_df).reshape(-1, 1)
 
     loss = tf.keras.losses.mean_squared_error(y_true, y_pred)
-    info(f"Loss: {loss}")
+    info(f"Loss: {loss.numpy()}")
 
     # input_variance = y_true.var()
     # absolute_error_variance = np.absolute(y_pred - y_true).var()
