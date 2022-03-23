@@ -118,6 +118,9 @@ def main():
 
     if model_type == "classification":
         features_df, label_df = get_data_for_classification_model()
+        pprint(features_df)
+        pprint(label_df)
+
         classification_model: tf.keras.Model = create_and_train_classification_model(features_df, label_df)
         classification_model.save("my_classification_model.h5")
         loaded_model: tf.keras.Model = tf.keras.models.load_model("my_classification_model.h5")
