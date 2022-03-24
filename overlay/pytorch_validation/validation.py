@@ -48,15 +48,6 @@ class PyTorchValidator:
         # Select job mode
         if self.request.worker_job_mode == JobMode.SYNCHRONOUS:
 
-            # For single-threaded jobs, set up MongoDB Querier in advance for reuse (eliminates overhead)
-            querier: Querier = Querier(
-                mongo_host=self.request.mongo_host,
-                mongo_port=self.request.mongo_port,
-                db_name=self.request.database,
-                read_preference=self.request.read_config.read_preference,
-                read_concern=self.request.read_config.read_concern
-            )
-
             # Make requests serially
             for gis_join in self.request.gis_joins:
                 loss: float = validate_model(
@@ -74,7 +65,6 @@ class PyTorchValidator:
                     limit=strata_limit,
                     sample_rate=sample_rate,
                     normalize_inputs=self.request.normalize_inputs,
-                    querier=querier,
                     verbose=verbose
                 )
 
@@ -82,9 +72,6 @@ class PyTorchValidator:
                     gis_join=gis_join,
                     loss=loss
                 ))
-
-            # Close the shared connection to MongoDB
-            querier.close()
 
         # Job mode not single-threaded; either multi-thread or multi-processed
         else:
@@ -116,7 +103,6 @@ class PyTorchValidator:
                             strata_limit,
                             sample_rate,
                             self.request.normalize_inputs,
-                            None,
                             verbose
                         )
                     )
@@ -149,7 +135,6 @@ def validate_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        querier: Querier = None,
         verbose: bool = True) -> float:
     # Load PyTorch model from disk (OS should cache in memory for future loads)
     model = torch.load(model_path)
@@ -161,16 +146,13 @@ def validate_model(
 
         info(f"Model :{model_description}")
 
-    close_querier_within_function = False
-    if querier is None:
-        querier = Querier(
-            mongo_host=mongo_host,
-            mongo_port=mongo_port,
-            db_name=database,
-            read_preference=read_preference,
-            read_concern=read_concern
-        )
-        close_querier_within_function = True
+    querier = Querier(
+        mongo_host=mongo_host,
+        mongo_port=mongo_port,
+        db_name=database,
+        read_preference=read_preference,
+        read_concern=read_concern
+    )
 
     documents = querier.spatial_query(
         collection_name=collection,
@@ -183,10 +165,7 @@ def validate_model(
 
     # Load MongoDB Documents into Pandas DataFrame
     features_df = pd.DataFrame(list(documents))
-
-    # If the MongoDB driver connection is local to this thread/function, close it when done using it
-    if close_querier_within_function:
-        querier.close()
+    querier.close()
 
     info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
