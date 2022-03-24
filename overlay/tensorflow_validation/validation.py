@@ -88,7 +88,7 @@ class TensorflowValidator:
                 or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
 
             executors_list: list = []
-            with executor_type(max_workers=10) as executor:
+            with executor_type(max_workers=8) as executor:
 
                 # Create either a thread or child process object for each GISJOIN validation job
                 for gis_join in self.request.gis_joins:
