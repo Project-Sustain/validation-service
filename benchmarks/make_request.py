@@ -10,7 +10,7 @@ model_file = "/s/parsons/b/others/sustain/SustainProject/validation-service/test
 with open(request_file, "r") as rfile:
     request = json.load(rfile)
 
-payload = {"request": request}
+payload = {"request": json.dumps(request)}
 
 pprint(payload)
 
