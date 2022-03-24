@@ -3,13 +3,13 @@
 ## Description
 
 - Master job mode: Asynchronous
-- Worker job mode: Multithreaded
+- Worker job mode: Multiprocessing
 - Model used: Tensorflow HDF5 file, type: Sequential regression, inputs: 2 (Pressure at Surface, Relative Humidity at Surface), outputs: 1 (Temperature 2m above Surface),
          learning rate: 0.001, epochs: 3, batch size 32, hidden layers: 2 (first hidden layer 16 units relu, second hidden layer 4 units relu) 
 - Number of GISJOINs: all 3192
 - Number of workers: 21 (roughly 152 GISJOINs per worker)
 - Loss function: MSE
-- Validation budget: None
+- Validation budget: None, all observations used
 - MongoDB configuration: Local mongos router, read-preference **primary**
 
 ## Request
@@ -17,7 +17,7 @@
 ```json
 {
   "master_job_mode": "ASYNCHRONOUS",
-  "worker_job_mode": "MULTITHREADED",
+  "worker_job_mode": "MULTIPROCESSING",
   "model_framework": "TENSORFLOW",
   "model_category": "REGRESSION",
   "mongo_host": "localhost",
