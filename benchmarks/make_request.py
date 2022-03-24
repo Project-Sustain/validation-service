@@ -5,7 +5,7 @@ import json
 from pprint import pprint
 
 url = "lattice-150.cs.colostate.edu:5000/validation_service/submit_validation_job"
-request_file = "/s/parsons/b/others/sustain/SustainProject/validation-service/testing/test_requests/1_gisjoin_lattice157.json"
+request_file = "/s/parsons/b/others/sustain/SustainProject/validation-service/testing/test_requests/all_gisjoins.json"
 model_file = "/s/parsons/b/others/sustain/SustainProject/validation-service/testing/test_models/tensorflow/linear_regression/hdf5/my_model.h5"
 
 with open(request_file, "r") as rfile:
