@@ -5,7 +5,10 @@ function print_usage {
   echo -e "EXAMPLE ./run_benchmark.sh sh13rs_gisjoins_vs"
 }
 
-[[ $# -eq 1 ]] || print_usage && exit 1
+if [[ $# -ne 1 ]]; then
+  print_usage
+  exit 1
+fi
 
 BENCHMARK_NAME="$1"
 
