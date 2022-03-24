@@ -4,7 +4,7 @@
   "model_framework": "TENSORFLOW",
   "model_category": "REGRESSION",
   "mongo_host": "localhost",
-  "mongo_port": 27018,
+  "mongo_port": 27017,
   "read_config": {
     "read_preference": "primary",
     "read_concern": "local"
