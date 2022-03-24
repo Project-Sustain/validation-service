@@ -1,4 +1,4 @@
-# Experiment 1
+# Experiment 2
 
 ## Description
 
@@ -10,7 +10,7 @@
 - Number of workers: 21 (roughly 152 GISJOINs per worker)
 - Loss function: MSE
 - Validation budget: None, all observations used
-- MongoDB configuration: Local mongos router, read-preference **primary**
+- MongoDB configuration: Local mongod daemon
 
 ## Request
 
@@ -21,7 +21,7 @@
   "model_framework": "TENSORFLOW",
   "model_category": "REGRESSION",
   "mongo_host": "localhost",
-  "mongo_port": 27018,
+  "mongo_port": 27017,
   "read_config": {
     "read_preference": "primary",
     "read_concern": "local"
