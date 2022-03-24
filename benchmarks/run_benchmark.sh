@@ -12,10 +12,14 @@ fi
 
 BENCHMARK_NAME="$1"
 
-#echo "Starting omni for $BENCHMARK_NAME benchmark..."
-#./start_omni.sh "$BENCHMARK_NAME"
+echo "Starting omni for $BENCHMARK_NAME benchmark..."
+./start_omni.sh "$BENCHMARK_NAME"
+
+sleep 2
 
 python3.8 make_request.py
 
-#echo "Stopping omni for $BENCHMARK_NAME benchmark..."
-#./stop_omni.sh
+sleep 2
+
+echo "Stopping omni for $BENCHMARK_NAME benchmark..."
+./stop_omni.sh
