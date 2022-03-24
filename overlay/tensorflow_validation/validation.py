@@ -29,6 +29,8 @@ class TensorflowValidator:
 
     def validate_gis_joins(self, verbose: bool = True) -> list:
 
+        info(f"Launching validation job for {len(self.request.gis_joins)} GISJOINs")
+
         # Convert protobuf "repeated" field type to a python list
         feature_fields = []
         for feature_field in self.request.feature_fields:
@@ -91,7 +93,7 @@ class TensorflowValidator:
                 # Create either a thread or child process object for each GISJOIN validation job
                 for gis_join in self.request.gis_joins:
 
-                    info(f"Launching validation job for GISJOIN {gis_join}")
+                    # info(f"Launching validation job for GISJOIN {gis_join}")
                     executors_list.append(
                         executor.submit(
                             validate_model,
