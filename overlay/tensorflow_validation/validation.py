@@ -8,7 +8,8 @@ from logging import info, error
 from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
-from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, JobMode
+from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, JobMode, \
+    LossFunction
 from overlay.db.querier import Querier
 from overlay.profiler import Timer
 from overlay.constants import MODELS_DIR
@@ -57,6 +58,7 @@ class TensorflowValidator:
                     model_path=self.model_path,
                     feature_fields=feature_fields,
                     label_field=self.request.label_field,
+                    loss_function=LossFunction.Name(self.request.loss_function),
                     mongo_host=self.request.mongo_host,
                     mongo_port=self.request.mongo_port,
                     read_preference=self.request.read_config.read_preference,
@@ -97,7 +99,7 @@ class TensorflowValidator:
                             self.model_path,
                             feature_fields,
                             self.request.label_field,
-                            self.request.loss_function,
+                            LossFunction.Name(self.request.loss_function),
                             self.request.mongo_host,
                             self.request.mongo_port,
                             self.request.read_config.read_preference,

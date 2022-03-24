@@ -7,7 +7,8 @@ import torch.nn as nn
 from logging import info, warning, error
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
-from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, BudgetType, JobMode
+from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, BudgetType, \
+    JobMode, LossFunction
 from overlay.db.querier import Querier
 from overlay.constants import MODELS_DIR
 from overlay.tensorflow_validation.validation import normalize_dataframe
@@ -55,7 +56,7 @@ class PyTorchValidator:
                     model_path=self.model_path,
                     feature_fields=feature_fields,
                     label_field=self.request.label_field,
-                    loss_function=self.request.loss_function,
+                    loss_function=LossFunction.Name(self.request.loss_function),
                     mongo_host=self.request.mongo_host,
                     mongo_port=self.request.mongo_port,
                     read_preference=self.request.read_config.read_preference,
@@ -93,7 +94,7 @@ class PyTorchValidator:
                             self.model_path,
                             feature_fields,
                             self.request.label_field,
-                            self.request.loss_function,
+                            LossFunction.Name(self.request.loss_function),
                             self.request.mongo_host,
                             self.request.mongo_port,
                             self.request.read_config.read_preference,
