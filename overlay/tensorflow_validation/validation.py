@@ -194,18 +194,27 @@ def validate_model(
     # Pop the label column off into its own DataFrame
     label_df = features_df.pop(label_field)
 
+    info(f"label_df: {label_df}")
+
     # Get predictions
     y_pred = model.predict(features_df)
+
+    info(f"y_pred: {y_pred}")
 
     # Use labels and predictions to evaluate the model
     y_true = np.array(label_df).reshape(-1, 1)
 
+    info(f"y_true: {y_true}")
+
     loss: float = 0.0
     if loss_function == "MEAN_SQUARED_ERROR":
+        info("MEAN_SQUARED_ERROR...")
         loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
+        info("ROOT_MEAN_SQUARED_ERROR...")
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
+        info("MEAN_ABSOLUTE_ERROR...")
         loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
     else:
         profiler.stop()
