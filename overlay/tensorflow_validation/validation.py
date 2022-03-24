@@ -199,7 +199,7 @@ def validate_model(
     info(f"label_df: {label_df}")
 
     # Get predictions
-    y_pred = model.predict(features_df)
+    y_pred = model.predict(features_df, verbose=1)
 
     info(f"y_pred: {y_pred}")
 
