@@ -1,0 +1,32 @@
+{
+  "master_job_mode": "ASYNCHRONOUS",
+  "worker_job_mode": "MULTIPROCESSING",
+  "model_framework": "TENSORFLOW",
+  "model_category": "REGRESSION",
+  "mongo_host": "localhost",
+  "mongo_port": 27018,
+  "read_config": {
+    "read_preference": "primary",
+    "read_concern": "local"
+  },
+  "database": "sustaindb",
+  "collection": "noaa_nam",
+  "feature_fields": [
+    "PRESSURE_AT_SURFACE_PASCAL",
+    "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
+  ],
+  "label_field": "TEMPERATURE_AT_SURFACE_KELVIN",
+  "normalize_inputs": true,
+  "validation_budget": {
+    "budget_type": "STATIC_BUDGET",
+    "static_budget": {
+      "total_limit": 0,
+      "strata_limit": 0,
+      "sample_rate": 0.0
+    }
+  },
+  "loss_function": "MEAN_SQUARED_ERROR",
+  "gis_joins": [
+    "G4900550"
+  ]
+}

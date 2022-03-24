@@ -154,6 +154,7 @@ def validate_model(
     if verbose:
         model.summary()
 
+    info(f"mongo_host={mongo_host}, mongo_port={mongo_port}")
     querier = Querier(
         mongo_host=mongo_host,
         mongo_port=mongo_port,
