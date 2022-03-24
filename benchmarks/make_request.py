@@ -14,15 +14,15 @@ payload = {"request": json.dumps(request)}
 
 pprint(payload)
 
-# files = [
-#   ('file', ('my_model.h5',
-#             open(model_file, 'rb'),
-#             'application/octet-stream')
-#    )
-# ]
-#
-# headers = {}
-#
-# response = requests.request("POST", url, headers=headers, data=payload, files=files)
-#
-# print(response.text)
+files = [
+  ('file', ('my_model.h5',
+            open(model_file, 'rb'),
+            'application/octet-stream')
+   )
+]
+
+headers = {}
+
+response = requests.request("POST", url, headers=headers, data=payload, files=files)
+
+print(response.text)
