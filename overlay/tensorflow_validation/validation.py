@@ -117,7 +117,6 @@ class TensorflowValidator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                info(future)
                 loss, ok, error_msg, duration_sec = future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
@@ -127,6 +126,7 @@ class TensorflowValidator:
                     error_msg=error_msg
                 ))
 
+        info(f"metrics: {len(metrics)} responses")
         return metrics
 
 
