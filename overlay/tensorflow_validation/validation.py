@@ -97,6 +97,7 @@ class TensorflowValidator:
                             self.model_path,
                             feature_fields,
                             self.request.label_field,
+                            self.request.loss_function,
                             self.request.mongo_host,
                             self.request.mongo_port,
                             self.request.read_config.read_preference,
