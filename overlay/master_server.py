@@ -80,6 +80,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 stub = validation_pb2_grpc.WorkerStub(channel)
                 request_copy = ValidationJobRequest()
                 request_copy.CopyFrom(request)
+                request_copy.gis_joins[:] = job.gis_joins
                 request_copy.id = worker_job.job_id
 
                 responses.append(stub.BeginValidationJob(request_copy))
@@ -99,6 +100,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             stub = validation_pb2_grpc.WorkerStub(channel)
             request_copy = ValidationJobRequest()
             request_copy.CopyFrom(_request)
+            request_copy.gis_joins[:] = _worker_job.gis_joins
             request_copy.id = _worker_job.job_id
 
             return stub.BeginValidationJob(request_copy)
@@ -129,6 +131,7 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
             stub = validation_pb2_grpc.WorkerStub(channel)
             request_copy = ValidationJobRequest()
             request_copy.CopyFrom(_request)
+            request_copy.gis_joins[:] = _worker_job.gis_joins
             request_copy.id = _worker_job.job_id
 
             return await stub.BeginValidationJob(request_copy)
