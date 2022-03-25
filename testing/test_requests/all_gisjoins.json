@@ -22,7 +22,7 @@
     "static_budget": {
       "total_limit": 0,
       "strata_limit": 0,
-      "sample_rate": 0.2
+      "sample_rate": 0.5
     }
   },
   "loss_function": "MEAN_SQUARED_ERROR",
