@@ -12,7 +12,7 @@ from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType
 
 UPLOAD_DIR = "./uploads"
-ALLOWED_EXTENSIONS = {"zip", "pth", "pickle", "h5"}
+ALLOWED_EXTENSIONS = {"zip", "pth", "pkl", "h5"}
 
 app = Flask(__name__)
 app.config["UPLOAD_DIR"] = UPLOAD_DIR
@@ -39,7 +39,7 @@ def file_type(filename) -> ModelFileType:
         return ModelFileType.TENSORFLOW_SAVED_MODEL_ZIP
     elif extension == "h5":
         return ModelFileType.TENSORFLOW_HDF5
-    elif extension == "pickle":
+    elif extension == "pkl":
         return ModelFileType.SCIKIT_LEARN_PICKLE
     else:
         return ModelFileType.UNKNOWN_MODEL_FILE_TYPE

@@ -97,7 +97,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         os.mkdir(model_dir)
         info(f"Created directory {model_dir}")
 
-        file_extension = "pickle"  # Default for Scikit-Learn pickle type
+        file_extension = "pkl"  # Default for Scikit-Learn pickle type
 
         # Validate the file type with the framework
         if request.model_framework == ModelFramework.TENSORFLOW:
