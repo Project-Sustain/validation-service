@@ -12,6 +12,7 @@ from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, Budge
 from overlay.db.querier import Querier
 from overlay.constants import MODELS_DIR
 from overlay.tensorflow_validation.validation import normalize_dataframe
+from overlay.profiler import Timer
 
 
 class PyTorchValidator:
@@ -51,7 +52,7 @@ class PyTorchValidator:
 
             # Make requests serially
             for gis_join in self.request.gis_joins:
-                loss: float = validate_model(
+                loss, ok, error_msg, duration_sec = validate_model(
                     gis_join=gis_join,
                     model_path=self.model_path,
                     feature_fields=feature_fields,
@@ -71,7 +72,10 @@ class PyTorchValidator:
 
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=loss,
+                    duration_sec=duration_sec,
+                    ok=ok,
+                    error_msg=error_msg
                 ))
 
         # Job mode not single-threaded; either multi-thread or multi-processed
@@ -79,10 +83,10 @@ class PyTorchValidator:
 
             # Choose executor type
             executor_type = ProcessPoolExecutor if self.request.worker_job_mode == JobMode.MULTIPROCESSING \
-                else ThreadPoolExecutor
+                or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
 
             executors_list: list = []
-            with executor_type(max_workers=10) as executor:
+            with executor_type(max_workers=8) as executor:
 
                 # Create either a thread or child process object for each GISJOIN validation job
                 for gis_join in self.request.gis_joins:
@@ -110,12 +114,13 @@ class PyTorchValidator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                info(future)
-                loss = future.result()
-
+                loss, ok, error_msg, duration_sec = future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=loss,
+                    duration_sec=duration_sec,
+                    ok=ok,
+                    error_msg=error_msg
                 ))
 
         return metrics
@@ -136,7 +141,11 @@ def validate_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> float:
+        verbose: bool = True) -> (float, bool, str, float):
+
+    profiler: Timer = Timer()
+    profiler.start()
+
     # Load PyTorch model from disk (OS should cache in memory for future loads)
     model = torch.load(model_path)
 
@@ -207,7 +216,7 @@ def validate_model(
 
     y_predicted = model(X)
     loss = criterion(y_predicted, y)
-
+    profiler.stop()
     info(f"Model validation results: {loss}")
 
-    return loss
+    return loss, True, "", profiler.elapsed
