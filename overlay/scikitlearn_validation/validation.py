@@ -52,7 +52,7 @@ class ScikitLearnValidator:
 
             # Make requests serially
             for gis_join in self.request.gis_joins:
-                loss: float = validate_model(
+                loss, ok, error_msg, duration_sec = validate_model(
                     gis_join=gis_join,
                     model_path=self.model_path,
                     feature_fields=feature_fields,
@@ -72,15 +72,17 @@ class ScikitLearnValidator:
 
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=loss,
+                    duration_sec=duration_sec,
+                    ok=ok,
+                    error_msg=error_msg
                 ))
 
         # Job mode not single-threaded; either multi-thread or multi-processed
         else:
-
             # Choose executor type
             executor_type = ProcessPoolExecutor if self.request.worker_job_mode == JobMode.MULTIPROCESSING \
-                else ThreadPoolExecutor
+                                                   or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
 
             executors_list: list = []
             with executor_type(max_workers=8) as executor:
@@ -113,12 +115,13 @@ class ScikitLearnValidator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                info(future)
-                loss = future.result()
-
+                loss, ok, error_msg, duration_sec = future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=loss,
+                    duration_sec=duration_sec,
+                    ok=ok,
+                    error_msg=error_msg
                 ))
 
         return metrics
@@ -139,8 +142,7 @@ def validate_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> float:
-
+        verbose: bool = True) -> (float, bool, str, float):
     profiler: Timer = Timer()
     profiler.start()
 
@@ -218,4 +220,4 @@ def validate_model(
     profiler.stop()
     info(f"Model validation results for GISJOIN {gis_join}: {score}")
 
-    return score
+    return score, True, "", profiler.elapsed
