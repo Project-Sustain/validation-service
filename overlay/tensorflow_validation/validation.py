@@ -55,7 +55,7 @@ class TensorflowValidator:
 
             # Make requests serially
             for gis_join in self.request.gis_joins:
-                loss, ok, error_msg, duration_sec = validate_model(
+                returned_gis_join, loss, ok, error_msg, duration_sec = validate_model(
                     gis_join=gis_join,
                     model_path=self.model_path,
                     feature_fields=feature_fields,
@@ -74,7 +74,7 @@ class TensorflowValidator:
                 )
 
                 metrics.append(ValidationMetric(
-                    gis_join=gis_join,
+                    gis_join=returned_gis_join,
                     loss=loss,
                     duration_sec=duration_sec,
                     ok=ok,
@@ -117,7 +117,7 @@ class TensorflowValidator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                loss, ok, error_msg, duration_sec = future.result()
+                gis_join, loss, ok, error_msg, duration_sec = future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
                     loss=loss,
@@ -148,7 +148,7 @@ def validate_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (float, bool, str, float):  # Returns the loss, ok status, error message, and duration
+        verbose: bool = True) -> (str, float, bool, str, float):  # Returns the gis_join, loss, ok status, error message, and duration
 
     profiler: Timer = Timer()
     profiler.start()
@@ -186,7 +186,7 @@ def validate_model(
     if len(features_df.index) == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
         error(error_msg)
-        return -1.0, False, error_msg, 0.0
+        return gis_join, -1.0, False, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
@@ -225,11 +225,11 @@ def validate_model(
         profiler.stop()
         error_msg = f"Unsupported loss function {loss_function}"
         error(error_msg)
-        return -1.0, False, error_msg, profiler.elapsed
+        return gis_join, -1.0, False, error_msg, profiler.elapsed
 
     profiler.stop()
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return loss, True, "", profiler.elapsed
+    return gis_join, loss, True, "", profiler.elapsed
 
 
 # Normalizes all the columns of a Pandas DataFrame using Scikit-Learn Min-Max Feature Scaling.
