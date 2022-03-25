@@ -1,7 +1,7 @@
 werkzeug
 Flask
 grpcio==1.43.0
-grpcio-tools
+grpcio-tools==1.43.0
 pymongo
 python-dotenv
 asyncio
