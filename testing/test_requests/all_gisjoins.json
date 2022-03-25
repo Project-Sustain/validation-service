@@ -20,9 +20,9 @@
   "validation_budget": {
     "budget_type": "STATIC_BUDGET",
     "static_budget": {
-      "total_limit": 20000000,
+      "total_limit": 0,
       "strata_limit": 0,
-      "sample_rate": 0.0
+      "sample_rate": 0.1
     }
   },
   "loss_function": "MEAN_SQUARED_ERROR",
