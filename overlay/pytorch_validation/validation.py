@@ -192,8 +192,8 @@ def validate_model(
     label_df = features_df.pop(label_field)
 
     # evaluate model
-    X = torch.from_numpy(features_df.astype(np.float32))
-    y = torch.from_numpy(label_df.astype(np.float32))
+    X = torch.from_numpy(features_df.values.astype(np.float32))
+    y = torch.from_numpy(label_df.values.astype(np.float32))
     y = y.view(y.shape[0], 1)  # convert y to a column vector
 
     n_samples, n_features = X.shape
