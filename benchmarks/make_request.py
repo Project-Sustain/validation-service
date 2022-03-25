@@ -2,10 +2,18 @@ import http.client
 import mimetypes
 from codecs import encode
 import json
-from pprint import pprint
+import sys
+import os
+
+experiment_dir = sys.argv[1]
+experiment_request = f"{experiment_dir}/request.json"
+
+if not os.path.exists(experiment_request):
+    print(f"{experiment_request} does not exist! Please create first (hint, use the testing/test_requests/ JSON requests as a template example)")
+    exit(1)
 
 url = "lattice-150.cs.colostate.edu:5000/validation_service/submit_validation_job"
-request_file = "/s/parsons/b/others/sustain/SustainProject/validation-service/testing/test_requests/all_gisjoins.json"
+request_file = f"/s/parsons/b/others/sustain/SustainProject/validation-service/benchmarks/{experiment_dir}/request.json"
 model_file = "/s/parsons/b/others/sustain/SustainProject/validation-service/testing/test_models/tensorflow/linear_regression/hdf5/my_model.h5"
 
 with open(request_file, "r") as rfile:

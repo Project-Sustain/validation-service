@@ -11,6 +11,7 @@ from overlay.constants import MODELS_DIR
 from overlay.db.querier import Querier
 from overlay.tensorflow_validation.validation import normalize_dataframe
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget
+from overlay.profiler import Timer
 
 
 class ScikitLearnValidator:
@@ -51,7 +52,7 @@ class ScikitLearnValidator:
 
             # Make requests serially
             for gis_join in self.request.gis_joins:
-                loss: float = validate_model(
+                gis_join, loss, ok, error_msg, duration_sec = validate_model(
                     gis_join=gis_join,
                     model_path=self.model_path,
                     feature_fields=feature_fields,
@@ -71,18 +72,20 @@ class ScikitLearnValidator:
 
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=loss,
+                    duration_sec=duration_sec,
+                    ok=ok,
+                    error_msg=error_msg
                 ))
 
         # Job mode not single-threaded; either multi-thread or multi-processed
         else:
-
             # Choose executor type
             executor_type = ProcessPoolExecutor if self.request.worker_job_mode == JobMode.MULTIPROCESSING \
-                else ThreadPoolExecutor
+                                                   or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
 
             executors_list: list = []
-            with executor_type(max_workers=10) as executor:
+            with executor_type(max_workers=8) as executor:
 
                 # Create either a thread or child process object for each GISJOIN validation job
                 for gis_join in self.request.gis_joins:
@@ -104,19 +107,21 @@ class ScikitLearnValidator:
                             strata_limit,
                             sample_rate,
                             self.request.normalize_inputs,
-                            None,
                             verbose
                         )
                     )
 
+            info(f"Sklearn validation: {str(self.request.worker_job_mode)} completed. Iterating over results ...")
+
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                info(future)
-                loss = future.result()
-
+                gis_join, loss, ok, error_msg, duration_sec = future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
-                    loss=loss
+                    loss=loss,
+                    duration_sec=duration_sec,
+                    ok=ok,
+                    error_msg=error_msg
                 ))
 
         return metrics
@@ -132,12 +137,15 @@ def validate_model(
         mongo_port: int,
         read_preference: str,
         read_concern: str,
-        collection: str,
         database: str,
+        collection: str,
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> float:
+        verbose: bool = True) -> (str, float, bool, str, float):  # Returns the gis_join, loss, ok status, error message, and duration
+    profiler: Timer = Timer()
+    profiler.start()
+
     # Load ScikitLearn model from disk
     info(f"Loading Scikit-Learn model from {model_path}")
     model = pickle.load(open(model_path, 'rb'))
@@ -196,8 +204,9 @@ def validate_model(
     info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
     if len(features_df.index) == 0:
-        error("DataFrame is empty! Returning -1.0 for loss")
-        return -1.0
+        error_msg = f"No records found for GISJOIN {gis_join}"
+        error(error_msg)
+        return gis_join, -1.0, False, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
@@ -209,6 +218,7 @@ def validate_model(
 
     # evaluate model
     score = model.score(features_df, label_df)
-    info(f"Model validation results: {score}")
+    profiler.stop()
+    info(f"Model validation results for GISJOIN {gis_join}: {score}")
 
-    return score
+    return gis_join, score, True, "", profiler.elapsed
