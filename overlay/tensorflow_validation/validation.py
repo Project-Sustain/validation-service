@@ -196,17 +196,20 @@ def validate_model(
     # Pop the label column off into its own DataFrame
     label_df = features_df.pop(label_field)
 
-    info(f"label_df: {label_df}")
+    if verbose:
+        info(f"label_df: {label_df}")
 
     # Get predictions
-    y_pred = model.predict(features_df, verbose=1)
+    y_pred = model.predict(features_df, verbose=1 if verbose else 0)
 
-    info(f"y_pred: {y_pred}")
+    if verbose:
+        info(f"y_pred: {y_pred}")
 
     # Use labels and predictions to evaluate the model
     y_true = np.array(label_df).reshape(-1, 1)
 
-    info(f"y_true: {y_true}")
+    if verbose:
+        info(f"y_true: {y_true}")
 
     loss: float = 0.0
     if loss_function == "MEAN_SQUARED_ERROR":
