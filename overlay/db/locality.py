@@ -67,6 +67,36 @@ def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     return gis_joins_to_shards
 
 
+# Discovers the number of records for each GISJOIN
+def discover_gis_join_counts():
+    resources_dir = 'overlay/resources'
+    gis_join_counts_filename = f"{resources_dir}/gis_join_counts.json"
+    if os.path.exists(gis_join_counts_filename):
+        info(f"Cached file {gis_join_counts_filename} already exists, skipping discovering counts")
+        return
+
+    info(f"No cached {gis_join_counts_filename} file exists, discovering counts...")
+    gis_join_counts = {}
+    county_gis_joins = load_gis_joins(resources_dir)
+    mongo_client = MongoClient(f"mongodb://{DB_HOST}:{DB_PORT}")
+    db = mongo_client[DB_NAME]
+    collection = db["noaa_nam"]
+    counter = 0
+    bar = ProgressBar(maxval=len(county_gis_joins), widgets=widgets).start()
+    for gis_join in county_gis_joins:
+        count = collection.find({"GISJOIN": gis_join}).count()
+        gis_join_counts[gis_join] = count
+        counter += 1
+        bar.update(counter)
+
+    bar.finish()
+
+    info(f"Saving GISJOIN counts to {gis_join_counts_filename}")
+    with open(gis_join_counts_filename, "w") as json_file:
+        json.dump(gis_join_counts, json_file)
+    info("Success")
+
+
 # Loads all county GISJOIN values from gis_joins.json as a list.
 def load_gis_joins(resources_dir: str):
     county_gis_joins = []
