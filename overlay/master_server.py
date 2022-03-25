@@ -310,6 +310,7 @@ def run(master_port=50051, local_testing=False):
             error("Shard discovery returned None. Exiting...")
             exit(1)
 
+        locality.discover_gis_join_counts()
         gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
         for shard in shard_metadata.values():
             info(shard)
