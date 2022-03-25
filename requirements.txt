@@ -1,6 +1,6 @@
 werkzeug
 Flask
-grpcio
+grpcio==1.43.0
 grpcio-tools
 pymongo
 python-dotenv
