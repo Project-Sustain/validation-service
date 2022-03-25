@@ -270,6 +270,8 @@ class Master(validation_pb2_grpc.MasterServicer):
             info("Launching jobs in synchronous mode")
             validation_job_responses = launch_worker_jobs_synchronously(job, request)
 
+        info("Received all validation responses, returning...")
+
         # Gather all the WorkerValidationJobResponses
         worker_job_responses = []
         errors = []
