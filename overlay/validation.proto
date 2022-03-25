@@ -100,7 +100,7 @@ message MongoReadConfig {
 message ValidationBudget {
   BudgetType budget_type = 1;
   StaticBudget static_budget = 2;
-  IncrementalVarianceBudget variance_budget = 4;
+  IncrementalVarianceBudget variance_budget = 3;
 }
 
 message IncrementalVarianceBudget {
@@ -124,7 +124,7 @@ enum UploadStatusCode {
 enum BudgetType {
   DEFAULT_BUDGET = 0;
   STATIC_BUDGET = 1;
-  INCREMENTAL_VARIANCE_BUDGET = 3;
+  INCREMENTAL_VARIANCE_BUDGET = 2;
 }
 
 enum JobMode {
