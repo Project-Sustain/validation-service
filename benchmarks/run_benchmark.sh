@@ -22,5 +22,4 @@ python3.8 make_request.py "$BENCHMARK_NAME" > "$BENCHMARK_NAME/response.json"
 
 sleep 2
 
-echo "Stopping omni for $BENCHMARK_NAME benchmark..."
 ./stop_omni.sh
