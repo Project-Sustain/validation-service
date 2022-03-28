@@ -1,16 +1,12 @@
 import concurrent.futures
 import os
 
-import tensorflow as tf
-import pandas as pd
-import numpy as np
 from logging import info, error
-from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, JobMode, \
     LossFunction, ModelFramework, ModelCategory, MongoReadConfig, ValidationBudget
-from overlay.db.querier import Querier
+
 from overlay.profiler import Timer
 from overlay.constants import MODELS_DIR
 
@@ -150,6 +146,13 @@ def validate_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, float, bool, str, float):  # Returns the gis_join, loss, ok status, error message, and duration
 
+    import tensorflow as tf
+    import pandas as pd
+    import numpy as np
+    from sklearn.preprocessing import MinMaxScaler
+
+    from overlay.db.querier import Querier
+
     profiler: Timer = Timer()
     profiler.start()
 
@@ -190,7 +193,8 @@ def validate_model(
 
     # Normalize features, if requested
     if normalize_inputs:
-        features_df = normalize_dataframe(features_df)
+        scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        features_df = pd.DataFrame(scaled, columns=features_df.columns)
         info(f"Normalized Pandas DataFrame")
 
     # Pop the label column off into its own DataFrame
@@ -230,12 +234,6 @@ def validate_model(
     profiler.stop()
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
     return gis_join, loss, True, "", profiler.elapsed
-
-
-# Normalizes all the columns of a Pandas DataFrame using Scikit-Learn Min-Max Feature Scaling.
-def normalize_dataframe(dataframe):
-    scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(dataframe)
-    return pd.DataFrame(scaled, columns=dataframe.columns)
 
 
 def test():
