@@ -9,7 +9,7 @@ from sklearn.preprocessing import MinMaxScaler
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, JobMode, \
-    LossFunction
+    LossFunction, ModelFramework, ModelCategory, MongoReadConfig, ValidationBudget
 from overlay.db.querier import Querier
 from overlay.profiler import Timer
 from overlay.constants import MODELS_DIR
@@ -236,3 +236,70 @@ def validate_model(
 def normalize_dataframe(dataframe):
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(dataframe)
     return pd.DataFrame(scaled, columns=dataframe.columns)
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    validator: TensorflowValidator = TensorflowValidator(
+        request=ValidationJobRequest(
+            id="test",
+            master_job_mode=JobMode.ASYNCHRONOUS,
+            worker_job_mode=JobMode.MULTIPROCESSING,
+            model_framework=ModelFramework.TENSORFLOW,
+            model_category=ModelCategory.REGRESSION,
+            mongo_host="lattice-150",
+            mongo_port=27018,
+            mongo_read_config=MongoReadConfig(
+                read_preference="primary",
+                read_concern="available"
+            ),
+            database="sustaindb",
+            collection="noaa_nam",
+            feature_fields=[
+                    "PRESSURE_AT_SURFACE_PASCAL",
+                    "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
+            ],
+            label_field="TEMPERATURE_AT_SURFACE_KELVIN",
+            normalize_inputs=True,
+            validation_budget=ValidationBudget(
+                budget_type=BudgetType.STATIC_BUDGET,
+                static_budget=StaticBudget(
+                    total_limit=0,
+                    strata_limit=0,
+                    sample_rate=0.2
+                )
+            ),
+            loss_function=LossFunction.MEAN_SQUARED_ERROR,
+            gis_joins=[
+                 'G3500470', 'G4200030', 'G4201090', 'G4201070', 'G4200970', 'G4200050', 'G3900030', 'G3901490', 'G3901510',
+                 'G3900950', 'G3901010', 'G3901530', 'G3200050', 'G4900190', 'G3800410', 'G3800130', 'G3800210', 'G2001650',
+                 'G2001690', 'G2000790', 'G2001530', 'G2000450', 'G2000750', 'G3100390', 'G3100330', 'G3101570', 'G3100590',
+                 'G3101550', 'G0500290', 'G0501410', 'G0501090', 'G0500050', 'G0500010', 'G4100050', 'G1301510', 'G1301430',
+                 'G1302430', 'G1301530', 'G1300610', 'G1300570', 'G1300530', 'G1302410', 'G1302470', 'G1300630', 'G3600230',
+                 'G3600750', 'G3600210', 'G3600910', 'G0800890', 'G0800750', 'G0800550', 'G4000650', 'G4000610', 'G4000410',
+                 'G2400130', 'G2400110', 'G2400150', 'G2801530', 'G2800830', 'G2801550', 'G2800350', 'G2800390', 'G3000430',
+                 'G3000710', 'G3000830', 'G2101850', 'G2101790', 'G2101870', 'G2101910', 'G2101730', 'G2100210', 'G2101750',
+                 'G3400270', 'G3400210', 'G3400190', 'G0100950', 'G0100350', 'G0101150', 'G0100410', 'G0100370', 'G2901710',
+                 'G2901370', 'G2901330', 'G2901770', 'G2901390', 'G0600450', 'G0600250', 'G0601110', 'G1600190', 'G1600390',
+                 'G4600450', 'G4601090', 'G4600430', 'G4600590', 'G4701250', 'G4700030', 'G4701350', 'G4700010', 'G4700810',
+                 'G4700850', 'G1700770', 'G1701290', 'G1701810', 'G1700690', 'G1700710', 'G1701850', 'G1801690', 'G1800870',
+                 'G1800770', 'G1801710', 'G1801730', 'G1900610', 'G1900630', 'G1900690', 'G1900990', 'G2601370', 'G2600050',
+                 'G2600910', 'G2600930', 'G2601350', 'G2701490', 'G2701150', 'G2700070', 'G2700570', 'G4500670', 'G4500590',
+                 'G2300310', 'G3700650', 'G3700990', 'G3700710', 'G3700670', 'G3701070', 'G4802710', 'G4800750', 'G4804570',
+                 'G4803690', 'G4801390', 'G4801850', 'G4801450', 'G4804930', 'G4804590', 'G4803230', 'G4802750', 'G4800290',
+                 'G2201050', 'G2201010', 'G2200990', 'G2200410', 'G2200330', 'G1200170', 'G1200870', 'G1200860', 'G1200210',
+                 'G0202750'
+            ]
+        )
+    )
+
+    validator.validate_gis_joins(verbose=False)
+
+    print("\n\n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>> FINISHED FIRST ROUND OF VALIDATIONS <<<<<<<<<<<<<<<<<\n\n\n\n", flush=True)
+
+    validator.validate_gis_joins(verbose=False)
+
+    print("\n\n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>> FINISHED SECOND ROUND OF VALIDATIONS <<<<<<<<<<<<<<<<<\n\n\n\n", flush=True)
