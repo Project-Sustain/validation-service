@@ -121,8 +121,8 @@ def test_multithreaded():
 def test_multiprocessed():
     # Iterate over all gis_joins and submit them for validation to the thread pool executor
     executors_list = []
-    with ProcessPoolExecutor(max_workers=10) as executor:
-        for i in range(3):
+    with ProcessPoolExecutor(max_workers=8) as executor:
+        for i in range(25):
             executors_list.append(executor.submit(train_and_evaluate, i))
 
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
