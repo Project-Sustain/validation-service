@@ -248,7 +248,7 @@ def test():
             model_category=ModelCategory.REGRESSION,
             mongo_host="lattice-150",
             mongo_port=27018,
-            mongo_read_config=MongoReadConfig(
+            read_config=MongoReadConfig(
                 read_preference="primary",
                 read_concern="available"
             ),
