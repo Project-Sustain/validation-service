@@ -7,6 +7,8 @@ from overlay import flask_server
 from overlay import master_server
 from overlay import worker_server
 
+from overlay.tensorflow_validation.validation import test
+
 
 def print_usage():
     print("USAGE\n\tpython3 overlay [OPTIONS]\n")
@@ -25,7 +27,7 @@ def main():
 
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, "mwfp:u:l", ["master", "worker", "flaskserver", "port=", "master_uri=", "local"])
+        opts, args = getopt.getopt(argv, "mwfp:u:lt", ["master", "worker", "flaskserver", "port=", "master_uri=", "local", "test"])
 
         node_type_arg = None
         port_arg = None
@@ -45,6 +47,9 @@ def main():
                 port_arg = int(arg)
             elif opt in ['-l', '--local']:
                 local_testing = True
+            elif opt in ['-t', '--test']:
+                test()
+                return
 
         if node_type_arg == "master":
             master_server.run(master_port=port_arg, local_testing=local_testing) \
