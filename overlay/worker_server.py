@@ -5,6 +5,7 @@ import io
 import zipfile
 import signal
 from concurrent import futures
+from loky import get_reusable_executor
 
 import socket
 
@@ -17,6 +18,8 @@ from overlay.profiler import Timer
 from overlay.tensorflow_validation.validation import TensorflowValidator
 from overlay.scikitlearn_validation.validation import ScikitLearnValidator
 from overlay.pytorch_validation.validation import PyTorchValidator
+
+shared_executor = get_reusable_executor(max_workers=8, timeout=10)
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
@@ -66,7 +69,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
 
-            tf_validator: TensorflowValidator = TensorflowValidator(request)
+            tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor)
             metrics = tf_validator.validate_gis_joins()
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
