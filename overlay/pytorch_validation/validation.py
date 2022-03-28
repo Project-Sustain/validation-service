@@ -7,11 +7,12 @@ import torch.nn as nn
 from logging import info, warning, error
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
+from sklearn.preprocessing import MinMaxScaler
+
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, BudgetType, \
     JobMode, LossFunction
 from overlay.db.querier import Querier
 from overlay.constants import MODELS_DIR
-from overlay.tensorflow_validation.validation import normalize_dataframe
 from overlay.profiler import Timer
 
 
@@ -186,7 +187,8 @@ def validate_model(
 
     # Normalize features, if requested
     if normalize_inputs:
-        features_df = normalize_dataframe(features_df)
+        scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        features_df = pd.DataFrame(scaled, columns=features_df.columns)
         info(f"Normalized Pandas DataFrame")
 
     # Pop the label column off into its own DataFrame
