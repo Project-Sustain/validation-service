@@ -68,7 +68,7 @@ BATCH_SIZE = 32
 def train_and_evaluate(model_id: int):
 
     # Pull in data from MongoDB into Pandas DataFrame
-    client = MongoClient(URI, connect=False)
+    client = MongoClient("mongodb://lattice-150:27018/")
     database = client["sustaindb"]
     collection = database["noaa_nam"]
     match = {"GISJOIN": "G3500170"}
