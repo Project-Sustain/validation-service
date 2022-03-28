@@ -309,12 +309,12 @@ def test():
         )
     )
 
-    validator.validate_gis_joins(verbose=False)
+    validator.validate_gis_joins(verbose=True)
 
     print("\n\n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>> FINISHED FIRST ROUND OF VALIDATIONS <<<<<<<<<<<<<<<<<\n\n\n\n",
           flush=True)
 
-    validator.validate_gis_joins(verbose=False)
+    validator.validate_gis_joins(verbose=True)
 
     print("\n\n\n\n >>>>>>>>>>>>>>>>>>>>>>>>>> FINISHED SECOND ROUND OF VALIDATIONS <<<<<<<<<<<<<<<<<\n\n\n\n",
           flush=True)
