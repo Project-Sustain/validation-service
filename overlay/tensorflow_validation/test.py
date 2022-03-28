@@ -81,20 +81,20 @@ def train_and_evaluate(model_id: int):
     label_df = features_df.pop("TEMPERATURE_AT_SURFACE_KELVIN")
 
     # Create and train Keras model
-    model = tf.keras.Sequential()
-    model.add(tf.keras.Input(shape=(2,)))
-    model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
-    model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
-    model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(0.001))
-    model.summary()
+    # model = tf.keras.Sequential()
+    # model.add(tf.keras.Input(shape=(2,)))
+    # model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
+    # model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
+    # model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(0.001))
+    # model.summary()
+    #
+    # history = model.fit(features_df, label_df, epochs=3, validation_split=0.2)
+    # hist = pd.DataFrame(history.history)
+    # hist["epoch"] = history.epoch
+    # pprint(hist)
 
-    history = model.fit(features_df, label_df, epochs=3, validation_split=0.2)
-    hist = pd.DataFrame(history.history)
-    hist["epoch"] = history.epoch
-    pprint(hist)
-
-    model.save(f"my_model_{model_id}.h5")
-    loaded_model: tf.keras.Model = tf.keras.models.load_model(f"my_model_{model_id}.h5")
+    # model.save(f"my_model_0.h5")
+    loaded_model: tf.keras.Model = tf.keras.models.load_model(f"my_model_0.h5")
     loaded_model.summary()
 
     validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
