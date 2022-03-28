@@ -152,6 +152,12 @@ def main():
     info(f"Multi-processed time elapsed: {profiler.elapsed}")
     profiler.reset()
 
+    profiler.start()
+    test_multiprocessed()
+    profiler.stop()
+    info(f"Multi-processed time elapsed: {profiler.elapsed}")
+    profiler.reset()
+
 
 if __name__ == "__main__":
     main()
