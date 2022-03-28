@@ -107,7 +107,7 @@ class TensorflowValidator:
                             strata_limit,
                             sample_rate,
                             self.request.normalize_inputs,
-                            False  # don't log summaries on concurrent model
+                            True  # don't log summaries on concurrent model
                         )
                     )
 

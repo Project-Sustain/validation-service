@@ -174,7 +174,7 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> No
     info(f"Environment: DB_HOST={DB_HOST}, DB_PORT={DB_PORT}, DB_NAME={DB_NAME}, MODELS_DIR={MODELS_DIR}")
 
     # Initialize server and worker
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
 
     # Set up Ctrl-C signal handling
