@@ -78,19 +78,15 @@ class TensorflowValidator:
                     error_msg=error_msg
                 ))
 
-        # Job mode not single-threaded; either multi-thread or multi-processed
+        # Job mode not single-threaded; use the shared ProcessPoolExecutor for multiprocessing
         else:
-            # Select either process or thread pool executor type
-            executor_type = ProcessPoolExecutor if self.request.worker_job_mode == JobMode.MULTIPROCESSING \
-                or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
 
             executors_list: list = []
-            # with executor_type(max_workers=8) as executor:
 
-            # Create either a thread or child process object for each GISJOIN validation job
+            # Create a child process object for each GISJOIN validation job
             for gis_join in self.request.gis_joins:
 
-                # info(f"Launching validation job for GISJOIN {gis_join}")
+                info(f"Launching validation job for GISJOIN {gis_join}")
                 executors_list.append(
                     self.shared_executor.submit(
                         validate_model,
@@ -108,7 +104,7 @@ class TensorflowValidator:
                         strata_limit,
                         sample_rate,
                         self.request.normalize_inputs,
-                        True  # don't log summaries on concurrent model
+                        False  # don't log summaries on concurrent model
                     )
                 )
 

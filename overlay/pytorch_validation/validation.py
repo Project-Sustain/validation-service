@@ -18,9 +18,10 @@ from overlay.profiler import Timer
 
 class PyTorchValidator:
 
-    def __init__(self, request: ValidationJobRequest):
+    def __init__(self, request: ValidationJobRequest, shared_executor):
         self.request: ValidationJobRequest = request
         self.model_path = self.get_model_path()
+        self.shared_executor = shared_executor
 
     def get_model_path(self):
         model_path = f"{MODELS_DIR}/{self.request.id}/"
@@ -79,39 +80,34 @@ class PyTorchValidator:
                     error_msg=error_msg
                 ))
 
-        # Job mode not single-threaded; either multi-thread or multi-processed
+        # Job mode not single-threaded; use the shared ProcessPoolExecutor for multiprocessing
         else:
 
-            # Choose executor type
-            executor_type = ProcessPoolExecutor if self.request.worker_job_mode == JobMode.MULTIPROCESSING \
-                or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
-
             executors_list: list = []
-            with executor_type(max_workers=8) as executor:
 
-                # Create either a thread or child process object for each GISJOIN validation job
-                for gis_join in self.request.gis_joins:
-                    info(f"Launching validation job for GISJOIN {gis_join}")
-                    executors_list.append(
-                        executor.submit(
-                            validate_model,
-                            gis_join,
-                            self.model_path,
-                            feature_fields,
-                            self.request.label_field,
-                            LossFunction.Name(self.request.loss_function),
-                            self.request.mongo_host,
-                            self.request.mongo_port,
-                            self.request.read_config.read_preference,
-                            self.request.read_config.read_concern,
-                            self.request.database,
-                            self.request.collection,
-                            strata_limit,
-                            sample_rate,
-                            self.request.normalize_inputs,
-                            verbose
-                        )
+            # Create a child process object for each GISJOIN validation job
+            for gis_join in self.request.gis_joins:
+                info(f"Launching validation job for GISJOIN {gis_join}")
+                executors_list.append(
+                    self.shared_executor.submit(
+                        validate_model,
+                        gis_join,
+                        self.model_path,
+                        feature_fields,
+                        self.request.label_field,
+                        LossFunction.Name(self.request.loss_function),
+                        self.request.mongo_host,
+                        self.request.mongo_port,
+                        self.request.read_config.read_preference,
+                        self.request.read_config.read_concern,
+                        self.request.database,
+                        self.request.collection,
+                        strata_limit,
+                        sample_rate,
+                        self.request.normalize_inputs,
+                        verbose
                     )
+                )
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
