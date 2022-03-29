@@ -217,20 +217,20 @@ class Master(validation_pb2_grpc.MasterServicer):
         profiler.start()
 
         info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
-        job_id = generate_job_id()  # Random UUID for the job
-        job = JobMetadata(job_id, request.gis_joins)
+        job_id: str = generate_job_id()  # Random UUID for the job
+        job: JobMetadata = JobMetadata(job_id, request.gis_joins)
         info(f"Created job id {job_id}")
 
         # Find and select workers with GISJOINs local to them
         for gis_join in request.gis_joins:
-            shard_hosting_gis_join = self.gis_join_locations[gis_join]
-            worker = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
+            shard_hosting_gis_join: ShardMetadata = self.gis_join_locations[gis_join]
+            worker: WorkerMetadata = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
             if worker is None:
                 error(f"Unable to find registered worker for GISJOIN {gis_join}")
                 continue
 
             # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
-            worker_job = get_or_create_worker_job(worker, job_id)
+            worker_job: WorkerJobMetadata = get_or_create_worker_job(worker, job_id)
             worker_job.gis_joins.append(gis_join)
             job.worker_jobs[worker.hostname] = worker_job
 
@@ -259,24 +259,11 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(err_msg)
             return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
 
-        # Select strategy for submitting the job from the master
-        if request.master_job_mode == JobMode.MULTITHREADED:
-            info("Launching jobs in multi-threaded mode")
-            validation_job_responses = launch_worker_jobs_multithreaded(job, request)
-        elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
-            info("Launching jobs in asynchronous mode")
-            validation_job_responses = launch_worker_jobs_asynchronously(job, request)
-        else:
-            info("Launching jobs in synchronous mode")
-            validation_job_responses = launch_worker_jobs_synchronously(job, request)
-
-        info("Received all validation responses, returning...")
-
         # Gather all the WorkerValidationJobResponses
         worker_job_responses = []
         errors = []
         ok = True
-        for worker_response in validation_job_responses:
+        for worker_response in launch_worker_jobs(request, job):
             if not worker_response.ok:
                 ok = False
                 error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
@@ -292,6 +279,23 @@ class Master(validation_pb2_grpc.MasterServicer):
             duration_sec=profiler.elapsed,
             worker_responses=worker_job_responses
         )
+
+
+# Returns validation job responses
+def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> list:
+    # Select strategy for submitting the job from the master
+    if request.master_job_mode == JobMode.MULTITHREADED:
+        info("Launching jobs in multi-threaded mode")
+        validation_job_responses = launch_worker_jobs_multithreaded(job, request)
+    elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
+        info("Launching jobs in asynchronous mode")
+        validation_job_responses = launch_worker_jobs_asynchronously(job, request)
+    else:
+        info("Launching jobs in synchronous mode")
+        validation_job_responses = launch_worker_jobs_synchronously(job, request)
+
+    info("Received all validation responses, returning...")
+    return validation_job_responses
 
 
 def run(master_port=50051, local_testing=False):

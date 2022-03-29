@@ -75,9 +75,10 @@ message ValidationMetric {
   string gis_join = 1;
   double loss = 2;
   double accuracy = 3;
-  double duration_sec = 4;
-  bool ok = 5;
-  string error_msg = 6;
+  double variance = 4;
+  double duration_sec = 5;
+  bool ok = 6;
+  string error_msg = 7;
 }
 
 message ModelFile {
