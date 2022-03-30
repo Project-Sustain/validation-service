@@ -219,7 +219,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         else:
             return False, f"Unsupported spatial_coverage type {SpatialCoverage.Name(request.spatial_coverage)}"
 
-        request.spatial_allocations[:] = spatial_allocations
+        request.allocations[:] = spatial_allocations
         return True, ""
 
 
@@ -256,13 +256,14 @@ class Master(validation_pb2_grpc.MasterServicer):
         profiler: Timer = Timer()
         profiler.start()
 
-        info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
+        if request.spatial_coverage == SpatialCoverage.ALL:
+            info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
+        else:
+            info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
+
         job_id: str = generate_job_id()  # Random UUID for the job
         job: JobMetadata = JobMetadata(job_id, request.gis_joins)
         info(f"Created job id {job_id}")
-
-
-
 
         # Sets up all the initial allocations per GISJOIN
         if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
