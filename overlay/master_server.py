@@ -11,15 +11,21 @@ from overlay.db import shards, locality
 from overlay.db.shards import ShardMetadata
 from overlay.profiler import Timer
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
-    ValidationJobRequest, JobMode, BudgetType, ValidationBudget
+    ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, Allocation
 
 
 class JobMetadata:
 
-    def __init__(self, job_id, gis_joins):
+    # Takes a job ID and a list of SpatialAllocations
+    # Example: [
+    #           {gis_join: "G5600050", strata_limit: 2000, sample_rate: 0.0},
+    #           {gis_join: "G5600170", strata_limit: 2300, sample_rate: 0.0},
+    #           ...
+    #          ]
+    def __init__(self, job_id: str, gis_joins: list):
         self.job_id = job_id
         self.worker_jobs = {}  # Mapping of { worker_hostname -> WorkerJobMetadata }
-        self.gis_joins = gis_joins
+        self.gis_joins = gis_joins  # list of SpatialAllocation objects
         self.status = "NEW"
 
 
@@ -28,14 +34,19 @@ class WorkerJobMetadata:
     def __init__(self, job_id, worker_ref):
         self.job_id = job_id
         self.worker = worker_ref
-        self.gis_joins = []
+        self.gis_joins = []  # list of SpatialAllocation objects
         self.status = "NEW"
 
     def complete(self):
         self.status = "DONE"
 
     def __repr__(self):
-        return f"WorkerJobMetadata: job_id={self.job_id}, worker={self.worker.hostname}, status={self.status}, gis_joins={self.gis_joins}"
+        gis_joins_str = ""
+        for gis_join in self.gis_joins:
+            gis_joins_str += "  {gis_join=%s, strata_limit=%d, sample_rate=%.2f}\n" \
+                             % (gis_join.gis_join, gis_join.strata_limit, gis_join.sample_rate)
+        return f"WorkerJobMetadata: job_id={self.job_id}, worker={self.worker.hostname}, status={self.status}, " \
+               f"gis_joins=[\n{gis_joins_str}\n]"
 
 
 class WorkerMetadata:
@@ -222,7 +233,8 @@ class Master(validation_pb2_grpc.MasterServicer):
         info(f"Created job id {job_id}")
 
         # Find and select workers with GISJOINs local to them
-        for gis_join in request.gis_joins:
+        for spatial_allocation in request.gis_joins:
+            gis_join = spatial_allocation.gis_join
             shard_hosting_gis_join: ShardMetadata = self.gis_join_locations[gis_join]
             worker: WorkerMetadata = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
             if worker is None:
@@ -231,71 +243,119 @@ class Master(validation_pb2_grpc.MasterServicer):
 
             # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
             worker_job: WorkerJobMetadata = get_or_create_worker_job(worker, job_id)
-            worker_job.gis_joins.append(gis_join)
+            worker_job.gis_joins.append(spatial_allocation)
             job.worker_jobs[worker.hostname] = worker_job
 
-        # Log selected workers
-        for worker_hostname, worker_job in job.worker_jobs.items():
-            info(f"{worker_hostname}: {worker_job}")
 
-        # Validation budget inference
-        budget_type: BudgetType = request.validation_budget.budget_type
-        if budget_type == BudgetType.STATIC_BUDGET:
-            static_budget: ValidationBudget = request.validation_budget.static_budget
-            if static_budget.total_limit > 0:
-                # Choose an equal limit per GISJOIN/strata that sums to the total budget limit
-                if static_budget.total_limit > len(request.gis_joins):
-                    static_budget.strata_limit = static_budget.total_limit // len(request.gis_joins)
-                else:
-                    info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
-                    static_budget.strata_limit = 1
+        # Sets up all the initial allocations per GISJOIN
+        if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+            pass
 
-        elif budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
-            err_msg = "Incremental variance budget not yet implemented!"
-            error(err_msg)
-            return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
-        else:
-            err_msg = f"Unknown budget type {request.validation_budget.budget_type}!"
-            error(err_msg)
-            return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
+        else:  # Default or static budget
 
-        # Gather all the WorkerValidationJobResponses
-        worker_job_responses = []
-        errors = []
-        ok = True
-        for worker_response in launch_worker_jobs(request, job):
-            if not worker_response.ok:
-                ok = False
-                error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
-                errors.append(error_msg)
-            worker_job_responses.append(worker_response)
+            # Set limit and sample rate for all GISJOINs
+            strata_limit, sample_rate = get_strata_limit_and_sample_rate(request)
+            for spatial_allocation in request.gis_joins:
+                spatial_allocation.strata_limit = strata_limit
+                spatial_allocation.sample_rate = sample_rate
 
-        error_msg = f"errors: {errors}"
-        profiler.stop()
-        return ValidationJobResponse(
-            id=job_id,
-            ok=ok,
-            error_msg=error_msg,
-            duration_sec=profiler.elapsed,
-            worker_responses=worker_job_responses
-        )
+            # Log selected workers
+            for worker_hostname, worker_job in job.worker_jobs.items():
+                info(f"{worker_hostname}: {worker_job}")
+
+            return ValidationJobResponse(
+                id="test",
+                ok=True,
+                error_msg="",
+                duration_sec=0.0,
+                worker_responses=[]
+            )
+
+            # Gather all the WorkerValidationJobResponses and check for errors
+            worker_responses = launch_worker_jobs(request, job)
+            errors = []
+            ok = True
+            for worker_response in worker_responses:
+                if not worker_response.ok:
+                    ok = False
+                    error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
+                    errors.append(error_msg)
+
+            error_msg = f"errors: {errors}"
+            profiler.stop()
+
+            return ValidationJobResponse(
+                id=job_id,
+                ok=ok,
+                error_msg=error_msg,
+                duration_sec=profiler.elapsed,
+                worker_responses=worker_responses
+            )
 
 
-# Returns validation job responses
+# Gets the limit and sample rate from the budget if supplied, and if not,
+# defaults to no limit and no sample rate.
+def get_strata_limit_and_sample_rate(request: ValidationJobRequest) -> (int, float):
+    # Defaults
+    strata_limit = 0
+    sample_rate = 0.0
+
+    if request.validation_budget.budget_type == BudgetType.STATIC_BUDGET:
+        static_budget = request.validation_budget.static_budget
+        if 0.0 < static_budget.sample_rate <= 1.0:
+            sample_rate = static_budget.sample_rate
+
+        if static_budget.strata_limit > 0:
+            strata_limit = static_budget.strata_limit
+
+        if static_budget.total_limit > 0:
+            # Choose an equal limit per GISJOIN/strata that sums to the total budget limit
+            if static_budget.total_limit > len(request.gis_joins):
+                strata_limit = static_budget.total_limit // len(request.gis_joins)
+            else:
+                info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
+                strata_limit = 1
+
+    return strata_limit, sample_rate
+
+
+# Processes a job with an incremental variance validation budget.
+# Returns a list of WorkerValidationJobResponse objects.
+def process_job_with_variance_budget(request: ValidationJobRequest, job: JobMetadata) -> list:
+    variance_budget: IncrementalVarianceBudget = request.validation_budget.variance_budget
+
+    # Establish initial allocations
+    gis_join_allocations = []
+    for gis_join in request.gis_joins:
+        gis_join_allocations.append(Allocation(
+            gis_join=gis_join,
+            allocation=variance_budget.initial_allocation
+        ))
+    variance_budget.allocations[:] = gis_join_allocations
+    request.variance_budget = variance_budget
+
+    results_for_allocations = []
+    worker_responses = launch_worker_jobs(request, job)
+
+    return launch_worker_jobs(request, job)
+
+
+# Launches a round of worker jobs based on the master job mode selected.
+# Returns a list of WorkerValidationJobResponse objects.
 def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> list:
     # Select strategy for submitting the job from the master
     if request.master_job_mode == JobMode.MULTITHREADED:
         info("Launching jobs in multi-threaded mode")
-        validation_job_responses = launch_worker_jobs_multithreaded(job, request)
+        worker_validation_job_responses = launch_worker_jobs_multithreaded(job, request)
     elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
         info("Launching jobs in asynchronous mode")
-        validation_job_responses = launch_worker_jobs_asynchronously(job, request)
+        worker_validation_job_responses = launch_worker_jobs_asynchronously(job, request)
     else:
         info("Launching jobs in synchronous mode")
-        validation_job_responses = launch_worker_jobs_synchronously(job, request)
+        worker_validation_job_responses = launch_worker_jobs_synchronously(job, request)
 
     info("Received all validation responses, returning...")
-    return validation_job_responses
+    return worker_validation_job_responses
 
 
 def run(master_port=50051, local_testing=False):

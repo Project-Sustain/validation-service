@@ -52,7 +52,7 @@ message ValidationJobRequest {
   bool normalize_inputs = 13;
   ValidationBudget validation_budget = 14;
   LossFunction loss_function = 15;
-  repeated string gis_joins = 16;
+  repeated SpatialAllocation gis_joins = 16;
   ModelFile model_file = 17;
 }
 
@@ -73,12 +73,13 @@ message WorkerValidationJobResponse {
 
 message ValidationMetric {
   string gis_join = 1;
-  double loss = 2;
-  double accuracy = 3;
-  double variance = 4;
-  double duration_sec = 5;
-  bool ok = 6;
-  string error_msg = 7;
+  int64  allocation = 2;
+  double loss = 3;
+  double accuracy = 4;
+  double variance = 5;
+  double duration_sec = 6;
+  bool ok = 7;
+  string error_msg = 8;
 }
 
 message ModelFile {
@@ -98,6 +99,12 @@ message MongoReadConfig {
   string read_concern = 2;
 }
 
+message SpatialAllocation {
+  string gis_join = 1;
+  int64  strata_limit = 2;
+  float  sample_rate = 3;
+}
+
 message ValidationBudget {
   BudgetType budget_type = 1;
   StaticBudget static_budget = 2;
@@ -105,7 +112,7 @@ message ValidationBudget {
 }
 
 message IncrementalVarianceBudget {
-  int64 initial_allocation = 1; // What every GISJOIN starts with, before more gets allocated
+  int64 initial_allocation = 1; // Initial equal allocation for all GISJOINs
 }
 
 message StaticBudget {

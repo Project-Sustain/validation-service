@@ -1,0 +1,9460 @@
+{
+  "master_job_mode": "ASYNCHRONOUS",
+  "worker_job_mode": "MULTIPROCESSING",
+  "model_framework": "TENSORFLOW",
+  "model_category": "REGRESSION",
+  "mongo_host": "localhost",
+  "mongo_port": 27017,
+  "read_config": {
+    "read_preference": "primary",
+    "read_concern": "local"
+  },
+  "database": "sustaindb",
+  "collection": "noaa_nam",
+  "feature_fields": [
+    "PRESSURE_AT_SURFACE_PASCAL",
+    "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT"
+  ],
+  "label_field": "TEMPERATURE_AT_SURFACE_KELVIN",
+  "normalize_inputs": true,
+  "validation_budget": {
+    "budget_type": "STATIC_BUDGET",
+    "static_budget": {
+      "total_limit": 0,
+      "strata_limit": 0,
+      "sample_rate": 0.5
+    }
+  },
+  "loss_function": "MEAN_SQUARED_ERROR",
+  "gis_joins": [
+    {
+      "gis_join": "G5600170"
+    },
+    {
+      "gis_join": "G5600030"
+    },
+    {
+      "gis_join": "G5600050"
+    },
+    {
+      "gis_join": "G5600210"
+    },
+    {
+      "gis_join": "G5600110"
+    },
+    {
+      "gis_join": "G5600270"
+    },
+    {
+      "gis_join": "G5600250"
+    },
+    {
+      "gis_join": "G5600430"
+    },
+    {
+      "gis_join": "G5600390"
+    },
+    {
+      "gis_join": "G5600330"
+    },
+    {
+      "gis_join": "G5600190"
+    },
+    {
+      "gis_join": "G5600450"
+    },
+    {
+      "gis_join": "G5600150"
+    },
+    {
+      "gis_join": "G5600010"
+    },
+    {
+      "gis_join": "G5600310"
+    },
+    {
+      "gis_join": "G5600090"
+    },
+    {
+      "gis_join": "G5600290"
+    },
+    {
+      "gis_join": "G5600410"
+    },
+    {
+      "gis_join": "G5600370"
+    },
+    {
+      "gis_join": "G5600230"
+    },
+    {
+      "gis_join": "G5600070"
+    },
+    {
+      "gis_join": "G5600350"
+    },
+    {
+      "gis_join": "G5600130"
+    },
+    {
+      "gis_join": "G3500570"
+    },
+    {
+      "gis_join": "G3500510"
+    },
+    {
+      "gis_join": "G3500250"
+    },
+    {
+      "gis_join": "G3500170"
+    },
+    {
+      "gis_join": "G3500190"
+    },
+    {
+      "gis_join": "G3500210"
+    },
+    {
+      "gis_join": "G3500410"
+    },
+    {
+      "gis_join": "G3500350"
+    },
+    {
+      "gis_join": "G3500550"
+    },
+    {
+      "gis_join": "G3500280"
+    },
+    {
+      "gis_join": "G3500060"
+    },
+    {
+      "gis_join": "G3500010"
+    },
+    {
+      "gis_join": "G3500150"
+    },
+    {
+      "gis_join": "G3500370"
+    },
+    {
+      "gis_join": "G3500450"
+    },
+    {
+      "gis_join": "G3500230"
+    },
+    {
+      "gis_join": "G3500090"
+    },
+    {
+      "gis_join": "G3500110"
+    },
+    {
+      "gis_join": "G3500070"
+    },
+    {
+      "gis_join": "G3500430"
+    },
+    {
+      "gis_join": "G3500290"
+    },
+    {
+      "gis_join": "G3500050"
+    },
+    {
+      "gis_join": "G3500470"
+    },
+    {
+      "gis_join": "G3500390"
+    },
+    {
+      "gis_join": "G3500610"
+    },
+    {
+      "gis_join": "G3500530"
+    },
+    {
+      "gis_join": "G3500130"
+    },
+    {
+      "gis_join": "G3500330"
+    },
+    {
+      "gis_join": "G3500490"
+    },
+    {
+      "gis_join": "G3500270"
+    },
+    {
+      "gis_join": "G3500590"
+    },
+    {
+      "gis_join": "G3500310"
+    },
+    {
+      "gis_join": "G3500030"
+    },
+    {
+      "gis_join": "G4200390"
+    },
+    {
+      "gis_join": "G4200350"
+    },
+    {
+      "gis_join": "G4201330"
+    },
+    {
+      "gis_join": "G4200530"
+    },
+    {
+      "gis_join": "G4200610"
+    },
+    {
+      "gis_join": "G4200730"
+    },
+    {
+      "gis_join": "G4200930"
+    },
+    {
+      "gis_join": "G4200990"
+    },
+    {
+      "gis_join": "G4200030"
+    },
+    {
+      "gis_join": "G4200450"
+    },
+    {
+      "gis_join": "G4200330"
+    },
+    {
+      "gis_join": "G4200830"
+    },
+    {
+      "gis_join": "G4200210"
+    },
+    {
+      "gis_join": "G4200010"
+    },
+    {
+      "gis_join": "G4200510"
+    },
+    {
+      "gis_join": "G4200890"
+    },
+    {
+      "gis_join": "G4201310"
+    },
+    {
+      "gis_join": "G4200370"
+    },
+    {
+      "gis_join": "G4200090"
+    },
+    {
+      "gis_join": "G4201170"
+    },
+    {
+      "gis_join": "G4200490"
+    },
+    {
+      "gis_join": "G4200850"
+    },
+    {
+      "gis_join": "G4200110"
+    },
+    {
+      "gis_join": "G4200190"
+    },
+    {
+      "gis_join": "G4200170"
+    },
+    {
+      "gis_join": "G4200590"
+    },
+    {
+      "gis_join": "G4201090"
+    },
+    {
+      "gis_join": "G4200650"
+    },
+    {
+      "gis_join": "G4200430"
+    },
+    {
+      "gis_join": "G4200570"
+    },
+    {
+      "gis_join": "G4200070"
+    },
+    {
+      "gis_join": "G4200410"
+    },
+    {
+      "gis_join": "G4201030"
+    },
+    {
+      "gis_join": "G4201070"
+    },
+    {
+      "gis_join": "G4201130"
+    },
+    {
+      "gis_join": "G4200130"
+    },
+    {
+      "gis_join": "G4201050"
+    },
+    {
+      "gis_join": "G4200150"
+    },
+    {
+      "gis_join": "G4200250"
+    },
+    {
+      "gis_join": "G4201270"
+    },
+    {
+      "gis_join": "G4201190"
+    },
+    {
+      "gis_join": "G4200230"
+    },
+    {
+      "gis_join": "G4200310"
+    },
+    {
+      "gis_join": "G4200970"
+    },
+    {
+      "gis_join": "G4200550"
+    },
+    {
+      "gis_join": "G4200950"
+    },
+    {
+      "gis_join": "G4200290"
+    },
+    {
+      "gis_join": "G4200810"
+    },
+    {
+      "gis_join": "G4201230"
+    },
+    {
+      "gis_join": "G4201250"
+    },
+    {
+      "gis_join": "G4201010"
+    },
+    {
+      "gis_join": "G4200470"
+    },
+    {
+      "gis_join": "G4201150"
+    },
+    {
+      "gis_join": "G4200910"
+    },
+    {
+      "gis_join": "G4200670"
+    },
+    {
+      "gis_join": "G4200790"
+    },
+    {
+      "gis_join": "G4200750"
+    },
+    {
+      "gis_join": "G4200870"
+    },
+    {
+      "gis_join": "G4200690"
+    },
+    {
+      "gis_join": "G4200270"
+    },
+    {
+      "gis_join": "G4200050"
+    },
+    {
+      "gis_join": "G4200630"
+    },
+    {
+      "gis_join": "G4201210"
+    },
+    {
+      "gis_join": "G4200770"
+    },
+    {
+      "gis_join": "G4201290"
+    },
+    {
+      "gis_join": "G4201110"
+    },
+    {
+      "gis_join": "G4200710"
+    },
+    {
+      "gis_join": "G3900490"
+    },
+    {
+      "gis_join": "G3901590"
+    },
+    {
+      "gis_join": "G3900030"
+    },
+    {
+      "gis_join": "G3900390"
+    },
+    {
+      "gis_join": "G3900270"
+    },
+    {
+      "gis_join": "G3900750"
+    },
+    {
+      "gis_join": "G3900230"
+    },
+    {
+      "gis_join": "G3900470"
+    },
+    {
+      "gis_join": "G3900930"
+    },
+    {
+      "gis_join": "G3901610"
+    },
+    {
+      "gis_join": "G3901050"
+    },
+    {
+      "gis_join": "G3901070"
+    },
+    {
+      "gis_join": "G3901490"
+    },
+    {
+      "gis_join": "G3901110"
+    },
+    {
+      "gis_join": "G3900730"
+    },
+    {
+      "gis_join": "G3900510"
+    },
+    {
+      "gis_join": "G3900310"
+    },
+    {
+      "gis_join": "G3901130"
+    },
+    {
+      "gis_join": "G3900150"
+    },
+    {
+      "gis_join": "G3900670"
+    },
+    {
+      "gis_join": "G3900070"
+    },
+    {
+      "gis_join": "G3901390"
+    },
+    {
+      "gis_join": "G3900610"
+    },
+    {
+      "gis_join": "G3900870"
+    },
+    {
+      "gis_join": "G3901430"
+    },
+    {
+      "gis_join": "G3900530"
+    },
+    {
+      "gis_join": "G3901750"
+    },
+    {
+      "gis_join": "G3900290"
+    },
+    {
+      "gis_join": "G3900910"
+    },
+    {
+      "gis_join": "G3900770"
+    },
+    {
+      "gis_join": "G3901150"
+    },
+    {
+      "gis_join": "G3900450"
+    },
+    {
+      "gis_join": "G3900850"
+    },
+    {
+      "gis_join": "G3901550"
+    },
+    {
+      "gis_join": "G3901510"
+    },
+    {
+      "gis_join": "G3900130"
+    },
+    {
+      "gis_join": "G3901250"
+    },
+    {
+      "gis_join": "G3901170"
+    },
+    {
+      "gis_join": "G3901350"
+    },
+    {
+      "gis_join": "G3901230"
+    },
+    {
+      "gis_join": "G3900810"
+    },
+    {
+      "gis_join": "G3901570"
+    },
+    {
+      "gis_join": "G3900790"
+    },
+    {
+      "gis_join": "G3901470"
+    },
+    {
+      "gis_join": "G3901690"
+    },
+    {
+      "gis_join": "G3900410"
+    },
+    {
+      "gis_join": "G3900630"
+    },
+    {
+      "gis_join": "G3901370"
+    },
+    {
+      "gis_join": "G3900950"
+    },
+    {
+      "gis_join": "G3900650"
+    },
+    {
+      "gis_join": "G3900890"
+    },
+    {
+      "gis_join": "G3900210"
+    },
+    {
+      "gis_join": "G3900090"
+    },
+    {
+      "gis_join": "G3901310"
+    },
+    {
+      "gis_join": "G3900430"
+    },
+    {
+      "gis_join": "G3900970"
+    },
+    {
+      "gis_join": "G3900570"
+    },
+    {
+      "gis_join": "G3900350"
+    },
+    {
+      "gis_join": "G3901730"
+    },
+    {
+      "gis_join": "G3900370"
+    },
+    {
+      "gis_join": "G3901010"
+    },
+    {
+      "gis_join": "G3900710"
+    },
+    {
+      "gis_join": "G3901410"
+    },
+    {
+      "gis_join": "G3900170"
+    },
+    {
+      "gis_join": "G3901270"
+    },
+    {
+      "gis_join": "G3900990"
+    },
+    {
+      "gis_join": "G3900250"
+    },
+    {
+      "gis_join": "G3900830"
+    },
+    {
+      "gis_join": "G3900110"
+    },
+    {
+      "gis_join": "G3901290"
+    },
+    {
+      "gis_join": "G3900190"
+    },
+    {
+      "gis_join": "G3901210"
+    },
+    {
+      "gis_join": "G3900010"
+    },
+    {
+      "gis_join": "G3900590"
+    },
+    {
+      "gis_join": "G3901330"
+    },
+    {
+      "gis_join": "G3901530"
+    },
+    {
+      "gis_join": "G3901190"
+    },
+    {
+      "gis_join": "G3900550"
+    },
+    {
+      "gis_join": "G3901710"
+    },
+    {
+      "gis_join": "G3901630"
+    },
+    {
+      "gis_join": "G3901090"
+    },
+    {
+      "gis_join": "G3900330"
+    },
+    {
+      "gis_join": "G3901670"
+    },
+    {
+      "gis_join": "G3900050"
+    },
+    {
+      "gis_join": "G3901030"
+    },
+    {
+      "gis_join": "G3900690"
+    },
+    {
+      "gis_join": "G3901450"
+    },
+    {
+      "gis_join": "G3901650"
+    },
+    {
+      "gis_join": "G4400010"
+    },
+    {
+      "gis_join": "G4400030"
+    },
+    {
+      "gis_join": "G4400090"
+    },
+    {
+      "gis_join": "G4400070"
+    },
+    {
+      "gis_join": "G4400050"
+    },
+    {
+      "gis_join": "G3200110"
+    },
+    {
+      "gis_join": "G3200090"
+    },
+    {
+      "gis_join": "G3200130"
+    },
+    {
+      "gis_join": "G3200150"
+    },
+    {
+      "gis_join": "G3200190"
+    },
+    {
+      "gis_join": "G3200310"
+    },
+    {
+      "gis_join": "G3200170"
+    },
+    {
+      "gis_join": "G3200050"
+    },
+    {
+      "gis_join": "G3200030"
+    },
+    {
+      "gis_join": "G3200210"
+    },
+    {
+      "gis_join": "G3200330"
+    },
+    {
+      "gis_join": "G3200010"
+    },
+    {
+      "gis_join": "G3200290"
+    },
+    {
+      "gis_join": "G3200230"
+    },
+    {
+      "gis_join": "G3205100"
+    },
+    {
+      "gis_join": "G3200270"
+    },
+    {
+      "gis_join": "G3200070"
+    },
+    {
+      "gis_join": "G4900350"
+    },
+    {
+      "gis_join": "G4900530"
+    },
+    {
+      "gis_join": "G4900230"
+    },
+    {
+      "gis_join": "G4900050"
+    },
+    {
+      "gis_join": "G4900030"
+    },
+    {
+      "gis_join": "G4900310"
+    },
+    {
+      "gis_join": "G4900570"
+    },
+    {
+      "gis_join": "G4900210"
+    },
+    {
+      "gis_join": "G4900510"
+    },
+    {
+      "gis_join": "G4900430"
+    },
+    {
+      "gis_join": "G4900470"
+    },
+    {
+      "gis_join": "G4900190"
+    },
+    {
+      "gis_join": "G4900250"
+    },
+    {
+      "gis_join": "G4900130"
+    },
+    {
+      "gis_join": "G4900410"
+    },
+    {
+      "gis_join": "G4900390"
+    },
+    {
+      "gis_join": "G4900270"
+    },
+    {
+      "gis_join": "G4900110"
+    },
+    {
+      "gis_join": "G4900550"
+    },
+    {
+      "gis_join": "G4900490"
+    },
+    {
+      "gis_join": "G4900330"
+    },
+    {
+      "gis_join": "G4900170"
+    },
+    {
+      "gis_join": "G4900150"
+    },
+    {
+      "gis_join": "G4900370"
+    },
+    {
+      "gis_join": "G4900290"
+    },
+    {
+      "gis_join": "G4900450"
+    },
+    {
+      "gis_join": "G4900010"
+    },
+    {
+      "gis_join": "G4900090"
+    },
+    {
+      "gis_join": "G4900070"
+    },
+    {
+      "gis_join": "G3800070"
+    },
+    {
+      "gis_join": "G3800190"
+    },
+    {
+      "gis_join": "G3800350"
+    },
+    {
+      "gis_join": "G3800410"
+    },
+    {
+      "gis_join": "G3800730"
+    },
+    {
+      "gis_join": "G3800790"
+    },
+    {
+      "gis_join": "G3800270"
+    },
+    {
+      "gis_join": "G3800650"
+    },
+    {
+      "gis_join": "G3800290"
+    },
+    {
+      "gis_join": "G3800250"
+    },
+    {
+      "gis_join": "G3800970"
+    },
+    {
+      "gis_join": "G3800390"
+    },
+    {
+      "gis_join": "G3801030"
+    },
+    {
+      "gis_join": "G3800870"
+    },
+    {
+      "gis_join": "G3800130"
+    },
+    {
+      "gis_join": "G3800670"
+    },
+    {
+      "gis_join": "G3800110"
+    },
+    {
+      "gis_join": "G3800570"
+    },
+    {
+      "gis_join": "G3800370"
+    },
+    {
+      "gis_join": "G3800710"
+    },
+    {
+      "gis_join": "G3801010"
+    },
+    {
+      "gis_join": "G3800210"
+    },
+    {
+      "gis_join": "G3800690"
+    },
+    {
+      "gis_join": "G3800510"
+    },
+    {
+      "gis_join": "G3800990"
+    },
+    {
+      "gis_join": "G3800590"
+    },
+    {
+      "gis_join": "G3800230"
+    },
+    {
+      "gis_join": "G3800910"
+    },
+    {
+      "gis_join": "G3800090"
+    },
+    {
+      "gis_join": "G3801050"
+    },
+    {
+      "gis_join": "G3800170"
+    },
+    {
+      "gis_join": "G3800770"
+    },
+    {
+      "gis_join": "G3800030"
+    },
+    {
+      "gis_join": "G3800930"
+    },
+    {
+      "gis_join": "G3800530"
+    },
+    {
+      "gis_join": "G3800050"
+    },
+    {
+      "gis_join": "G3800550"
+    },
+    {
+      "gis_join": "G3800330"
+    },
+    {
+      "gis_join": "G3800310"
+    },
+    {
+      "gis_join": "G3800470"
+    },
+    {
+      "gis_join": "G3800950"
+    },
+    {
+      "gis_join": "G3800150"
+    },
+    {
+      "gis_join": "G3800850"
+    },
+    {
+      "gis_join": "G3800830"
+    },
+    {
+      "gis_join": "G3800890"
+    },
+    {
+      "gis_join": "G3800810"
+    },
+    {
+      "gis_join": "G3800750"
+    },
+    {
+      "gis_join": "G3800010"
+    },
+    {
+      "gis_join": "G3800630"
+    },
+    {
+      "gis_join": "G3800490"
+    },
+    {
+      "gis_join": "G3800430"
+    },
+    {
+      "gis_join": "G3800610"
+    },
+    {
+      "gis_join": "G3800450"
+    },
+    {
+      "gis_join": "G2000970"
+    },
+    {
+      "gis_join": "G2001590"
+    },
+    {
+      "gis_join": "G2001650"
+    },
+    {
+      "gis_join": "G2001290"
+    },
+    {
+      "gis_join": "G2000810"
+    },
+    {
+      "gis_join": "G2000190"
+    },
+    {
+      "gis_join": "G2002010"
+    },
+    {
+      "gis_join": "G2001130"
+    },
+    {
+      "gis_join": "G2000090"
+    },
+    {
+      "gis_join": "G2001710"
+    },
+    {
+      "gis_join": "G2000890"
+    },
+    {
+      "gis_join": "G2001310"
+    },
+    {
+      "gis_join": "G2000670"
+    },
+    {
+      "gis_join": "G2000610"
+    },
+    {
+      "gis_join": "G2000950"
+    },
+    {
+      "gis_join": "G2000990"
+    },
+    {
+      "gis_join": "G2000690"
+    },
+    {
+      "gis_join": "G2000250"
+    },
+    {
+      "gis_join": "G2001690"
+    },
+    {
+      "gis_join": "G2001350"
+    },
+    {
+      "gis_join": "G2001810"
+    },
+    {
+      "gis_join": "G2001390"
+    },
+    {
+      "gis_join": "G2000070"
+    },
+    {
+      "gis_join": "G2000030"
+    },
+    {
+      "gis_join": "G2002050"
+    },
+    {
+      "gis_join": "G2000790"
+    },
+    {
+      "gis_join": "G2000470"
+    },
+    {
+      "gis_join": "G2001030"
+    },
+    {
+      "gis_join": "G2001630"
+    },
+    {
+      "gis_join": "G2000390"
+    },
+    {
+      "gis_join": "G2001070"
+    },
+    {
+      "gis_join": "G2001270"
+    },
+    {
+      "gis_join": "G2001890"
+    },
+    {
+      "gis_join": "G2001670"
+    },
+    {
+      "gis_join": "G2002030"
+    },
+    {
+      "gis_join": "G2001530"
+    },
+    {
+      "gis_join": "G2001330"
+    },
+    {
+      "gis_join": "G2000650"
+    },
+    {
+      "gis_join": "G2001830"
+    },
+    {
+      "gis_join": "G2000930"
+    },
+    {
+      "gis_join": "G2000630"
+    },
+    {
+      "gis_join": "G2000310"
+    },
+    {
+      "gis_join": "G2000730"
+    },
+    {
+      "gis_join": "G2001610"
+    },
+    {
+      "gis_join": "G2001850"
+    },
+    {
+      "gis_join": "G2000490"
+    },
+    {
+      "gis_join": "G2001730"
+    },
+    {
+      "gis_join": "G2001430"
+    },
+    {
+      "gis_join": "G2001770"
+    },
+    {
+      "gis_join": "G2001190"
+    },
+    {
+      "gis_join": "G2001150"
+    },
+    {
+      "gis_join": "G2001910"
+    },
+    {
+      "gis_join": "G2001230"
+    },
+    {
+      "gis_join": "G2001510"
+    },
+    {
+      "gis_join": "G2000450"
+    },
+    {
+      "gis_join": "G2000530"
+    },
+    {
+      "gis_join": "G2001210"
+    },
+    {
+      "gis_join": "G2000210"
+    },
+    {
+      "gis_join": "G2000430"
+    },
+    {
+      "gis_join": "G2001050"
+    },
+    {
+      "gis_join": "G2001750"
+    },
+    {
+      "gis_join": "G2000350"
+    },
+    {
+      "gis_join": "G2000710"
+    },
+    {
+      "gis_join": "G2001570"
+    },
+    {
+      "gis_join": "G2000550"
+    },
+    {
+      "gis_join": "G2000330"
+    },
+    {
+      "gis_join": "G2000590"
+    },
+    {
+      "gis_join": "G2001790"
+    },
+    {
+      "gis_join": "G2001450"
+    },
+    {
+      "gis_join": "G2000270"
+    },
+    {
+      "gis_join": "G2002070"
+    },
+    {
+      "gis_join": "G2001470"
+    },
+    {
+      "gis_join": "G2000110"
+    },
+    {
+      "gis_join": "G2001970"
+    },
+    {
+      "gis_join": "G2000850"
+    },
+    {
+      "gis_join": "G2001090"
+    },
+    {
+      "gis_join": "G2000570"
+    },
+    {
+      "gis_join": "G2001870"
+    },
+    {
+      "gis_join": "G2001550"
+    },
+    {
+      "gis_join": "G2000510"
+    },
+    {
+      "gis_join": "G2000170"
+    },
+    {
+      "gis_join": "G2001170"
+    },
+    {
+      "gis_join": "G2001250"
+    },
+    {
+      "gis_join": "G2002090"
+    },
+    {
+      "gis_join": "G2000770"
+    },
+    {
+      "gis_join": "G2000290"
+    },
+    {
+      "gis_join": "G2001010"
+    },
+    {
+      "gis_join": "G2000370"
+    },
+    {
+      "gis_join": "G2001950"
+    },
+    {
+      "gis_join": "G2000230"
+    },
+    {
+      "gis_join": "G2000150"
+    },
+    {
+      "gis_join": "G2000750"
+    },
+    {
+      "gis_join": "G2001930"
+    },
+    {
+      "gis_join": "G2001410"
+    },
+    {
+      "gis_join": "G2000830"
+    },
+    {
+      "gis_join": "G2001370"
+    },
+    {
+      "gis_join": "G2000130"
+    },
+    {
+      "gis_join": "G2000010"
+    },
+    {
+      "gis_join": "G2001490"
+    },
+    {
+      "gis_join": "G2001110"
+    },
+    {
+      "gis_join": "G2000870"
+    },
+    {
+      "gis_join": "G2001990"
+    },
+    {
+      "gis_join": "G2000410"
+    },
+    {
+      "gis_join": "G2000050"
+    },
+    {
+      "gis_join": "G2000910"
+    },
+    {
+      "gis_join": "G3101470"
+    },
+    {
+      "gis_join": "G3101730"
+    },
+    {
+      "gis_join": "G3101510"
+    },
+    {
+      "gis_join": "G3100390"
+    },
+    {
+      "gis_join": "G3101670"
+    },
+    {
+      "gis_join": "G3101010"
+    },
+    {
+      "gis_join": "G3100570"
+    },
+    {
+      "gis_join": "G3100690"
+    },
+    {
+      "gis_join": "G3101390"
+    },
+    {
+      "gis_join": "G3101630"
+    },
+    {
+      "gis_join": "G3101830"
+    },
+    {
+      "gis_join": "G3101110"
+    },
+    {
+      "gis_join": "G3100910"
+    },
+    {
+      "gis_join": "G3100130"
+    },
+    {
+      "gis_join": "G3101310"
+    },
+    {
+      "gis_join": "G3100330"
+    },
+    {
+      "gis_join": "G3100950"
+    },
+    {
+      "gis_join": "G3100550"
+    },
+    {
+      "gis_join": "G3101450"
+    },
+    {
+      "gis_join": "G3100230"
+    },
+    {
+      "gis_join": "G3100530"
+    },
+    {
+      "gis_join": "G3101810"
+    },
+    {
+      "gis_join": "G3100930"
+    },
+    {
+      "gis_join": "G3101030"
+    },
+    {
+      "gis_join": "G3100750"
+    },
+    {
+      "gis_join": "G3100110"
+    },
+    {
+      "gis_join": "G3100290"
+    },
+    {
+      "gis_join": "G3101770"
+    },
+    {
+      "gis_join": "G3101290"
+    },
+    {
+      "gis_join": "G3100810"
+    },
+    {
+      "gis_join": "G3100630"
+    },
+    {
+      "gis_join": "G3100270"
+    },
+    {
+      "gis_join": "G3101370"
+    },
+    {
+      "gis_join": "G3100250"
+    },
+    {
+      "gis_join": "G3100310"
+    },
+    {
+      "gis_join": "G3101150"
+    },
+    {
+      "gis_join": "G3101430"
+    },
+    {
+      "gis_join": "G3100830"
+    },
+    {
+      "gis_join": "G3100090"
+    },
+    {
+      "gis_join": "G3100450"
+    },
+    {
+      "gis_join": "G3100510"
+    },
+    {
+      "gis_join": "G3101050"
+    },
+    {
+      "gis_join": "G3100990"
+    },
+    {
+      "gis_join": "G3100770"
+    },
+    {
+      "gis_join": "G3101570"
+    },
+    {
+      "gis_join": "G3101530"
+    },
+    {
+      "gis_join": "G3100970"
+    },
+    {
+      "gis_join": "G3101130"
+    },
+    {
+      "gis_join": "G3100730"
+    },
+    {
+      "gis_join": "G3101350"
+    },
+    {
+      "gis_join": "G3101190"
+    },
+    {
+      "gis_join": "G3101750"
+    },
+    {
+      "gis_join": "G3101250"
+    },
+    {
+      "gis_join": "G3101170"
+    },
+    {
+      "gis_join": "G3101270"
+    },
+    {
+      "gis_join": "G3100010"
+    },
+    {
+      "gis_join": "G3100670"
+    },
+    {
+      "gis_join": "G3101230"
+    },
+    {
+      "gis_join": "G3100610"
+    },
+    {
+      "gis_join": "G3100850"
+    },
+    {
+      "gis_join": "G3101070"
+    },
+    {
+      "gis_join": "G3101850"
+    },
+    {
+      "gis_join": "G3101090"
+    },
+    {
+      "gis_join": "G3100790"
+    },
+    {
+      "gis_join": "G3101490"
+    },
+    {
+      "gis_join": "G3101410"
+    },
+    {
+      "gis_join": "G3100890"
+    },
+    {
+      "gis_join": "G3100190"
+    },
+    {
+      "gis_join": "G3100590"
+    },
+    {
+      "gis_join": "G3100410"
+    },
+    {
+      "gis_join": "G3101210"
+    },
+    {
+      "gis_join": "G3101610"
+    },
+    {
+      "gis_join": "G3100050"
+    },
+    {
+      "gis_join": "G3100650"
+    },
+    {
+      "gis_join": "G3101690"
+    },
+    {
+      "gis_join": "G3100350"
+    },
+    {
+      "gis_join": "G3100470"
+    },
+    {
+      "gis_join": "G3100170"
+    },
+    {
+      "gis_join": "G3101330"
+    },
+    {
+      "gis_join": "G3100150"
+    },
+    {
+      "gis_join": "G3100370"
+    },
+    {
+      "gis_join": "G3100710"
+    },
+    {
+      "gis_join": "G3101550"
+    },
+    {
+      "gis_join": "G3100070"
+    },
+    {
+      "gis_join": "G3100210"
+    },
+    {
+      "gis_join": "G3100490"
+    },
+    {
+      "gis_join": "G3100430"
+    },
+    {
+      "gis_join": "G3101710"
+    },
+    {
+      "gis_join": "G3100030"
+    },
+    {
+      "gis_join": "G3100870"
+    },
+    {
+      "gis_join": "G3101590"
+    },
+    {
+      "gis_join": "G3101650"
+    },
+    {
+      "gis_join": "G3101790"
+    },
+    {
+      "gis_join": "G0500090"
+    },
+    {
+      "gis_join": "G0500430"
+    },
+    {
+      "gis_join": "G0500650"
+    },
+    {
+      "gis_join": "G0500710"
+    },
+    {
+      "gis_join": "G0500470"
+    },
+    {
+      "gis_join": "G0500370"
+    },
+    {
+      "gis_join": "G0501270"
+    },
+    {
+      "gis_join": "G0500670"
+    },
+    {
+      "gis_join": "G0501130"
+    },
+    {
+      "gis_join": "G0500570"
+    },
+    {
+      "gis_join": "G0501170"
+    },
+    {
+      "gis_join": "G0500190"
+    },
+    {
+      "gis_join": "G0500730"
+    },
+    {
+      "gis_join": "G0500550"
+    },
+    {
+      "gis_join": "G0500770"
+    },
+    {
+      "gis_join": "G0501290"
+    },
+    {
+      "gis_join": "G0500330"
+    },
+    {
+      "gis_join": "G0500930"
+    },
+    {
+      "gis_join": "G0500450"
+    },
+    {
+      "gis_join": "G0500290"
+    },
+    {
+      "gis_join": "G0500690"
+    },
+    {
+      "gis_join": "G0500070"
+    },
+    {
+      "gis_join": "G0501250"
+    },
+    {
+      "gis_join": "G0501030"
+    },
+    {
+      "gis_join": "G0500110"
+    },
+    {
+      "gis_join": "G0501490"
+    },
+    {
+      "gis_join": "G0501350"
+    },
+    {
+      "gis_join": "G0501330"
+    },
+    {
+      "gis_join": "G0500970"
+    },
+    {
+      "gis_join": "G0500830"
+    },
+    {
+      "gis_join": "G0500030"
+    },
+    {
+      "gis_join": "G0501470"
+    },
+    {
+      "gis_join": "G0500590"
+    },
+    {
+      "gis_join": "G0500630"
+    },
+    {
+      "gis_join": "G0501410"
+    },
+    {
+      "gis_join": "G0500810"
+    },
+    {
+      "gis_join": "G0501050"
+    },
+    {
+      "gis_join": "G0501430"
+    },
+    {
+      "gis_join": "G0500270"
+    },
+    {
+      "gis_join": "G0501090"
+    },
+    {
+      "gis_join": "G0500530"
+    },
+    {
+      "gis_join": "G0501310"
+    },
+    {
+      "gis_join": "G0500850"
+    },
+    {
+      "gis_join": "G0501110"
+    },
+    {
+      "gis_join": "G0501070"
+    },
+    {
+      "gis_join": "G0501210"
+    },
+    {
+      "gis_join": "G0500150"
+    },
+    {
+      "gis_join": "G0501010"
+    },
+    {
+      "gis_join": "G0500310"
+    },
+    {
+      "gis_join": "G0501230"
+    },
+    {
+      "gis_join": "G0500170"
+    },
+    {
+      "gis_join": "G0500050"
+    },
+    {
+      "gis_join": "G0500130"
+    },
+    {
+      "gis_join": "G0500790"
+    },
+    {
+      "gis_join": "G0500230"
+    },
+    {
+      "gis_join": "G0500210"
+    },
+    {
+      "gis_join": "G0500250"
+    },
+    {
+      "gis_join": "G0501150"
+    },
+    {
+      "gis_join": "G0500610"
+    },
+    {
+      "gis_join": "G0501190"
+    },
+    {
+      "gis_join": "G0500490"
+    },
+    {
+      "gis_join": "G0500990"
+    },
+    {
+      "gis_join": "G0500350"
+    },
+    {
+      "gis_join": "G0500390"
+    },
+    {
+      "gis_join": "G0500510"
+    },
+    {
+      "gis_join": "G0500910"
+    },
+    {
+      "gis_join": "G0500410"
+    },
+    {
+      "gis_join": "G0501390"
+    },
+    {
+      "gis_join": "G0500010"
+    },
+    {
+      "gis_join": "G0500870"
+    },
+    {
+      "gis_join": "G0501450"
+    },
+    {
+      "gis_join": "G0500890"
+    },
+    {
+      "gis_join": "G0501370"
+    },
+    {
+      "gis_join": "G0500950"
+    },
+    {
+      "gis_join": "G0500750"
+    },
+    {
+      "gis_join": "G4100490"
+    },
+    {
+      "gis_join": "G4100030"
+    },
+    {
+      "gis_join": "G4100270"
+    },
+    {
+      "gis_join": "G4100070"
+    },
+    {
+      "gis_join": "G4100370"
+    },
+    {
+      "gis_join": "G4100610"
+    },
+    {
+      "gis_join": "G4100130"
+    },
+    {
+      "gis_join": "G4100090"
+    },
+    {
+      "gis_join": "G4100110"
+    },
+    {
+      "gis_join": "G4100630"
+    },
+    {
+      "gis_join": "G4100510"
+    },
+    {
+      "gis_join": "G4100190"
+    },
+    {
+      "gis_join": "G4100250"
+    },
+    {
+      "gis_join": "G4100410"
+    },
+    {
+      "gis_join": "G4100210"
+    },
+    {
+      "gis_join": "G4100390"
+    },
+    {
+      "gis_join": "G4100430"
+    },
+    {
+      "gis_join": "G4100710"
+    },
+    {
+      "gis_join": "G4100310"
+    },
+    {
+      "gis_join": "G4100150"
+    },
+    {
+      "gis_join": "G4100650"
+    },
+    {
+      "gis_join": "G4100590"
+    },
+    {
+      "gis_join": "G4100570"
+    },
+    {
+      "gis_join": "G4100550"
+    },
+    {
+      "gis_join": "G4100530"
+    },
+    {
+      "gis_join": "G4100290"
+    },
+    {
+      "gis_join": "G4100450"
+    },
+    {
+      "gis_join": "G4100670"
+    },
+    {
+      "gis_join": "G4100690"
+    },
+    {
+      "gis_join": "G4100470"
+    },
+    {
+      "gis_join": "G4100050"
+    },
+    {
+      "gis_join": "G4100350"
+    },
+    {
+      "gis_join": "G4100230"
+    },
+    {
+      "gis_join": "G4100010"
+    },
+    {
+      "gis_join": "G4100330"
+    },
+    {
+      "gis_join": "G4100170"
+    },
+    {
+      "gis_join": "G5500110"
+    },
+    {
+      "gis_join": "G5500150"
+    },
+    {
+      "gis_join": "G5500590"
+    },
+    {
+      "gis_join": "G5500550"
+    },
+    {
+      "gis_join": "G5500950"
+    },
+    {
+      "gis_join": "G5500850"
+    },
+    {
+      "gis_join": "G5500470"
+    },
+    {
+      "gis_join": "G5500630"
+    },
+    {
+      "gis_join": "G5500310"
+    },
+    {
+      "gis_join": "G5500230"
+    },
+    {
+      "gis_join": "G5500190"
+    },
+    {
+      "gis_join": "G5500510"
+    },
+    {
+      "gis_join": "G5500370"
+    },
+    {
+      "gis_join": "G5500610"
+    },
+    {
+      "gis_join": "G5500830"
+    },
+    {
+      "gis_join": "G5500490"
+    },
+    {
+      "gis_join": "G5500570"
+    },
+    {
+      "gis_join": "G5500930"
+    },
+    {
+      "gis_join": "G5501350"
+    },
+    {
+      "gis_join": "G5501050"
+    },
+    {
+      "gis_join": "G5500650"
+    },
+    {
+      "gis_join": "G5500690"
+    },
+    {
+      "gis_join": "G5500250"
+    },
+    {
+      "gis_join": "G5500290"
+    },
+    {
+      "gis_join": "G5500010"
+    },
+    {
+      "gis_join": "G5500210"
+    },
+    {
+      "gis_join": "G5501110"
+    },
+    {
+      "gis_join": "G5501070"
+    },
+    {
+      "gis_join": "G5500810"
+    },
+    {
+      "gis_join": "G5501390"
+    },
+    {
+      "gis_join": "G5500730"
+    },
+    {
+      "gis_join": "G5500050"
+    },
+    {
+      "gis_join": "G5500390"
+    },
+    {
+      "gis_join": "G5501010"
+    },
+    {
+      "gis_join": "G5500170"
+    },
+    {
+      "gis_join": "G5500710"
+    },
+    {
+      "gis_join": "G5500090"
+    },
+    {
+      "gis_join": "G5501130"
+    },
+    {
+      "gis_join": "G5500870"
+    },
+    {
+      "gis_join": "G5500890"
+    },
+    {
+      "gis_join": "G5501230"
+    },
+    {
+      "gis_join": "G5501370"
+    },
+    {
+      "gis_join": "G5500750"
+    },
+    {
+      "gis_join": "G5500450"
+    },
+    {
+      "gis_join": "G5500970"
+    },
+    {
+      "gis_join": "G5501310"
+    },
+    {
+      "gis_join": "G5500070"
+    },
+    {
+      "gis_join": "G5500530"
+    },
+    {
+      "gis_join": "G5501330"
+    },
+    {
+      "gis_join": "G5500330"
+    },
+    {
+      "gis_join": "G5501250"
+    },
+    {
+      "gis_join": "G5500780"
+    },
+    {
+      "gis_join": "G5500910"
+    },
+    {
+      "gis_join": "G5500790"
+    },
+    {
+      "gis_join": "G5500030"
+    },
+    {
+      "gis_join": "G5500410"
+    },
+    {
+      "gis_join": "G5501190"
+    },
+    {
+      "gis_join": "G5501030"
+    },
+    {
+      "gis_join": "G5500990"
+    },
+    {
+      "gis_join": "G5500130"
+    },
+    {
+      "gis_join": "G5501150"
+    },
+    {
+      "gis_join": "G5501170"
+    },
+    {
+      "gis_join": "G5501410"
+    },
+    {
+      "gis_join": "G5501210"
+    },
+    {
+      "gis_join": "G5500670"
+    },
+    {
+      "gis_join": "G5500350"
+    },
+    {
+      "gis_join": "G5500770"
+    },
+    {
+      "gis_join": "G5501090"
+    },
+    {
+      "gis_join": "G5500430"
+    },
+    {
+      "gis_join": "G5501290"
+    },
+    {
+      "gis_join": "G5501270"
+    },
+    {
+      "gis_join": "G5500270"
+    },
+    {
+      "gis_join": "G1300330"
+    },
+    {
+      "gis_join": "G1301510"
+    },
+    {
+      "gis_join": "G1302790"
+    },
+    {
+      "gis_join": "G1300650"
+    },
+    {
+      "gis_join": "G1302070"
+    },
+    {
+      "gis_join": "G1301950"
+    },
+    {
+      "gis_join": "G1300190"
+    },
+    {
+      "gis_join": "G1301790"
+    },
+    {
+      "gis_join": "G1300490"
+    },
+    {
+      "gis_join": "G1300990"
+    },
+    {
+      "gis_join": "G1302290"
+    },
+    {
+      "gis_join": "G1300150"
+    },
+    {
+      "gis_join": "G1300930"
+    },
+    {
+      "gis_join": "G1302190"
+    },
+    {
+      "gis_join": "G1301670"
+    },
+    {
+      "gis_join": "G1302690"
+    },
+    {
+      "gis_join": "G1300850"
+    },
+    {
+      "gis_join": "G1301250"
+    },
+    {
+      "gis_join": "G1301770"
+    },
+    {
+      "gis_join": "G1301710"
+    },
+    {
+      "gis_join": "G1300690"
+    },
+    {
+      "gis_join": "G1303170"
+    },
+    {
+      "gis_join": "G1300750"
+    },
+    {
+      "gis_join": "G1301430"
+    },
+    {
+      "gis_join": "G1302010"
+    },
+    {
+      "gis_join": "G1302350"
+    },
+    {
+      "gis_join": "G1301990"
+    },
+    {
+      "gis_join": "G1301330"
+    },
+    {
+      "gis_join": "G1301350"
+    },
+    {
+      "gis_join": "G1302450"
+    },
+    {
+      "gis_join": "G1303110"
+    },
+    {
+      "gis_join": "G1301190"
+    },
+    {
+      "gis_join": "G1302890"
+    },
+    {
+      "gis_join": "G1302050"
+    },
+    {
+      "gis_join": "G1300270"
+    },
+    {
+      "gis_join": "G1302430"
+    },
+    {
+      "gis_join": "G1302610"
+    },
+    {
+      "gis_join": "G1300550"
+    },
+    {
+      "gis_join": "G1302170"
+    },
+    {
+      "gis_join": "G1300030"
+    },
+    {
+      "gis_join": "G1302870"
+    },
+    {
+      "gis_join": "G1302510"
+    },
+    {
+      "gis_join": "G1302270"
+    },
+    {
+      "gis_join": "G1300070"
+    },
+    {
+      "gis_join": "G1301850"
+    },
+    {
+      "gis_join": "G1301750"
+    },
+    {
+      "gis_join": "G1301110"
+    },
+    {
+      "gis_join": "G1300370"
+    },
+    {
+      "gis_join": "G1300050"
+    },
+    {
+      "gis_join": "G1300430"
+    },
+    {
+      "gis_join": "G1301530"
+    },
+    {
+      "gis_join": "G1301210"
+    },
+    {
+      "gis_join": "G1303050"
+    },
+    {
+      "gis_join": "G1302850"
+    },
+    {
+      "gis_join": "G1301390"
+    },
+    {
+      "gis_join": "G1301030"
+    },
+    {
+      "gis_join": "G1302710"
+    },
+    {
+      "gis_join": "G1300810"
+    },
+    {
+      "gis_join": "G1302810"
+    },
+    {
+      "gis_join": "G1301810"
+    },
+    {
+      "gis_join": "G1302750"
+    },
+    {
+      "gis_join": "G1303070"
+    },
+    {
+      "gis_join": "G1300910"
+    },
+    {
+      "gis_join": "G1302650"
+    },
+    {
+      "gis_join": "G1303030"
+    },
+    {
+      "gis_join": "G1302210"
+    },
+    {
+      "gis_join": "G1300210"
+    },
+    {
+      "gis_join": "G1300470"
+    },
+    {
+      "gis_join": "G1300870"
+    },
+    {
+      "gis_join": "G1301870"
+    },
+    {
+      "gis_join": "G1301650"
+    },
+    {
+      "gis_join": "G1302550"
+    },
+    {
+      "gis_join": "G1301970"
+    },
+    {
+      "gis_join": "G1301410"
+    },
+    {
+      "gis_join": "G1300310"
+    },
+    {
+      "gis_join": "G1302930"
+    },
+    {
+      "gis_join": "G1300970"
+    },
+    {
+      "gis_join": "G1303190"
+    },
+    {
+      "gis_join": "G1300610"
+    },
+    {
+      "gis_join": "G1302670"
+    },
+    {
+      "gis_join": "G1302150"
+    },
+    {
+      "gis_join": "G1301610"
+    },
+    {
+      "gis_join": "G1303090"
+    },
+    {
+      "gis_join": "G1302730"
+    },
+    {
+      "gis_join": "G1301930"
+    },
+    {
+      "gis_join": "G1302570"
+    },
+    {
+      "gis_join": "G1301590"
+    },
+    {
+      "gis_join": "G1300710"
+    },
+    {
+      "gis_join": "G1301830"
+    },
+    {
+      "gis_join": "G1302830"
+    },
+    {
+      "gis_join": "G1300890"
+    },
+    {
+      "gis_join": "G1300770"
+    },
+    {
+      "gis_join": "G1302770"
+    },
+    {
+      "gis_join": "G1301890"
+    },
+    {
+      "gis_join": "G1301150"
+    },
+    {
+      "gis_join": "G1301910"
+    },
+    {
+      "gis_join": "G1302590"
+    },
+    {
+      "gis_join": "G1300350"
+    },
+    {
+      "gis_join": "G1300790"
+    },
+    {
+      "gis_join": "G1300950"
+    },
+    {
+      "gis_join": "G1301490"
+    },
+    {
+      "gis_join": "G1303210"
+    },
+    {
+      "gis_join": "G1301470"
+    },
+    {
+      "gis_join": "G1300570"
+    },
+    {
+      "gis_join": "G1302370"
+    },
+    {
+      "gis_join": "G1301450"
+    },
+    {
+      "gis_join": "G1301310"
+    },
+    {
+      "gis_join": "G1300530"
+    },
+    {
+      "gis_join": "G1301570"
+    },
+    {
+      "gis_join": "G1302310"
+    },
+    {
+      "gis_join": "G1302970"
+    },
+    {
+      "gis_join": "G1300110"
+    },
+    {
+      "gis_join": "G1300170"
+    },
+    {
+      "gis_join": "G1301370"
+    },
+    {
+      "gis_join": "G1302090"
+    },
+    {
+      "gis_join": "G1301290"
+    },
+    {
+      "gis_join": "G1300130"
+    },
+    {
+      "gis_join": "G1302230"
+    },
+    {
+      "gis_join": "G1303130"
+    },
+    {
+      "gis_join": "G1300010"
+    },
+    {
+      "gis_join": "G1300590"
+    },
+    {
+      "gis_join": "G1301730"
+    },
+    {
+      "gis_join": "G1302330"
+    },
+    {
+      "gis_join": "G1301630"
+    },
+    {
+      "gis_join": "G1301690"
+    },
+    {
+      "gis_join": "G1302410"
+    },
+    {
+      "gis_join": "G1302530"
+    },
+    {
+      "gis_join": "G1302490"
+    },
+    {
+      "gis_join": "G1302130"
+    },
+    {
+      "gis_join": "G1300230"
+    },
+    {
+      "gis_join": "G1300830"
+    },
+    {
+      "gis_join": "G1300390"
+    },
+    {
+      "gis_join": "G1302990"
+    },
+    {
+      "gis_join": "G1300290"
+    },
+    {
+      "gis_join": "G1300450"
+    },
+    {
+      "gis_join": "G1302630"
+    },
+    {
+      "gis_join": "G1302910"
+    },
+    {
+      "gis_join": "G1301270"
+    },
+    {
+      "gis_join": "G1302110"
+    },
+    {
+      "gis_join": "G1301130"
+    },
+    {
+      "gis_join": "G1303150"
+    },
+    {
+      "gis_join": "G1302470"
+    },
+    {
+      "gis_join": "G1300670"
+    },
+    {
+      "gis_join": "G1302950"
+    },
+    {
+      "gis_join": "G1301170"
+    },
+    {
+      "gis_join": "G1300730"
+    },
+    {
+      "gis_join": "G1301070"
+    },
+    {
+      "gis_join": "G1302390"
+    },
+    {
+      "gis_join": "G1300630"
+    },
+    {
+      "gis_join": "G1301050"
+    },
+    {
+      "gis_join": "G1300090"
+    },
+    {
+      "gis_join": "G1303010"
+    },
+    {
+      "gis_join": "G1301090"
+    },
+    {
+      "gis_join": "G1301230"
+    },
+    {
+      "gis_join": "G1300510"
+    },
+    {
+      "gis_join": "G1302250"
+    },
+    {
+      "gis_join": "G1301010"
+    },
+    {
+      "gis_join": "G1300250"
+    },
+    {
+      "gis_join": "G1301550"
+    },
+    {
+      "gis_join": "G3600230"
+    },
+    {
+      "gis_join": "G3600790"
+    },
+    {
+      "gis_join": "G3600570"
+    },
+    {
+      "gis_join": "G3600710"
+    },
+    {
+      "gis_join": "G3600410"
+    },
+    {
+      "gis_join": "G3601230"
+    },
+    {
+      "gis_join": "G3600050"
+    },
+    {
+      "gis_join": "G3600950"
+    },
+    {
+      "gis_join": "G3600370"
+    },
+    {
+      "gis_join": "G3601010"
+    },
+    {
+      "gis_join": "G3600110"
+    },
+    {
+      "gis_join": "G3600650"
+    },
+    {
+      "gis_join": "G3601150"
+    },
+    {
+      "gis_join": "G3600530"
+    },
+    {
+      "gis_join": "G3600070"
+    },
+    {
+      "gis_join": "G3600630"
+    },
+    {
+      "gis_join": "G3600350"
+    },
+    {
+      "gis_join": "G3600430"
+    },
+    {
+      "gis_join": "G3601130"
+    },
+    {
+      "gis_join": "G3600550"
+    },
+    {
+      "gis_join": "G3600610"
+    },
+    {
+      "gis_join": "G3600850"
+    },
+    {
+      "gis_join": "G3600130"
+    },
+    {
+      "gis_join": "G3600150"
+    },
+    {
+      "gis_join": "G3600330"
+    },
+    {
+      "gis_join": "G3600090"
+    },
+    {
+      "gis_join": "G3600990"
+    },
+    {
+      "gis_join": "G3600930"
+    },
+    {
+      "gis_join": "G3600750"
+    },
+    {
+      "gis_join": "G3600190"
+    },
+    {
+      "gis_join": "G3600830"
+    },
+    {
+      "gis_join": "G3600490"
+    },
+    {
+      "gis_join": "G3601110"
+    },
+    {
+      "gis_join": "G3600590"
+    },
+    {
+      "gis_join": "G3600690"
+    },
+    {
+      "gis_join": "G3600390"
+    },
+    {
+      "gis_join": "G3600670"
+    },
+    {
+      "gis_join": "G3600730"
+    },
+    {
+      "gis_join": "G3600210"
+    },
+    {
+      "gis_join": "G3601070"
+    },
+    {
+      "gis_join": "G3600470"
+    },
+    {
+      "gis_join": "G3600270"
+    },
+    {
+      "gis_join": "G3600510"
+    },
+    {
+      "gis_join": "G3600810"
+    },
+    {
+      "gis_join": "G3601210"
+    },
+    {
+      "gis_join": "G3600170"
+    },
+    {
+      "gis_join": "G3600450"
+    },
+    {
+      "gis_join": "G3600030"
+    },
+    {
+      "gis_join": "G3600870"
+    },
+    {
+      "gis_join": "G3601190"
+    },
+    {
+      "gis_join": "G3601090"
+    },
+    {
+      "gis_join": "G3600010"
+    },
+    {
+      "gis_join": "G3600250"
+    },
+    {
+      "gis_join": "G3600970"
+    },
+    {
+      "gis_join": "G3600310"
+    },
+    {
+      "gis_join": "G3601170"
+    },
+    {
+      "gis_join": "G3600890"
+    },
+    {
+      "gis_join": "G3600910"
+    },
+    {
+      "gis_join": "G3601050"
+    },
+    {
+      "gis_join": "G3600290"
+    },
+    {
+      "gis_join": "G3600770"
+    },
+    {
+      "gis_join": "G3601030"
+    },
+    {
+      "gis_join": "G0800510"
+    },
+    {
+      "gis_join": "G0800430"
+    },
+    {
+      "gis_join": "G0800710"
+    },
+    {
+      "gis_join": "G0800690"
+    },
+    {
+      "gis_join": "G0800210"
+    },
+    {
+      "gis_join": "G0800370"
+    },
+    {
+      "gis_join": "G0800890"
+    },
+    {
+      "gis_join": "G0800030"
+    },
+    {
+      "gis_join": "G0800110"
+    },
+    {
+      "gis_join": "G0801130"
+    },
+    {
+      "gis_join": "G0800990"
+    },
+    {
+      "gis_join": "G0800010"
+    },
+    {
+      "gis_join": "G0800970"
+    },
+    {
+      "gis_join": "G0800450"
+    },
+    {
+      "gis_join": "G0800290"
+    },
+    {
+      "gis_join": "G0800730"
+    },
+    {
+      "gis_join": "G0800830"
+    },
+    {
+      "gis_join": "G0800170"
+    },
+    {
+      "gis_join": "G0801150"
+    },
+    {
+      "gis_join": "G0801250"
+    },
+    {
+      "gis_join": "G0800870"
+    },
+    {
+      "gis_join": "G0800670"
+    },
+    {
+      "gis_join": "G0800650"
+    },
+    {
+      "gis_join": "G0800390"
+    },
+    {
+      "gis_join": "G0800270"
+    },
+    {
+      "gis_join": "G0800250"
+    },
+    {
+      "gis_join": "G0801170"
+    },
+    {
+      "gis_join": "G0800790"
+    },
+    {
+      "gis_join": "G0801030"
+    },
+    {
+      "gis_join": "G0800230"
+    },
+    {
+      "gis_join": "G0800590"
+    },
+    {
+      "gis_join": "G0800090"
+    },
+    {
+      "gis_join": "G0800490"
+    },
+    {
+      "gis_join": "G0800770"
+    },
+    {
+      "gis_join": "G0801090"
+    },
+    {
+      "gis_join": "G0800910"
+    },
+    {
+      "gis_join": "G0800810"
+    },
+    {
+      "gis_join": "G0800950"
+    },
+    {
+      "gis_join": "G0800610"
+    },
+    {
+      "gis_join": "G0801190"
+    },
+    {
+      "gis_join": "G0800570"
+    },
+    {
+      "gis_join": "G0801010"
+    },
+    {
+      "gis_join": "G0800630"
+    },
+    {
+      "gis_join": "G0800330"
+    },
+    {
+      "gis_join": "G0800350"
+    },
+    {
+      "gis_join": "G0800750"
+    },
+    {
+      "gis_join": "G0800130"
+    },
+    {
+      "gis_join": "G0800530"
+    },
+    {
+      "gis_join": "G0801050"
+    },
+    {
+      "gis_join": "G0800190"
+    },
+    {
+      "gis_join": "G0800150"
+    },
+    {
+      "gis_join": "G0800070"
+    },
+    {
+      "gis_join": "G0800140"
+    },
+    {
+      "gis_join": "G0801110"
+    },
+    {
+      "gis_join": "G0800050"
+    },
+    {
+      "gis_join": "G0801070"
+    },
+    {
+      "gis_join": "G0800310"
+    },
+    {
+      "gis_join": "G0800850"
+    },
+    {
+      "gis_join": "G0800470"
+    },
+    {
+      "gis_join": "G0801230"
+    },
+    {
+      "gis_join": "G0800930"
+    },
+    {
+      "gis_join": "G0801210"
+    },
+    {
+      "gis_join": "G0800410"
+    },
+    {
+      "gis_join": "G0800550"
+    },
+    {
+      "gis_join": "G4000070"
+    },
+    {
+      "gis_join": "G4000010"
+    },
+    {
+      "gis_join": "G4001270"
+    },
+    {
+      "gis_join": "G4000130"
+    },
+    {
+      "gis_join": "G4000970"
+    },
+    {
+      "gis_join": "G4001150"
+    },
+    {
+      "gis_join": "G4001070"
+    },
+    {
+      "gis_join": "G4000030"
+    },
+    {
+      "gis_join": "G4001290"
+    },
+    {
+      "gis_join": "G4000090"
+    },
+    {
+      "gis_join": "G4000570"
+    },
+    {
+      "gis_join": "G4000710"
+    },
+    {
+      "gis_join": "G4000250"
+    },
+    {
+      "gis_join": "G4000750"
+    },
+    {
+      "gis_join": "G4001030"
+    },
+    {
+      "gis_join": "G4001370"
+    },
+    {
+      "gis_join": "G4001430"
+    },
+    {
+      "gis_join": "G4000050"
+    },
+    {
+      "gis_join": "G4000350"
+    },
+    {
+      "gis_join": "G4000850"
+    },
+    {
+      "gis_join": "G4000930"
+    },
+    {
+      "gis_join": "G4001230"
+    },
+    {
+      "gis_join": "G4001010"
+    },
+    {
+      "gis_join": "G4000450"
+    },
+    {
+      "gis_join": "G4000870"
+    },
+    {
+      "gis_join": "G4000650"
+    },
+    {
+      "gis_join": "G4000470"
+    },
+    {
+      "gis_join": "G4000110"
+    },
+    {
+      "gis_join": "G4001470"
+    },
+    {
+      "gis_join": "G4000330"
+    },
+    {
+      "gis_join": "G4000730"
+    },
+    {
+      "gis_join": "G4000310"
+    },
+    {
+      "gis_join": "G4000390"
+    },
+    {
+      "gis_join": "G4001530"
+    },
+    {
+      "gis_join": "G4000770"
+    },
+    {
+      "gis_join": "G4000510"
+    },
+    {
+      "gis_join": "G4001210"
+    },
+    {
+      "gis_join": "G4001350"
+    },
+    {
+      "gis_join": "G4001450"
+    },
+    {
+      "gis_join": "G4000630"
+    },
+    {
+      "gis_join": "G4000830"
+    },
+    {
+      "gis_join": "G4000490"
+    },
+    {
+      "gis_join": "G4000690"
+    },
+    {
+      "gis_join": "G4000170"
+    },
+    {
+      "gis_join": "G4001490"
+    },
+    {
+      "gis_join": "G4000370"
+    },
+    {
+      "gis_join": "G4000210"
+    },
+    {
+      "gis_join": "G4000810"
+    },
+    {
+      "gis_join": "G4001110"
+    },
+    {
+      "gis_join": "G4000890"
+    },
+    {
+      "gis_join": "G4001510"
+    },
+    {
+      "gis_join": "G4000610"
+    },
+    {
+      "gis_join": "G4001310"
+    },
+    {
+      "gis_join": "G4000270"
+    },
+    {
+      "gis_join": "G4001250"
+    },
+    {
+      "gis_join": "G4000190"
+    },
+    {
+      "gis_join": "G4001130"
+    },
+    {
+      "gis_join": "G4001170"
+    },
+    {
+      "gis_join": "G4001190"
+    },
+    {
+      "gis_join": "G4000590"
+    },
+    {
+      "gis_join": "G4000790"
+    },
+    {
+      "gis_join": "G4000550"
+    },
+    {
+      "gis_join": "G4000950"
+    },
+    {
+      "gis_join": "G4000670"
+    },
+    {
+      "gis_join": "G4000910"
+    },
+    {
+      "gis_join": "G4001410"
+    },
+    {
+      "gis_join": "G4001050"
+    },
+    {
+      "gis_join": "G4000230"
+    },
+    {
+      "gis_join": "G4000150"
+    },
+    {
+      "gis_join": "G4000290"
+    },
+    {
+      "gis_join": "G4000530"
+    },
+    {
+      "gis_join": "G4001090"
+    },
+    {
+      "gis_join": "G4000410"
+    },
+    {
+      "gis_join": "G4000990"
+    },
+    {
+      "gis_join": "G4001330"
+    },
+    {
+      "gis_join": "G4000430"
+    },
+    {
+      "gis_join": "G4001390"
+    },
+    {
+      "gis_join": "G1000050"
+    },
+    {
+      "gis_join": "G1000030"
+    },
+    {
+      "gis_join": "G1000010"
+    },
+    {
+      "gis_join": "G2400250"
+    },
+    {
+      "gis_join": "G2400450"
+    },
+    {
+      "gis_join": "G2400310"
+    },
+    {
+      "gis_join": "G2400130"
+    },
+    {
+      "gis_join": "G2400370"
+    },
+    {
+      "gis_join": "G2400190"
+    },
+    {
+      "gis_join": "G2400350"
+    },
+    {
+      "gis_join": "G2400030"
+    },
+    {
+      "gis_join": "G2400270"
+    },
+    {
+      "gis_join": "G2400090"
+    },
+    {
+      "gis_join": "G2400110"
+    },
+    {
+      "gis_join": "G2400290"
+    },
+    {
+      "gis_join": "G2400170"
+    },
+    {
+      "gis_join": "G2405100"
+    },
+    {
+      "gis_join": "G2400210"
+    },
+    {
+      "gis_join": "G2400010"
+    },
+    {
+      "gis_join": "G2400470"
+    },
+    {
+      "gis_join": "G2400230"
+    },
+    {
+      "gis_join": "G2400430"
+    },
+    {
+      "gis_join": "G2400050"
+    },
+    {
+      "gis_join": "G2400330"
+    },
+    {
+      "gis_join": "G2400410"
+    },
+    {
+      "gis_join": "G2400150"
+    },
+    {
+      "gis_join": "G2400390"
+    },
+    {
+      "gis_join": "G5401010"
+    },
+    {
+      "gis_join": "G5400730"
+    },
+    {
+      "gis_join": "G5400930"
+    },
+    {
+      "gis_join": "G5400390"
+    },
+    {
+      "gis_join": "G5400030"
+    },
+    {
+      "gis_join": "G5400190"
+    },
+    {
+      "gis_join": "G5400990"
+    },
+    {
+      "gis_join": "G5400250"
+    },
+    {
+      "gis_join": "G5400070"
+    },
+    {
+      "gis_join": "G5400870"
+    },
+    {
+      "gis_join": "G5400890"
+    },
+    {
+      "gis_join": "G5400910"
+    },
+    {
+      "gis_join": "G5400790"
+    },
+    {
+      "gis_join": "G5400410"
+    },
+    {
+      "gis_join": "G5400710"
+    },
+    {
+      "gis_join": "G5400270"
+    },
+    {
+      "gis_join": "G5400170"
+    },
+    {
+      "gis_join": "G5400810"
+    },
+    {
+      "gis_join": "G5400850"
+    },
+    {
+      "gis_join": "G5400570"
+    },
+    {
+      "gis_join": "G5400970"
+    },
+    {
+      "gis_join": "G5401030"
+    },
+    {
+      "gis_join": "G5401070"
+    },
+    {
+      "gis_join": "G5400130"
+    },
+    {
+      "gis_join": "G5401090"
+    },
+    {
+      "gis_join": "G5400110"
+    },
+    {
+      "gis_join": "G5400830"
+    },
+    {
+      "gis_join": "G5400770"
+    },
+    {
+      "gis_join": "G5400450"
+    },
+    {
+      "gis_join": "G5400470"
+    },
+    {
+      "gis_join": "G5400350"
+    },
+    {
+      "gis_join": "G5400010"
+    },
+    {
+      "gis_join": "G5400490"
+    },
+    {
+      "gis_join": "G5400670"
+    },
+    {
+      "gis_join": "G5400690"
+    },
+    {
+      "gis_join": "G5400050"
+    },
+    {
+      "gis_join": "G5400950"
+    },
+    {
+      "gis_join": "G5400150"
+    },
+    {
+      "gis_join": "G5400750"
+    },
+    {
+      "gis_join": "G5400430"
+    },
+    {
+      "gis_join": "G5400230"
+    },
+    {
+      "gis_join": "G5400610"
+    },
+    {
+      "gis_join": "G5400510"
+    },
+    {
+      "gis_join": "G5400630"
+    },
+    {
+      "gis_join": "G5400330"
+    },
+    {
+      "gis_join": "G5401050"
+    },
+    {
+      "gis_join": "G5400090"
+    },
+    {
+      "gis_join": "G5400290"
+    },
+    {
+      "gis_join": "G5400550"
+    },
+    {
+      "gis_join": "G5400210"
+    },
+    {
+      "gis_join": "G5400530"
+    },
+    {
+      "gis_join": "G5400590"
+    },
+    {
+      "gis_join": "G5400310"
+    },
+    {
+      "gis_join": "G5400650"
+    },
+    {
+      "gis_join": "G5400370"
+    },
+    {
+      "gis_join": "G2801010"
+    },
+    {
+      "gis_join": "G2801070"
+    },
+    {
+      "gis_join": "G2800270"
+    },
+    {
+      "gis_join": "G2800690"
+    },
+    {
+      "gis_join": "G2800590"
+    },
+    {
+      "gis_join": "G2800950"
+    },
+    {
+      "gis_join": "G2801050"
+    },
+    {
+      "gis_join": "G2800510"
+    },
+    {
+      "gis_join": "G2800790"
+    },
+    {
+      "gis_join": "G2800710"
+    },
+    {
+      "gis_join": "G2801090"
+    },
+    {
+      "gis_join": "G2800810"
+    },
+    {
+      "gis_join": "G2801530"
+    },
+    {
+      "gis_join": "G2800910"
+    },
+    {
+      "gis_join": "G2800310"
+    },
+    {
+      "gis_join": "G2801250"
+    },
+    {
+      "gis_join": "G2801490"
+    },
+    {
+      "gis_join": "G2800610"
+    },
+    {
+      "gis_join": "G2801290"
+    },
+    {
+      "gis_join": "G2801330"
+    },
+    {
+      "gis_join": "G2801170"
+    },
+    {
+      "gis_join": "G2800730"
+    },
+    {
+      "gis_join": "G2800870"
+    },
+    {
+      "gis_join": "G2801430"
+    },
+    {
+      "gis_join": "G2800530"
+    },
+    {
+      "gis_join": "G2800830"
+    },
+    {
+      "gis_join": "G2801450"
+    },
+    {
+      "gis_join": "G2801410"
+    },
+    {
+      "gis_join": "G2800570"
+    },
+    {
+      "gis_join": "G2800970"
+    },
+    {
+      "gis_join": "G2801150"
+    },
+    {
+      "gis_join": "G2801570"
+    },
+    {
+      "gis_join": "G2801390"
+    },
+    {
+      "gis_join": "G2800850"
+    },
+    {
+      "gis_join": "G2801210"
+    },
+    {
+      "gis_join": "G2801230"
+    },
+    {
+      "gis_join": "G2801110"
+    },
+    {
+      "gis_join": "G2800630"
+    },
+    {
+      "gis_join": "G2801130"
+    },
+    {
+      "gis_join": "G2801190"
+    },
+    {
+      "gis_join": "G2800490"
+    },
+    {
+      "gis_join": "G2800210"
+    },
+    {
+      "gis_join": "G2801470"
+    },
+    {
+      "gis_join": "G2800230"
+    },
+    {
+      "gis_join": "G2800550"
+    },
+    {
+      "gis_join": "G2800090"
+    },
+    {
+      "gis_join": "G2801590"
+    },
+    {
+      "gis_join": "G2800170"
+    },
+    {
+      "gis_join": "G2801350"
+    },
+    {
+      "gis_join": "G2800890"
+    },
+    {
+      "gis_join": "G2800330"
+    },
+    {
+      "gis_join": "G2800670"
+    },
+    {
+      "gis_join": "G2801610"
+    },
+    {
+      "gis_join": "G2800990"
+    },
+    {
+      "gis_join": "G2801550"
+    },
+    {
+      "gis_join": "G2800410"
+    },
+    {
+      "gis_join": "G2801030"
+    },
+    {
+      "gis_join": "G2800150"
+    },
+    {
+      "gis_join": "G2801270"
+    },
+    {
+      "gis_join": "G2801310"
+    },
+    {
+      "gis_join": "G2801630"
+    },
+    {
+      "gis_join": "G2800370"
+    },
+    {
+      "gis_join": "G2800190"
+    },
+    {
+      "gis_join": "G2800750"
+    },
+    {
+      "gis_join": "G2801370"
+    },
+    {
+      "gis_join": "G2800470"
+    },
+    {
+      "gis_join": "G2800350"
+    },
+    {
+      "gis_join": "G2801510"
+    },
+    {
+      "gis_join": "G2800650"
+    },
+    {
+      "gis_join": "G2800010"
+    },
+    {
+      "gis_join": "G2800930"
+    },
+    {
+      "gis_join": "G2800130"
+    },
+    {
+      "gis_join": "G2800290"
+    },
+    {
+      "gis_join": "G2800070"
+    },
+    {
+      "gis_join": "G2800050"
+    },
+    {
+      "gis_join": "G2800030"
+    },
+    {
+      "gis_join": "G2800430"
+    },
+    {
+      "gis_join": "G2800110"
+    },
+    {
+      "gis_join": "G2800390"
+    },
+    {
+      "gis_join": "G2800770"
+    },
+    {
+      "gis_join": "G2800450"
+    },
+    {
+      "gis_join": "G2800250"
+    },
+    {
+      "gis_join": "G0900110"
+    },
+    {
+      "gis_join": "G0900010"
+    },
+    {
+      "gis_join": "G0900130"
+    },
+    {
+      "gis_join": "G0900050"
+    },
+    {
+      "gis_join": "G0900030"
+    },
+    {
+      "gis_join": "G0900150"
+    },
+    {
+      "gis_join": "G0900070"
+    },
+    {
+      "gis_join": "G0900090"
+    },
+    {
+      "gis_join": "G3000730"
+    },
+    {
+      "gis_join": "G3000690"
+    },
+    {
+      "gis_join": "G3000370"
+    },
+    {
+      "gis_join": "G3000170"
+    },
+    {
+      "gis_join": "G3000610"
+    },
+    {
+      "gis_join": "G3000450"
+    },
+    {
+      "gis_join": "G3000190"
+    },
+    {
+      "gis_join": "G3000970"
+    },
+    {
+      "gis_join": "G3000050"
+    },
+    {
+      "gis_join": "G3000530"
+    },
+    {
+      "gis_join": "G3000570"
+    },
+    {
+      "gis_join": "G3000210"
+    },
+    {
+      "gis_join": "G3001090"
+    },
+    {
+      "gis_join": "G3000430"
+    },
+    {
+      "gis_join": "G3000870"
+    },
+    {
+      "gis_join": "G3001070"
+    },
+    {
+      "gis_join": "G3000270"
+    },
+    {
+      "gis_join": "G3000290"
+    },
+    {
+      "gis_join": "G3000490"
+    },
+    {
+      "gis_join": "G3000810"
+    },
+    {
+      "gis_join": "G3000410"
+    },
+    {
+      "gis_join": "G3000890"
+    },
+    {
+      "gis_join": "G3000090"
+    },
+    {
+      "gis_join": "G3000130"
+    },
+    {
+      "gis_join": "G3000150"
+    },
+    {
+      "gis_join": "G3000390"
+    },
+    {
+      "gis_join": "G3000110"
+    },
+    {
+      "gis_join": "G3000710"
+    },
+    {
+      "gis_join": "G3000650"
+    },
+    {
+      "gis_join": "G3000930"
+    },
+    {
+      "gis_join": "G3000750"
+    },
+    {
+      "gis_join": "G3000310"
+    },
+    {
+      "gis_join": "G3001030"
+    },
+    {
+      "gis_join": "G3000010"
+    },
+    {
+      "gis_join": "G3000670"
+    },
+    {
+      "gis_join": "G3000350"
+    },
+    {
+      "gis_join": "G3000790"
+    },
+    {
+      "gis_join": "G3000510"
+    },
+    {
+      "gis_join": "G3001050"
+    },
+    {
+      "gis_join": "G3000250"
+    },
+    {
+      "gis_join": "G3000590"
+    },
+    {
+      "gis_join": "G3000830"
+    },
+    {
+      "gis_join": "G3000630"
+    },
+    {
+      "gis_join": "G3001110"
+    },
+    {
+      "gis_join": "G3000950"
+    },
+    {
+      "gis_join": "G3000030"
+    },
+    {
+      "gis_join": "G3000470"
+    },
+    {
+      "gis_join": "G3000330"
+    },
+    {
+      "gis_join": "G3000990"
+    },
+    {
+      "gis_join": "G3000850"
+    },
+    {
+      "gis_join": "G3000910"
+    },
+    {
+      "gis_join": "G3000230"
+    },
+    {
+      "gis_join": "G3000550"
+    },
+    {
+      "gis_join": "G3000770"
+    },
+    {
+      "gis_join": "G3001010"
+    },
+    {
+      "gis_join": "G3000070"
+    },
+    {
+      "gis_join": "G2100350"
+    },
+    {
+      "gis_join": "G2101210"
+    },
+    {
+      "gis_join": "G2101030"
+    },
+    {
+      "gis_join": "G2100710"
+    },
+    {
+      "gis_join": "G2100050"
+    },
+    {
+      "gis_join": "G2101250"
+    },
+    {
+      "gis_join": "G2102170"
+    },
+    {
+      "gis_join": "G2101370"
+    },
+    {
+      "gis_join": "G2100970"
+    },
+    {
+      "gis_join": "G2100730"
+    },
+    {
+      "gis_join": "G2101570"
+    },
+    {
+      "gis_join": "G2101070"
+    },
+    {
+      "gis_join": "G2102330"
+    },
+    {
+      "gis_join": "G2100870"
+    },
+    {
+      "gis_join": "G2101850"
+    },
+    {
+      "gis_join": "G2101810"
+    },
+    {
+      "gis_join": "G2100170"
+    },
+    {
+      "gis_join": "G2101790"
+    },
+    {
+      "gis_join": "G2101170"
+    },
+    {
+      "gis_join": "G2102270"
+    },
+    {
+      "gis_join": "G2100530"
+    },
+    {
+      "gis_join": "G2101690"
+    },
+    {
+      "gis_join": "G2101510"
+    },
+    {
+      "gis_join": "G2100150"
+    },
+    {
+      "gis_join": "G2101010"
+    },
+    {
+      "gis_join": "G2101390"
+    },
+    {
+      "gis_join": "G2100790"
+    },
+    {
+      "gis_join": "G2102150"
+    },
+    {
+      "gis_join": "G2100430"
+    },
+    {
+      "gis_join": "G2101290"
+    },
+    {
+      "gis_join": "G2102050"
+    },
+    {
+      "gis_join": "G2101530"
+    },
+    {
+      "gis_join": "G2100930"
+    },
+    {
+      "gis_join": "G2100610"
+    },
+    {
+      "gis_join": "G2101350"
+    },
+    {
+      "gis_join": "G2100070"
+    },
+    {
+      "gis_join": "G2101430"
+    },
+    {
+      "gis_join": "G2100890"
+    },
+    {
+      "gis_join": "G2101230"
+    },
+    {
+      "gis_join": "G2101450"
+    },
+    {
+      "gis_join": "G2102190"
+    },
+    {
+      "gis_join": "G2101110"
+    },
+    {
+      "gis_join": "G2102370"
+    },
+    {
+      "gis_join": "G2101270"
+    },
+    {
+      "gis_join": "G2101870"
+    },
+    {
+      "gis_join": "G2102310"
+    },
+    {
+      "gis_join": "G2102290"
+    },
+    {
+      "gis_join": "G2100490"
+    },
+    {
+      "gis_join": "G2100190"
+    },
+    {
+      "gis_join": "G2100850"
+    },
+    {
+      "gis_join": "G2100950"
+    },
+    {
+      "gis_join": "G2100750"
+    },
+    {
+      "gis_join": "G2101410"
+    },
+    {
+      "gis_join": "G2101610"
+    },
+    {
+      "gis_join": "G2100130"
+    },
+    {
+      "gis_join": "G2101910"
+    },
+    {
+      "gis_join": "G2101150"
+    },
+    {
+      "gis_join": "G2100570"
+    },
+    {
+      "gis_join": "G2100630"
+    },
+    {
+      "gis_join": "G2100510"
+    },
+    {
+      "gis_join": "G2101710"
+    },
+    {
+      "gis_join": "G2100030"
+    },
+    {
+      "gis_join": "G2101830"
+    },
+    {
+      "gis_join": "G2101730"
+    },
+    {
+      "gis_join": "G2101090"
+    },
+    {
+      "gis_join": "G2101050"
+    },
+    {
+      "gis_join": "G2101770"
+    },
+    {
+      "gis_join": "G2100390"
+    },
+    {
+      "gis_join": "G2100290"
+    },
+    {
+      "gis_join": "G2100910"
+    },
+    {
+      "gis_join": "G2101670"
+    },
+    {
+      "gis_join": "G2102230"
+    },
+    {
+      "gis_join": "G2101330"
+    },
+    {
+      "gis_join": "G2100110"
+    },
+    {
+      "gis_join": "G2101990"
+    },
+    {
+      "gis_join": "G2100650"
+    },
+    {
+      "gis_join": "G2102250"
+    },
+    {
+      "gis_join": "G2101930"
+    },
+    {
+      "gis_join": "G2100770"
+    },
+    {
+      "gis_join": "G2100690"
+    },
+    {
+      "gis_join": "G2100830"
+    },
+    {
+      "gis_join": "G2100670"
+    },
+    {
+      "gis_join": "G2101970"
+    },
+    {
+      "gis_join": "G2100210"
+    },
+    {
+      "gis_join": "G2101550"
+    },
+    {
+      "gis_join": "G2102010"
+    },
+    {
+      "gis_join": "G2101950"
+    },
+    {
+      "gis_join": "G2101650"
+    },
+    {
+      "gis_join": "G2100270"
+    },
+    {
+      "gis_join": "G2100010"
+    },
+    {
+      "gis_join": "G2100550"
+    },
+    {
+      "gis_join": "G2100370"
+    },
+    {
+      "gis_join": "G2101190"
+    },
+    {
+      "gis_join": "G2101630"
+    },
+    {
+      "gis_join": "G2100090"
+    },
+    {
+      "gis_join": "G2102070"
+    },
+    {
+      "gis_join": "G2101130"
+    },
+    {
+      "gis_join": "G2100250"
+    },
+    {
+      "gis_join": "G2101490"
+    },
+    {
+      "gis_join": "G2102090"
+    },
+    {
+      "gis_join": "G2100310"
+    },
+    {
+      "gis_join": "G2100470"
+    },
+    {
+      "gis_join": "G2100410"
+    },
+    {
+      "gis_join": "G2101310"
+    },
+    {
+      "gis_join": "G2102030"
+    },
+    {
+      "gis_join": "G2102210"
+    },
+    {
+      "gis_join": "G2100810"
+    },
+    {
+      "gis_join": "G2101590"
+    },
+    {
+      "gis_join": "G2102350"
+    },
+    {
+      "gis_join": "G2100990"
+    },
+    {
+      "gis_join": "G2100450"
+    },
+    {
+      "gis_join": "G2102110"
+    },
+    {
+      "gis_join": "G2101470"
+    },
+    {
+      "gis_join": "G2101750"
+    },
+    {
+      "gis_join": "G2100230"
+    },
+    {
+      "gis_join": "G2100330"
+    },
+    {
+      "gis_join": "G2102390"
+    },
+    {
+      "gis_join": "G2102130"
+    },
+    {
+      "gis_join": "G2100590"
+    },
+    {
+      "gis_join": "G2101890"
+    },
+    {
+      "gis_join": "G3400270"
+    },
+    {
+      "gis_join": "G3400110"
+    },
+    {
+      "gis_join": "G3400170"
+    },
+    {
+      "gis_join": "G3400010"
+    },
+    {
+      "gis_join": "G3400330"
+    },
+    {
+      "gis_join": "G3400410"
+    },
+    {
+      "gis_join": "G3400210"
+    },
+    {
+      "gis_join": "G3400070"
+    },
+    {
+      "gis_join": "G3400310"
+    },
+    {
+      "gis_join": "G3400350"
+    },
+    {
+      "gis_join": "G3400250"
+    },
+    {
+      "gis_join": "G3400130"
+    },
+    {
+      "gis_join": "G3400290"
+    },
+    {
+      "gis_join": "G3400190"
+    },
+    {
+      "gis_join": "G3400390"
+    },
+    {
+      "gis_join": "G3400150"
+    },
+    {
+      "gis_join": "G3400090"
+    },
+    {
+      "gis_join": "G3400030"
+    },
+    {
+      "gis_join": "G3400050"
+    },
+    {
+      "gis_join": "G3400370"
+    },
+    {
+      "gis_join": "G3400230"
+    },
+    {
+      "gis_join": "G3300050"
+    },
+    {
+      "gis_join": "G3300170"
+    },
+    {
+      "gis_join": "G3300110"
+    },
+    {
+      "gis_join": "G3300070"
+    },
+    {
+      "gis_join": "G3300010"
+    },
+    {
+      "gis_join": "G3300150"
+    },
+    {
+      "gis_join": "G3300190"
+    },
+    {
+      "gis_join": "G3300030"
+    },
+    {
+      "gis_join": "G3300130"
+    },
+    {
+      "gis_join": "G3300090"
+    },
+    {
+      "gis_join": "G0100470"
+    },
+    {
+      "gis_join": "G0100830"
+    },
+    {
+      "gis_join": "G0101030"
+    },
+    {
+      "gis_join": "G0100790"
+    },
+    {
+      "gis_join": "G0100490"
+    },
+    {
+      "gis_join": "G0100090"
+    },
+    {
+      "gis_join": "G0100050"
+    },
+    {
+      "gis_join": "G0100270"
+    },
+    {
+      "gis_join": "G0100290"
+    },
+    {
+      "gis_join": "G0100770"
+    },
+    {
+      "gis_join": "G0100730"
+    },
+    {
+      "gis_join": "G0100910"
+    },
+    {
+      "gis_join": "G0100070"
+    },
+    {
+      "gis_join": "G0101070"
+    },
+    {
+      "gis_join": "G0100550"
+    },
+    {
+      "gis_join": "G0100610"
+    },
+    {
+      "gis_join": "G0101090"
+    },
+    {
+      "gis_join": "G0100010"
+    },
+    {
+      "gis_join": "G0101210"
+    },
+    {
+      "gis_join": "G0100930"
+    },
+    {
+      "gis_join": "G0100150"
+    },
+    {
+      "gis_join": "G0100630"
+    },
+    {
+      "gis_join": "G0100570"
+    },
+    {
+      "gis_join": "G0100890"
+    },
+    {
+      "gis_join": "G0100130"
+    },
+    {
+      "gis_join": "G0100950"
+    },
+    {
+      "gis_join": "G0101250"
+    },
+    {
+      "gis_join": "G0101190"
+    },
+    {
+      "gis_join": "G0100970"
+    },
+    {
+      "gis_join": "G0101290"
+    },
+    {
+      "gis_join": "G0100030"
+    },
+    {
+      "gis_join": "G0100710"
+    },
+    {
+      "gis_join": "G0100310"
+    },
+    {
+      "gis_join": "G0101310"
+    },
+    {
+      "gis_join": "G0100510"
+    },
+    {
+      "gis_join": "G0100450"
+    },
+    {
+      "gis_join": "G0101050"
+    },
+    {
+      "gis_join": "G0100250"
+    },
+    {
+      "gis_join": "G0100690"
+    },
+    {
+      "gis_join": "G0100350"
+    },
+    {
+      "gis_join": "G0100390"
+    },
+    {
+      "gis_join": "G0100110"
+    },
+    {
+      "gis_join": "G0101330"
+    },
+    {
+      "gis_join": "G0101010"
+    },
+    {
+      "gis_join": "G0101150"
+    },
+    {
+      "gis_join": "G0100990"
+    },
+    {
+      "gis_join": "G0100330"
+    },
+    {
+      "gis_join": "G0100210"
+    },
+    {
+      "gis_join": "G0100190"
+    },
+    {
+      "gis_join": "G0100670"
+    },
+    {
+      "gis_join": "G0100870"
+    },
+    {
+      "gis_join": "G0101270"
+    },
+    {
+      "gis_join": "G0100750"
+    },
+    {
+      "gis_join": "G0100410"
+    },
+    {
+      "gis_join": "G0101170"
+    },
+    {
+      "gis_join": "G0100590"
+    },
+    {
+      "gis_join": "G0101230"
+    },
+    {
+      "gis_join": "G0101130"
+    },
+    {
+      "gis_join": "G0100430"
+    },
+    {
+      "gis_join": "G0100650"
+    },
+    {
+      "gis_join": "G0101110"
+    },
+    {
+      "gis_join": "G0100530"
+    },
+    {
+      "gis_join": "G0100810"
+    },
+    {
+      "gis_join": "G0100170"
+    },
+    {
+      "gis_join": "G0100370"
+    },
+    {
+      "gis_join": "G0100230"
+    },
+    {
+      "gis_join": "G0100850"
+    },
+    {
+      "gis_join": "G1500070"
+    },
+    {
+      "gis_join": "G1500030"
+    },
+    {
+      "gis_join": "G1500050"
+    },
+    {
+      "gis_join": "G1500010"
+    },
+    {
+      "gis_join": "G1500090"
+    },
+    {
+      "gis_join": "G2901590"
+    },
+    {
+      "gis_join": "G2901030"
+    },
+    {
+      "gis_join": "G2902210"
+    },
+    {
+      "gis_join": "G2901470"
+    },
+    {
+      "gis_join": "G2902010"
+    },
+    {
+      "gis_join": "G2900570"
+    },
+    {
+      "gis_join": "G2901450"
+    },
+    {
+      "gis_join": "G2902270"
+    },
+    {
+      "gis_join": "G2901230"
+    },
+    {
+      "gis_join": "G2902110"
+    },
+    {
+      "gis_join": "G2901130"
+    },
+    {
+      "gis_join": "G2901310"
+    },
+    {
+      "gis_join": "G2901670"
+    },
+    {
+      "gis_join": "G2900270"
+    },
+    {
+      "gis_join": "G2900970"
+    },
+    {
+      "gis_join": "G2902090"
+    },
+    {
+      "gis_join": "G2901710"
+    },
+    {
+      "gis_join": "G2900610"
+    },
+    {
+      "gis_join": "G2900050"
+    },
+    {
+      "gis_join": "G2901570"
+    },
+    {
+      "gis_join": "G2901430"
+    },
+    {
+      "gis_join": "G2900230"
+    },
+    {
+      "gis_join": "G2900510"
+    },
+    {
+      "gis_join": "G2900770"
+    },
+    {
+      "gis_join": "G2900290"
+    },
+    {
+      "gis_join": "G2901750"
+    },
+    {
+      "gis_join": "G2900430"
+    },
+    {
+      "gis_join": "G2900030"
+    },
+    {
+      "gis_join": "G2900410"
+    },
+    {
+      "gis_join": "G2900530"
+    },
+    {
+      "gis_join": "G2900930"
+    },
+    {
+      "gis_join": "G2900790"
+    },
+    {
+      "gis_join": "G2900990"
+    },
+    {
+      "gis_join": "G2905100"
+    },
+    {
+      "gis_join": "G2901850"
+    },
+    {
+      "gis_join": "G2900830"
+    },
+    {
+      "gis_join": "G2900370"
+    },
+    {
+      "gis_join": "G2901530"
+    },
+    {
+      "gis_join": "G2902290"
+    },
+    {
+      "gis_join": "G2900710"
+    },
+    {
+      "gis_join": "G2901410"
+    },
+    {
+      "gis_join": "G2901370"
+    },
+    {
+      "gis_join": "G2901870"
+    },
+    {
+      "gis_join": "G2902150"
+    },
+    {
+      "gis_join": "G2902070"
+    },
+    {
+      "gis_join": "G2900330"
+    },
+    {
+      "gis_join": "G2901290"
+    },
+    {
+      "gis_join": "G2900490"
+    },
+    {
+      "gis_join": "G2900950"
+    },
+    {
+      "gis_join": "G2900250"
+    },
+    {
+      "gis_join": "G2901110"
+    },
+    {
+      "gis_join": "G2900170"
+    },
+    {
+      "gis_join": "G2901650"
+    },
+    {
+      "gis_join": "G2901550"
+    },
+    {
+      "gis_join": "G2901970"
+    },
+    {
+      "gis_join": "G2900450"
+    },
+    {
+      "gis_join": "G2901150"
+    },
+    {
+      "gis_join": "G2900890"
+    },
+    {
+      "gis_join": "G2901790"
+    },
+    {
+      "gis_join": "G2901050"
+    },
+    {
+      "gis_join": "G2901010"
+    },
+    {
+      "gis_join": "G2901330"
+    },
+    {
+      "gis_join": "G2902190"
+    },
+    {
+      "gis_join": "G2900850"
+    },
+    {
+      "gis_join": "G2900870"
+    },
+    {
+      "gis_join": "G2901190"
+    },
+    {
+      "gis_join": "G2900750"
+    },
+    {
+      "gis_join": "G2900390"
+    },
+    {
+      "gis_join": "G2901350"
+    },
+    {
+      "gis_join": "G2901490"
+    },
+    {
+      "gis_join": "G2900130"
+    },
+    {
+      "gis_join": "G2900070"
+    },
+    {
+      "gis_join": "G2901250"
+    },
+    {
+      "gis_join": "G2901090"
+    },
+    {
+      "gis_join": "G2900670"
+    },
+    {
+      "gis_join": "G2900550"
+    },
+    {
+      "gis_join": "G2900150"
+    },
+    {
+      "gis_join": "G2901170"
+    },
+    {
+      "gis_join": "G2900110"
+    },
+    {
+      "gis_join": "G2901070"
+    },
+    {
+      "gis_join": "G2902050"
+    },
+    {
+      "gis_join": "G2901630"
+    },
+    {
+      "gis_join": "G2901890"
+    },
+    {
+      "gis_join": "G2900470"
+    },
+    {
+      "gis_join": "G2901610"
+    },
+    {
+      "gis_join": "G2901510"
+    },
+    {
+      "gis_join": "G2900210"
+    },
+    {
+      "gis_join": "G2901270"
+    },
+    {
+      "gis_join": "G2900190"
+    },
+    {
+      "gis_join": "G2900010"
+    },
+    {
+      "gis_join": "G2901770"
+    },
+    {
+      "gis_join": "G2900350"
+    },
+    {
+      "gis_join": "G2900310"
+    },
+    {
+      "gis_join": "G2902030"
+    },
+    {
+      "gis_join": "G2901210"
+    },
+    {
+      "gis_join": "G2900690"
+    },
+    {
+      "gis_join": "G2901830"
+    },
+    {
+      "gis_join": "G2901730"
+    },
+    {
+      "gis_join": "G2901990"
+    },
+    {
+      "gis_join": "G2902130"
+    },
+    {
+      "gis_join": "G2900910"
+    },
+    {
+      "gis_join": "G2900630"
+    },
+    {
+      "gis_join": "G2902250"
+    },
+    {
+      "gis_join": "G2901390"
+    },
+    {
+      "gis_join": "G2900590"
+    },
+    {
+      "gis_join": "G2900810"
+    },
+    {
+      "gis_join": "G2900650"
+    },
+    {
+      "gis_join": "G2902170"
+    },
+    {
+      "gis_join": "G2901690"
+    },
+    {
+      "gis_join": "G2902230"
+    },
+    {
+      "gis_join": "G2901810"
+    },
+    {
+      "gis_join": "G2900090"
+    },
+    {
+      "gis_join": "G2900730"
+    },
+    {
+      "gis_join": "G2901950"
+    },
+    {
+      "gis_join": "G2901860"
+    },
+    {
+      "gis_join": "G0600750"
+    },
+    {
+      "gis_join": "G0600310"
+    },
+    {
+      "gis_join": "G0600870"
+    },
+    {
+      "gis_join": "G0600230"
+    },
+    {
+      "gis_join": "G0600270"
+    },
+    {
+      "gis_join": "G0600470"
+    },
+    {
+      "gis_join": "G0600950"
+    },
+    {
+      "gis_join": "G0600450"
+    },
+    {
+      "gis_join": "G0601150"
+    },
+    {
+      "gis_join": "G0600670"
+    },
+    {
+      "gis_join": "G0600390"
+    },
+    {
+      "gis_join": "G0601070"
+    },
+    {
+      "gis_join": "G0600510"
+    },
+    {
+      "gis_join": "G0600590"
+    },
+    {
+      "gis_join": "G0600110"
+    },
+    {
+      "gis_join": "G0600530"
+    },
+    {
+      "gis_join": "G0600090"
+    },
+    {
+      "gis_join": "G0600250"
+    },
+    {
+      "gis_join": "G0600610"
+    },
+    {
+      "gis_join": "G0600830"
+    },
+    {
+      "gis_join": "G0601030"
+    },
+    {
+      "gis_join": "G0600050"
+    },
+    {
+      "gis_join": "G0600690"
+    },
+    {
+      "gis_join": "G0600630"
+    },
+    {
+      "gis_join": "G0600890"
+    },
+    {
+      "gis_join": "G0600730"
+    },
+    {
+      "gis_join": "G0600990"
+    },
+    {
+      "gis_join": "G0600430"
+    },
+    {
+      "gis_join": "G0600210"
+    },
+    {
+      "gis_join": "G0600410"
+    },
+    {
+      "gis_join": "G0600030"
+    },
+    {
+      "gis_join": "G0600190"
+    },
+    {
+      "gis_join": "G0600150"
+    },
+    {
+      "gis_join": "G0600350"
+    },
+    {
+      "gis_join": "G0600550"
+    },
+    {
+      "gis_join": "G0600710"
+    },
+    {
+      "gis_join": "G0600850"
+    },
+    {
+      "gis_join": "G0600930"
+    },
+    {
+      "gis_join": "G0600790"
+    },
+    {
+      "gis_join": "G0600810"
+    },
+    {
+      "gis_join": "G0600770"
+    },
+    {
+      "gis_join": "G0600570"
+    },
+    {
+      "gis_join": "G0600290"
+    },
+    {
+      "gis_join": "G0600970"
+    },
+    {
+      "gis_join": "G0600130"
+    },
+    {
+      "gis_join": "G0600010"
+    },
+    {
+      "gis_join": "G0600170"
+    },
+    {
+      "gis_join": "G0601050"
+    },
+    {
+      "gis_join": "G0600330"
+    },
+    {
+      "gis_join": "G0601010"
+    },
+    {
+      "gis_join": "G0600650"
+    },
+    {
+      "gis_join": "G0600070"
+    },
+    {
+      "gis_join": "G0600490"
+    },
+    {
+      "gis_join": "G0601090"
+    },
+    {
+      "gis_join": "G0601110"
+    },
+    {
+      "gis_join": "G0600910"
+    },
+    {
+      "gis_join": "G0600370"
+    },
+    {
+      "gis_join": "G0601130"
+    },
+    {
+      "gis_join": "G1600670"
+    },
+    {
+      "gis_join": "G1600210"
+    },
+    {
+      "gis_join": "G1600150"
+    },
+    {
+      "gis_join": "G1600190"
+    },
+    {
+      "gis_join": "G1600370"
+    },
+    {
+      "gis_join": "G1600870"
+    },
+    {
+      "gis_join": "G1600450"
+    },
+    {
+      "gis_join": "G1600290"
+    },
+    {
+      "gis_join": "G1600330"
+    },
+    {
+      "gis_join": "G1600610"
+    },
+    {
+      "gis_join": "G1600570"
+    },
+    {
+      "gis_join": "G1600430"
+    },
+    {
+      "gis_join": "G1600770"
+    },
+    {
+      "gis_join": "G1600490"
+    },
+    {
+      "gis_join": "G1600590"
+    },
+    {
+      "gis_join": "G1600070"
+    },
+    {
+      "gis_join": "G1600270"
+    },
+    {
+      "gis_join": "G1600250"
+    },
+    {
+      "gis_join": "G1600170"
+    },
+    {
+      "gis_join": "G1600830"
+    },
+    {
+      "gis_join": "G1600810"
+    },
+    {
+      "gis_join": "G1600530"
+    },
+    {
+      "gis_join": "G1600350"
+    },
+    {
+      "gis_join": "G1600790"
+    },
+    {
+      "gis_join": "G1600750"
+    },
+    {
+      "gis_join": "G1600510"
+    },
+    {
+      "gis_join": "G1600050"
+    },
+    {
+      "gis_join": "G1600010"
+    },
+    {
+      "gis_join": "G1600470"
+    },
+    {
+      "gis_join": "G1600130"
+    },
+    {
+      "gis_join": "G1600550"
+    },
+    {
+      "gis_join": "G1600390"
+    },
+    {
+      "gis_join": "G1600410"
+    },
+    {
+      "gis_join": "G1600690"
+    },
+    {
+      "gis_join": "G1600630"
+    },
+    {
+      "gis_join": "G1600730"
+    },
+    {
+      "gis_join": "G1600710"
+    },
+    {
+      "gis_join": "G1600090"
+    },
+    {
+      "gis_join": "G1600310"
+    },
+    {
+      "gis_join": "G1600110"
+    },
+    {
+      "gis_join": "G1600030"
+    },
+    {
+      "gis_join": "G1600230"
+    },
+    {
+      "gis_join": "G1600650"
+    },
+    {
+      "gis_join": "G1600850"
+    },
+    {
+      "gis_join": "G4601050"
+    },
+    {
+      "gis_join": "G4600910"
+    },
+    {
+      "gis_join": "G4600870"
+    },
+    {
+      "gis_join": "G4600730"
+    },
+    {
+      "gis_join": "G4600390"
+    },
+    {
+      "gis_join": "G4601350"
+    },
+    {
+      "gis_join": "G4600050"
+    },
+    {
+      "gis_join": "G4600570"
+    },
+    {
+      "gis_join": "G4600370"
+    },
+    {
+      "gis_join": "G4601270"
+    },
+    {
+      "gis_join": "G4600990"
+    },
+    {
+      "gis_join": "G4600530"
+    },
+    {
+      "gis_join": "G4600170"
+    },
+    {
+      "gis_join": "G4601150"
+    },
+    {
+      "gis_join": "G4601110"
+    },
+    {
+      "gis_join": "G4600450"
+    },
+    {
+      "gis_join": "G4601030"
+    },
+    {
+      "gis_join": "G4600190"
+    },
+    {
+      "gis_join": "G4600130"
+    },
+    {
+      "gis_join": "G4600610"
+    },
+    {
+      "gis_join": "G4601230"
+    },
+    {
+      "gis_join": "G4601290"
+    },
+    {
+      "gis_join": "G4600930"
+    },
+    {
+      "gis_join": "G4601070"
+    },
+    {
+      "gis_join": "G4600890"
+    },
+    {
+      "gis_join": "G4600490"
+    },
+    {
+      "gis_join": "G4600970"
+    },
+    {
+      "gis_join": "G4600110"
+    },
+    {
+      "gis_join": "G4600850"
+    },
+    {
+      "gis_join": "G4600790"
+    },
+    {
+      "gis_join": "G4600350"
+    },
+    {
+      "gis_join": "G4601090"
+    },
+    {
+      "gis_join": "G4600210"
+    },
+    {
+      "gis_join": "G4600690"
+    },
+    {
+      "gis_join": "G4600150"
+    },
+    {
+      "gis_join": "G4600510"
+    },
+    {
+      "gis_join": "G4600070"
+    },
+    {
+      "gis_join": "G4600710"
+    },
+    {
+      "gis_join": "G4600250"
+    },
+    {
+      "gis_join": "G4601190"
+    },
+    {
+      "gis_join": "G4601210"
+    },
+    {
+      "gis_join": "G4600550"
+    },
+    {
+      "gis_join": "G4601130"
+    },
+    {
+      "gis_join": "G4600330"
+    },
+    {
+      "gis_join": "G4600430"
+    },
+    {
+      "gis_join": "G4600470"
+    },
+    {
+      "gis_join": "G4600630"
+    },
+    {
+      "gis_join": "G4601370"
+    },
+    {
+      "gis_join": "G4600090"
+    },
+    {
+      "gis_join": "G4600770"
+    },
+    {
+      "gis_join": "G4600270"
+    },
+    {
+      "gis_join": "G4600030"
+    },
+    {
+      "gis_join": "G4601010"
+    },
+    {
+      "gis_join": "G4600410"
+    },
+    {
+      "gis_join": "G4600670"
+    },
+    {
+      "gis_join": "G4600950"
+    },
+    {
+      "gis_join": "G4600310"
+    },
+    {
+      "gis_join": "G4600810"
+    },
+    {
+      "gis_join": "G4600750"
+    },
+    {
+      "gis_join": "G4600590"
+    },
+    {
+      "gis_join": "G4601170"
+    },
+    {
+      "gis_join": "G4600290"
+    },
+    {
+      "gis_join": "G4600230"
+    },
+    {
+      "gis_join": "G4600650"
+    },
+    {
+      "gis_join": "G4601250"
+    },
+    {
+      "gis_join": "G4600830"
+    },
+    {
+      "gis_join": "G2500230"
+    },
+    {
+      "gis_join": "G2500030"
+    },
+    {
+      "gis_join": "G2500210"
+    },
+    {
+      "gis_join": "G2500250"
+    },
+    {
+      "gis_join": "G2500150"
+    },
+    {
+      "gis_join": "G2500010"
+    },
+    {
+      "gis_join": "G2500110"
+    },
+    {
+      "gis_join": "G2500090"
+    },
+    {
+      "gis_join": "G2500130"
+    },
+    {
+      "gis_join": "G2500050"
+    },
+    {
+      "gis_join": "G2500190"
+    },
+    {
+      "gis_join": "G2500170"
+    },
+    {
+      "gis_join": "G2500270"
+    },
+    {
+      "gis_join": "G2500070"
+    },
+    {
+      "gis_join": "G4701010"
+    },
+    {
+      "gis_join": "G4700330"
+    },
+    {
+      "gis_join": "G4701370"
+    },
+    {
+      "gis_join": "G4700350"
+    },
+    {
+      "gis_join": "G4700270"
+    },
+    {
+      "gis_join": "G4700650"
+    },
+    {
+      "gis_join": "G4700510"
+    },
+    {
+      "gis_join": "G4700210"
+    },
+    {
+      "gis_join": "G4701590"
+    },
+    {
+      "gis_join": "G4701310"
+    },
+    {
+      "gis_join": "G4701670"
+    },
+    {
+      "gis_join": "G4700530"
+    },
+    {
+      "gis_join": "G4701250"
+    },
+    {
+      "gis_join": "G4700130"
+    },
+    {
+      "gis_join": "G4700870"
+    },
+    {
+      "gis_join": "G4701450"
+    },
+    {
+      "gis_join": "G4700230"
+    },
+    {
+      "gis_join": "G4701410"
+    },
+    {
+      "gis_join": "G4701290"
+    },
+    {
+      "gis_join": "G4700590"
+    },
+    {
+      "gis_join": "G4700990"
+    },
+    {
+      "gis_join": "G4700030"
+    },
+    {
+      "gis_join": "G4701730"
+    },
+    {
+      "gis_join": "G4701490"
+    },
+    {
+      "gis_join": "G4701550"
+    },
+    {
+      "gis_join": "G4700050"
+    },
+    {
+      "gis_join": "G4700390"
+    },
+    {
+      "gis_join": "G4700890"
+    },
+    {
+      "gis_join": "G4701630"
+    },
+    {
+      "gis_join": "G4701350"
+    },
+    {
+      "gis_join": "G4700730"
+    },
+    {
+      "gis_join": "G4701890"
+    },
+    {
+      "gis_join": "G4700290"
+    },
+    {
+      "gis_join": "G4701390"
+    },
+    {
+      "gis_join": "G4700670"
+    },
+    {
+      "gis_join": "G4701050"
+    },
+    {
+      "gis_join": "G4700070"
+    },
+    {
+      "gis_join": "G4700910"
+    },
+    {
+      "gis_join": "G4700710"
+    },
+    {
+      "gis_join": "G4701470"
+    },
+    {
+      "gis_join": "G4700010"
+    },
+    {
+      "gis_join": "G4701230"
+    },
+    {
+      "gis_join": "G4700830"
+    },
+    {
+      "gis_join": "G4701690"
+    },
+    {
+      "gis_join": "G4700810"
+    },
+    {
+      "gis_join": "G4701110"
+    },
+    {
+      "gis_join": "G4700790"
+    },
+    {
+      "gis_join": "G4701870"
+    },
+    {
+      "gis_join": "G4701850"
+    },
+    {
+      "gis_join": "G4700630"
+    },
+    {
+      "gis_join": "G4701430"
+    },
+    {
+      "gis_join": "G4700370"
+    },
+    {
+      "gis_join": "G4701510"
+    },
+    {
+      "gis_join": "G4700610"
+    },
+    {
+      "gis_join": "G4701790"
+    },
+    {
+      "gis_join": "G4701150"
+    },
+    {
+      "gis_join": "G4701210"
+    },
+    {
+      "gis_join": "G4701770"
+    },
+    {
+      "gis_join": "G4700190"
+    },
+    {
+      "gis_join": "G4701170"
+    },
+    {
+      "gis_join": "G4701130"
+    },
+    {
+      "gis_join": "G4701570"
+    },
+    {
+      "gis_join": "G4700690"
+    },
+    {
+      "gis_join": "G4701070"
+    },
+    {
+      "gis_join": "G4701710"
+    },
+    {
+      "gis_join": "G4701610"
+    },
+    {
+      "gis_join": "G4700450"
+    },
+    {
+      "gis_join": "G4700550"
+    },
+    {
+      "gis_join": "G4701650"
+    },
+    {
+      "gis_join": "G4701830"
+    },
+    {
+      "gis_join": "G4701330"
+    },
+    {
+      "gis_join": "G4700750"
+    },
+    {
+      "gis_join": "G4700850"
+    },
+    {
+      "gis_join": "G4700310"
+    },
+    {
+      "gis_join": "G4701190"
+    },
+    {
+      "gis_join": "G4701030"
+    },
+    {
+      "gis_join": "G4701090"
+    },
+    {
+      "gis_join": "G4700570"
+    },
+    {
+      "gis_join": "G4700250"
+    },
+    {
+      "gis_join": "G4700430"
+    },
+    {
+      "gis_join": "G4700110"
+    },
+    {
+      "gis_join": "G4700170"
+    },
+    {
+      "gis_join": "G4700470"
+    },
+    {
+      "gis_join": "G4701270"
+    },
+    {
+      "gis_join": "G4700490"
+    },
+    {
+      "gis_join": "G4700930"
+    },
+    {
+      "gis_join": "G4700090"
+    },
+    {
+      "gis_join": "G4700950"
+    },
+    {
+      "gis_join": "G4700770"
+    },
+    {
+      "gis_join": "G4701810"
+    },
+    {
+      "gis_join": "G4700970"
+    },
+    {
+      "gis_join": "G4701530"
+    },
+    {
+      "gis_join": "G4700150"
+    },
+    {
+      "gis_join": "G4700410"
+    },
+    {
+      "gis_join": "G4701750"
+    },
+    {
+      "gis_join": "G1701010"
+    },
+    {
+      "gis_join": "G1701230"
+    },
+    {
+      "gis_join": "G1701130"
+    },
+    {
+      "gis_join": "G1700130"
+    },
+    {
+      "gis_join": "G1701030"
+    },
+    {
+      "gis_join": "G1701450"
+    },
+    {
+      "gis_join": "G1701510"
+    },
+    {
+      "gis_join": "G1700270"
+    },
+    {
+      "gis_join": "G1700530"
+    },
+    {
+      "gis_join": "G1701190"
+    },
+    {
+      "gis_join": "G1700770"
+    },
+    {
+      "gis_join": "G1701070"
+    },
+    {
+      "gis_join": "G1702030"
+    },
+    {
+      "gis_join": "G1700950"
+    },
+    {
+      "gis_join": "G1701890"
+    },
+    {
+      "gis_join": "G1701550"
+    },
+    {
+      "gis_join": "G1700450"
+    },
+    {
+      "gis_join": "G1701650"
+    },
+    {
+      "gis_join": "G1701370"
+    },
+    {
+      "gis_join": "G1701470"
+    },
+    {
+      "gis_join": "G1700670"
+    },
+    {
+      "gis_join": "G1700370"
+    },
+    {
+      "gis_join": "G1700790"
+    },
+    {
+      "gis_join": "G1701050"
+    },
+    {
+      "gis_join": "G1700470"
+    },
+    {
+      "gis_join": "G1701310"
+    },
+    {
+      "gis_join": "G1700830"
+    },
+    {
+      "gis_join": "G1700090"
+    },
+    {
+      "gis_join": "G1700850"
+    },
+    {
+      "gis_join": "G1701290"
+    },
+    {
+      "gis_join": "G1700330"
+    },
+    {
+      "gis_join": "G1700650"
+    },
+    {
+      "gis_join": "G1702010"
+    },
+    {
+      "gis_join": "G1700350"
+    },
+    {
+      "gis_join": "G1701090"
+    },
+    {
+      "gis_join": "G1701970"
+    },
+    {
+      "gis_join": "G1700410"
+    },
+    {
+      "gis_join": "G1701350"
+    },
+    {
+      "gis_join": "G1701330"
+    },
+    {
+      "gis_join": "G1701150"
+    },
+    {
+      "gis_join": "G1701810"
+    },
+    {
+      "gis_join": "G1701710"
+    },
+    {
+      "gis_join": "G1701830"
+    },
+    {
+      "gis_join": "G1700810"
+    },
+    {
+      "gis_join": "G1701730"
+    },
+    {
+      "gis_join": "G1700870"
+    },
+    {
+      "gis_join": "G1701750"
+    },
+    {
+      "gis_join": "G1700610"
+    },
+    {
+      "gis_join": "G1700930"
+    },
+    {
+      "gis_join": "G1701590"
+    },
+    {
+      "gis_join": "G1701790"
+    },
+    {
+      "gis_join": "G1701770"
+    },
+    {
+      "gis_join": "G1701930"
+    },
+    {
+      "gis_join": "G1701410"
+    },
+    {
+      "gis_join": "G1701670"
+    },
+    {
+      "gis_join": "G1701630"
+    },
+    {
+      "gis_join": "G1700310"
+    },
+    {
+      "gis_join": "G1701250"
+    },
+    {
+      "gis_join": "G1701990"
+    },
+    {
+      "gis_join": "G1700430"
+    },
+    {
+      "gis_join": "G1700050"
+    },
+    {
+      "gis_join": "G1701430"
+    },
+    {
+      "gis_join": "G1700990"
+    },
+    {
+      "gis_join": "G1701950"
+    },
+    {
+      "gis_join": "G1700910"
+    },
+    {
+      "gis_join": "G1700190"
+    },
+    {
+      "gis_join": "G1701270"
+    },
+    {
+      "gis_join": "G1700490"
+    },
+    {
+      "gis_join": "G1701210"
+    },
+    {
+      "gis_join": "G1701490"
+    },
+    {
+      "gis_join": "G1701110"
+    },
+    {
+      "gis_join": "G1700690"
+    },
+    {
+      "gis_join": "G1700970"
+    },
+    {
+      "gis_join": "G1700750"
+    },
+    {
+      "gis_join": "G1700010"
+    },
+    {
+      "gis_join": "G1700070"
+    },
+    {
+      "gis_join": "G1700250"
+    },
+    {
+      "gis_join": "G1700030"
+    },
+    {
+      "gis_join": "G1700570"
+    },
+    {
+      "gis_join": "G1700730"
+    },
+    {
+      "gis_join": "G1700590"
+    },
+    {
+      "gis_join": "G1700630"
+    },
+    {
+      "gis_join": "G1700290"
+    },
+    {
+      "gis_join": "G1700710"
+    },
+    {
+      "gis_join": "G1700170"
+    },
+    {
+      "gis_join": "G1700890"
+    },
+    {
+      "gis_join": "G1700230"
+    },
+    {
+      "gis_join": "G1700210"
+    },
+    {
+      "gis_join": "G1700390"
+    },
+    {
+      "gis_join": "G1700510"
+    },
+    {
+      "gis_join": "G1701870"
+    },
+    {
+      "gis_join": "G1700110"
+    },
+    {
+      "gis_join": "G1701690"
+    },
+    {
+      "gis_join": "G1700550"
+    },
+    {
+      "gis_join": "G1701910"
+    },
+    {
+      "gis_join": "G1701390"
+    },
+    {
+      "gis_join": "G1701530"
+    },
+    {
+      "gis_join": "G1701170"
+    },
+    {
+      "gis_join": "G1701610"
+    },
+    {
+      "gis_join": "G1701850"
+    },
+    {
+      "gis_join": "G1701570"
+    },
+    {
+      "gis_join": "G1700150"
+    },
+    {
+      "gis_join": "G1100010"
+    },
+    {
+      "gis_join": "G1800510"
+    },
+    {
+      "gis_join": "G1800910"
+    },
+    {
+      "gis_join": "G1801330"
+    },
+    {
+      "gis_join": "G1800810"
+    },
+    {
+      "gis_join": "G1800450"
+    },
+    {
+      "gis_join": "G1801050"
+    },
+    {
+      "gis_join": "G1800750"
+    },
+    {
+      "gis_join": "G1800130"
+    },
+    {
+      "gis_join": "G1800250"
+    },
+    {
+      "gis_join": "G1800990"
+    },
+    {
+      "gis_join": "G1800110"
+    },
+    {
+      "gis_join": "G1801510"
+    },
+    {
+      "gis_join": "G1801130"
+    },
+    {
+      "gis_join": "G1801690"
+    },
+    {
+      "gis_join": "G1801110"
+    },
+    {
+      "gis_join": "G1800330"
+    },
+    {
+      "gis_join": "G1801370"
+    },
+    {
+      "gis_join": "G1800590"
+    },
+    {
+      "gis_join": "G1800570"
+    },
+    {
+      "gis_join": "G1801570"
+    },
+    {
+      "gis_join": "G1800830"
+    },
+    {
+      "gis_join": "G1800670"
+    },
+    {
+      "gis_join": "G1801350"
+    },
+    {
+      "gis_join": "G1800410"
+    },
+    {
+      "gis_join": "G1801530"
+    },
+    {
+      "gis_join": "G1800890"
+    },
+    {
+      "gis_join": "G1800550"
+    },
+    {
+      "gis_join": "G1801490"
+    },
+    {
+      "gis_join": "G1801830"
+    },
+    {
+      "gis_join": "G1800850"
+    },
+    {
+      "gis_join": "G1801290"
+    },
+    {
+      "gis_join": "G1801270"
+    },
+    {
+      "gis_join": "G1800390"
+    },
+    {
+      "gis_join": "G1801450"
+    },
+    {
+      "gis_join": "G1800270"
+    },
+    {
+      "gis_join": "G1800530"
+    },
+    {
+      "gis_join": "G1800230"
+    },
+    {
+      "gis_join": "G1800490"
+    },
+    {
+      "gis_join": "G1800190"
+    },
+    {
+      "gis_join": "G1801230"
+    },
+    {
+      "gis_join": "G1800870"
+    },
+    {
+      "gis_join": "G1801070"
+    },
+    {
+      "gis_join": "G1800970"
+    },
+    {
+      "gis_join": "G1800710"
+    },
+    {
+      "gis_join": "G1800730"
+    },
+    {
+      "gis_join": "G1801150"
+    },
+    {
+      "gis_join": "G1800470"
+    },
+    {
+      "gis_join": "G1800630"
+    },
+    {
+      "gis_join": "G1801010"
+    },
+    {
+      "gis_join": "G1800790"
+    },
+    {
+      "gis_join": "G1801210"
+    },
+    {
+      "gis_join": "G1801410"
+    },
+    {
+      "gis_join": "G1801650"
+    },
+    {
+      "gis_join": "G1800150"
+    },
+    {
+      "gis_join": "G1800770"
+    },
+    {
+      "gis_join": "G1801630"
+    },
+    {
+      "gis_join": "G1801810"
+    },
+    {
+      "gis_join": "G1800930"
+    },
+    {
+      "gis_join": "G1800430"
+    },
+    {
+      "gis_join": "G1800030"
+    },
+    {
+      "gis_join": "G1800690"
+    },
+    {
+      "gis_join": "G1800090"
+    },
+    {
+      "gis_join": "G1801770"
+    },
+    {
+      "gis_join": "G1801710"
+    },
+    {
+      "gis_join": "G1801610"
+    },
+    {
+      "gis_join": "G1800310"
+    },
+    {
+      "gis_join": "G1800070"
+    },
+    {
+      "gis_join": "G1801190"
+    },
+    {
+      "gis_join": "G1800170"
+    },
+    {
+      "gis_join": "G1801090"
+    },
+    {
+      "gis_join": "G1801550"
+    },
+    {
+      "gis_join": "G1800050"
+    },
+    {
+      "gis_join": "G1800950"
+    },
+    {
+      "gis_join": "G1801790"
+    },
+    {
+      "gis_join": "G1800290"
+    },
+    {
+      "gis_join": "G1801170"
+    },
+    {
+      "gis_join": "G1801390"
+    },
+    {
+      "gis_join": "G1801750"
+    },
+    {
+      "gis_join": "G1801310"
+    },
+    {
+      "gis_join": "G1801030"
+    },
+    {
+      "gis_join": "G1800210"
+    },
+    {
+      "gis_join": "G1800010"
+    },
+    {
+      "gis_join": "G1800350"
+    },
+    {
+      "gis_join": "G1801430"
+    },
+    {
+      "gis_join": "G1801730"
+    },
+    {
+      "gis_join": "G1801250"
+    },
+    {
+      "gis_join": "G1800650"
+    },
+    {
+      "gis_join": "G1800370"
+    },
+    {
+      "gis_join": "G1800610"
+    },
+    {
+      "gis_join": "G1801670"
+    },
+    {
+      "gis_join": "G1801470"
+    },
+    {
+      "gis_join": "G1801590"
+    },
+    {
+      "gis_join": "G5000030"
+    },
+    {
+      "gis_join": "G5000190"
+    },
+    {
+      "gis_join": "G5000170"
+    },
+    {
+      "gis_join": "G5000070"
+    },
+    {
+      "gis_join": "G5000090"
+    },
+    {
+      "gis_join": "G5000210"
+    },
+    {
+      "gis_join": "G5000270"
+    },
+    {
+      "gis_join": "G5000110"
+    },
+    {
+      "gis_join": "G5000010"
+    },
+    {
+      "gis_join": "G5000230"
+    },
+    {
+      "gis_join": "G5000050"
+    },
+    {
+      "gis_join": "G5000250"
+    },
+    {
+      "gis_join": "G5000150"
+    },
+    {
+      "gis_join": "G5000130"
+    },
+    {
+      "gis_join": "G0400010"
+    },
+    {
+      "gis_join": "G0400090"
+    },
+    {
+      "gis_join": "G0400130"
+    },
+    {
+      "gis_join": "G0400150"
+    },
+    {
+      "gis_join": "G0400120"
+    },
+    {
+      "gis_join": "G0400170"
+    },
+    {
+      "gis_join": "G0400190"
+    },
+    {
+      "gis_join": "G0400210"
+    },
+    {
+      "gis_join": "G0400250"
+    },
+    {
+      "gis_join": "G0400270"
+    },
+    {
+      "gis_join": "G0400070"
+    },
+    {
+      "gis_join": "G0400230"
+    },
+    {
+      "gis_join": "G0400050"
+    },
+    {
+      "gis_join": "G0400110"
+    },
+    {
+      "gis_join": "G0400030"
+    },
+    {
+      "gis_join": "G1901390"
+    },
+    {
+      "gis_join": "G1901950"
+    },
+    {
+      "gis_join": "G1900910"
+    },
+    {
+      "gis_join": "G1901010"
+    },
+    {
+      "gis_join": "G1900070"
+    },
+    {
+      "gis_join": "G1901470"
+    },
+    {
+      "gis_join": "G1901810"
+    },
+    {
+      "gis_join": "G1900150"
+    },
+    {
+      "gis_join": "G1901130"
+    },
+    {
+      "gis_join": "G1900270"
+    },
+    {
+      "gis_join": "G1901430"
+    },
+    {
+      "gis_join": "G1901250"
+    },
+    {
+      "gis_join": "G1901750"
+    },
+    {
+      "gis_join": "G1900170"
+    },
+    {
+      "gis_join": "G1900610"
+    },
+    {
+      "gis_join": "G1900670"
+    },
+    {
+      "gis_join": "G1901590"
+    },
+    {
+      "gis_join": "G1900090"
+    },
+    {
+      "gis_join": "G1900830"
+    },
+    {
+      "gis_join": "G1900750"
+    },
+    {
+      "gis_join": "G1901410"
+    },
+    {
+      "gis_join": "G1900450"
+    },
+    {
+      "gis_join": "G1901050"
+    },
+    {
+      "gis_join": "G1901690"
+    },
+    {
+      "gis_join": "G1901150"
+    },
+    {
+      "gis_join": "G1901830"
+    },
+    {
+      "gis_join": "G1901030"
+    },
+    {
+      "gis_join": "G1901370"
+    },
+    {
+      "gis_join": "G1900230"
+    },
+    {
+      "gis_join": "G1901870"
+    },
+    {
+      "gis_join": "G1901290"
+    },
+    {
+      "gis_join": "G1901850"
+    },
+    {
+      "gis_join": "G1900630"
+    },
+    {
+      "gis_join": "G1901330"
+    },
+    {
+      "gis_join": "G1900650"
+    },
+    {
+      "gis_join": "G1901550"
+    },
+    {
+      "gis_join": "G1901110"
+    },
+    {
+      "gis_join": "G1901270"
+    },
+    {
+      "gis_join": "G1900790"
+    },
+    {
+      "gis_join": "G1900950"
+    },
+    {
+      "gis_join": "G1901070"
+    },
+    {
+      "gis_join": "G1901190"
+    },
+    {
+      "gis_join": "G1900130"
+    },
+    {
+      "gis_join": "G1901670"
+    },
+    {
+      "gis_join": "G1901510"
+    },
+    {
+      "gis_join": "G1900890"
+    },
+    {
+      "gis_join": "G1901650"
+    },
+    {
+      "gis_join": "G1901610"
+    },
+    {
+      "gis_join": "G1901890"
+    },
+    {
+      "gis_join": "G1900690"
+    },
+    {
+      "gis_join": "G1900250"
+    },
+    {
+      "gis_join": "G1900290"
+    },
+    {
+      "gis_join": "G1900870"
+    },
+    {
+      "gis_join": "G1900370"
+    },
+    {
+      "gis_join": "G1901790"
+    },
+    {
+      "gis_join": "G1900430"
+    },
+    {
+      "gis_join": "G1901730"
+    },
+    {
+      "gis_join": "G1901090"
+    },
+    {
+      "gis_join": "G1900350"
+    },
+    {
+      "gis_join": "G1900930"
+    },
+    {
+      "gis_join": "G1901450"
+    },
+    {
+      "gis_join": "G1900470"
+    },
+    {
+      "gis_join": "G1901530"
+    },
+    {
+      "gis_join": "G1900050"
+    },
+    {
+      "gis_join": "G1900810"
+    },
+    {
+      "gis_join": "G1901930"
+    },
+    {
+      "gis_join": "G1901770"
+    },
+    {
+      "gis_join": "G1900590"
+    },
+    {
+      "gis_join": "G1901310"
+    },
+    {
+      "gis_join": "G1901210"
+    },
+    {
+      "gis_join": "G1900730"
+    },
+    {
+      "gis_join": "G1900570"
+    },
+    {
+      "gis_join": "G1901710"
+    },
+    {
+      "gis_join": "G1900210"
+    },
+    {
+      "gis_join": "G1900770"
+    },
+    {
+      "gis_join": "G1901170"
+    },
+    {
+      "gis_join": "G1900190"
+    },
+    {
+      "gis_join": "G1900850"
+    },
+    {
+      "gis_join": "G1901970"
+    },
+    {
+      "gis_join": "G1900390"
+    },
+    {
+      "gis_join": "G1900490"
+    },
+    {
+      "gis_join": "G1901630"
+    },
+    {
+      "gis_join": "G1901490"
+    },
+    {
+      "gis_join": "G1900310"
+    },
+    {
+      "gis_join": "G1900030"
+    },
+    {
+      "gis_join": "G1900550"
+    },
+    {
+      "gis_join": "G1900010"
+    },
+    {
+      "gis_join": "G1901570"
+    },
+    {
+      "gis_join": "G1901910"
+    },
+    {
+      "gis_join": "G1900110"
+    },
+    {
+      "gis_join": "G1900510"
+    },
+    {
+      "gis_join": "G1900710"
+    },
+    {
+      "gis_join": "G1900530"
+    },
+    {
+      "gis_join": "G1901230"
+    },
+    {
+      "gis_join": "G1900990"
+    },
+    {
+      "gis_join": "G1900330"
+    },
+    {
+      "gis_join": "G1900410"
+    },
+    {
+      "gis_join": "G1900970"
+    },
+    {
+      "gis_join": "G1901350"
+    },
+    {
+      "gis_join": "G5300590"
+    },
+    {
+      "gis_join": "G5300610"
+    },
+    {
+      "gis_join": "G5300250"
+    },
+    {
+      "gis_join": "G5300530"
+    },
+    {
+      "gis_join": "G5300290"
+    },
+    {
+      "gis_join": "G5300270"
+    },
+    {
+      "gis_join": "G5300130"
+    },
+    {
+      "gis_join": "G5300470"
+    },
+    {
+      "gis_join": "G5300630"
+    },
+    {
+      "gis_join": "G5300690"
+    },
+    {
+      "gis_join": "G5300550"
+    },
+    {
+      "gis_join": "G5300030"
+    },
+    {
+      "gis_join": "G5300450"
+    },
+    {
+      "gis_join": "G5300190"
+    },
+    {
+      "gis_join": "G5300210"
+    },
+    {
+      "gis_join": "G5300110"
+    },
+    {
+      "gis_join": "G5300090"
+    },
+    {
+      "gis_join": "G5300510"
+    },
+    {
+      "gis_join": "G5300390"
+    },
+    {
+      "gis_join": "G5300570"
+    },
+    {
+      "gis_join": "G5300370"
+    },
+    {
+      "gis_join": "G5300770"
+    },
+    {
+      "gis_join": "G5300050"
+    },
+    {
+      "gis_join": "G5300350"
+    },
+    {
+      "gis_join": "G5300430"
+    },
+    {
+      "gis_join": "G5300410"
+    },
+    {
+      "gis_join": "G5300070"
+    },
+    {
+      "gis_join": "G5300150"
+    },
+    {
+      "gis_join": "G5300670"
+    },
+    {
+      "gis_join": "G5300750"
+    },
+    {
+      "gis_join": "G5300650"
+    },
+    {
+      "gis_join": "G5300170"
+    },
+    {
+      "gis_join": "G5300730"
+    },
+    {
+      "gis_join": "G5300310"
+    },
+    {
+      "gis_join": "G5300490"
+    },
+    {
+      "gis_join": "G5300330"
+    },
+    {
+      "gis_join": "G5300710"
+    },
+    {
+      "gis_join": "G5300010"
+    },
+    {
+      "gis_join": "G5300230"
+    },
+    {
+      "gis_join": "G2600190"
+    },
+    {
+      "gis_join": "G2600690"
+    },
+    {
+      "gis_join": "G2601230"
+    },
+    {
+      "gis_join": "G2600250"
+    },
+    {
+      "gis_join": "G2600010"
+    },
+    {
+      "gis_join": "G2600810"
+    },
+    {
+      "gis_join": "G2600450"
+    },
+    {
+      "gis_join": "G2600270"
+    },
+    {
+      "gis_join": "G2600110"
+    },
+    {
+      "gis_join": "G2601370"
+    },
+    {
+      "gis_join": "G2601570"
+    },
+    {
+      "gis_join": "G2601410"
+    },
+    {
+      "gis_join": "G2600510"
+    },
+    {
+      "gis_join": "G2601110"
+    },
+    {
+      "gis_join": "G2600530"
+    },
+    {
+      "gis_join": "G2601530"
+    },
+    {
+      "gis_join": "G2601550"
+    },
+    {
+      "gis_join": "G2600710"
+    },
+    {
+      "gis_join": "G2600470"
+    },
+    {
+      "gis_join": "G2601490"
+    },
+    {
+      "gis_join": "G2600750"
+    },
+    {
+      "gis_join": "G2601430"
+    },
+    {
+      "gis_join": "G2600990"
+    },
+    {
+      "gis_join": "G2600730"
+    },
+    {
+      "gis_join": "G2601310"
+    },
+    {
+      "gis_join": "G2600090"
+    },
+    {
+      "gis_join": "G2600050"
+    },
+    {
+      "gis_join": "G2600630"
+    },
+    {
+      "gis_join": "G2601590"
+    },
+    {
+      "gis_join": "G2601090"
+    },
+    {
+      "gis_join": "G2601470"
+    },
+    {
+      "gis_join": "G2600230"
+    },
+    {
+      "gis_join": "G2600850"
+    },
+    {
+      "gis_join": "G2601030"
+    },
+    {
+      "gis_join": "G2600030"
+    },
+    {
+      "gis_join": "G2600950"
+    },
+    {
+      "gis_join": "G2601130"
+    },
+    {
+      "gis_join": "G2600910"
+    },
+    {
+      "gis_join": "G2600610"
+    },
+    {
+      "gis_join": "G2601190"
+    },
+    {
+      "gis_join": "G2601390"
+    },
+    {
+      "gis_join": "G2600150"
+    },
+    {
+      "gis_join": "G2600330"
+    },
+    {
+      "gis_join": "G2600490"
+    },
+    {
+      "gis_join": "G2600430"
+    },
+    {
+      "gis_join": "G2600370"
+    },
+    {
+      "gis_join": "G2601150"
+    },
+    {
+      "gis_join": "G2600310"
+    },
+    {
+      "gis_join": "G2601290"
+    },
+    {
+      "gis_join": "G2601070"
+    },
+    {
+      "gis_join": "G2600410"
+    },
+    {
+      "gis_join": "G2601650"
+    },
+    {
+      "gis_join": "G2600070"
+    },
+    {
+      "gis_join": "G2600210"
+    },
+    {
+      "gis_join": "G2600550"
+    },
+    {
+      "gis_join": "G2601510"
+    },
+    {
+      "gis_join": "G2601270"
+    },
+    {
+      "gis_join": "G2600130"
+    },
+    {
+      "gis_join": "G2600170"
+    },
+    {
+      "gis_join": "G2600670"
+    },
+    {
+      "gis_join": "G2600830"
+    },
+    {
+      "gis_join": "G2600930"
+    },
+    {
+      "gis_join": "G2600890"
+    },
+    {
+      "gis_join": "G2601630"
+    },
+    {
+      "gis_join": "G2600770"
+    },
+    {
+      "gis_join": "G2600870"
+    },
+    {
+      "gis_join": "G2600650"
+    },
+    {
+      "gis_join": "G2600390"
+    },
+    {
+      "gis_join": "G2600970"
+    },
+    {
+      "gis_join": "G2600590"
+    },
+    {
+      "gis_join": "G2601050"
+    },
+    {
+      "gis_join": "G2601250"
+    },
+    {
+      "gis_join": "G2600570"
+    },
+    {
+      "gis_join": "G2601210"
+    },
+    {
+      "gis_join": "G2601450"
+    },
+    {
+      "gis_join": "G2600290"
+    },
+    {
+      "gis_join": "G2600790"
+    },
+    {
+      "gis_join": "G2601330"
+    },
+    {
+      "gis_join": "G2600350"
+    },
+    {
+      "gis_join": "G2601170"
+    },
+    {
+      "gis_join": "G2601010"
+    },
+    {
+      "gis_join": "G2601350"
+    },
+    {
+      "gis_join": "G2601610"
+    },
+    {
+      "gis_join": "G2701310"
+    },
+    {
+      "gis_join": "G2700550"
+    },
+    {
+      "gis_join": "G2701050"
+    },
+    {
+      "gis_join": "G2701410"
+    },
+    {
+      "gis_join": "G2701350"
+    },
+    {
+      "gis_join": "G2701190"
+    },
+    {
+      "gis_join": "G2700130"
+    },
+    {
+      "gis_join": "G2700110"
+    },
+    {
+      "gis_join": "G2701630"
+    },
+    {
+      "gis_join": "G2700690"
+    },
+    {
+      "gis_join": "G2701290"
+    },
+    {
+      "gis_join": "G2701030"
+    },
+    {
+      "gis_join": "G2700930"
+    },
+    {
+      "gis_join": "G2701470"
+    },
+    {
+      "gis_join": "G2701610"
+    },
+    {
+      "gis_join": "G2700630"
+    },
+    {
+      "gis_join": "G2700150"
+    },
+    {
+      "gis_join": "G2701490"
+    },
+    {
+      "gis_join": "G2700670"
+    },
+    {
+      "gis_join": "G2700990"
+    },
+    {
+      "gis_join": "G2701370"
+    },
+    {
+      "gis_join": "G2701550"
+    },
+    {
+      "gis_join": "G2701730"
+    },
+    {
+      "gis_join": "G2701530"
+    },
+    {
+      "gis_join": "G2701070"
+    },
+    {
+      "gis_join": "G2701570"
+    },
+    {
+      "gis_join": "G2700270"
+    },
+    {
+      "gis_join": "G2700890"
+    },
+    {
+      "gis_join": "G2700530"
+    },
+    {
+      "gis_join": "G2700650"
+    },
+    {
+      "gis_join": "G2700730"
+    },
+    {
+      "gis_join": "G2701150"
+    },
+    {
+      "gis_join": "G2700710"
+    },
+    {
+      "gis_join": "G2700510"
+    },
+    {
+      "gis_join": "G2700290"
+    },
+    {
+      "gis_join": "G2701450"
+    },
+    {
+      "gis_join": "G2701250"
+    },
+    {
+      "gis_join": "G2700950"
+    },
+    {
+      "gis_join": "G2700070"
+    },
+    {
+      "gis_join": "G2700310"
+    },
+    {
+      "gis_join": "G2700490"
+    },
+    {
+      "gis_join": "G2701090"
+    },
+    {
+      "gis_join": "G2700010"
+    },
+    {
+      "gis_join": "G2701430"
+    },
+    {
+      "gis_join": "G2701590"
+    },
+    {
+      "gis_join": "G2700370"
+    },
+    {
+      "gis_join": "G2700190"
+    },
+    {
+      "gis_join": "G2700230"
+    },
+    {
+      "gis_join": "G2701710"
+    },
+    {
+      "gis_join": "G2700210"
+    },
+    {
+      "gis_join": "G2700810"
+    },
+    {
+      "gis_join": "G2700790"
+    },
+    {
+      "gis_join": "G2700870"
+    },
+    {
+      "gis_join": "G2700750"
+    },
+    {
+      "gis_join": "G2701210"
+    },
+    {
+      "gis_join": "G2700170"
+    },
+    {
+      "gis_join": "G2701690"
+    },
+    {
+      "gis_join": "G2700030"
+    },
+    {
+      "gis_join": "G2700590"
+    },
+    {
+      "gis_join": "G2701170"
+    },
+    {
+      "gis_join": "G2700830"
+    },
+    {
+      "gis_join": "G2700570"
+    },
+    {
+      "gis_join": "G2700430"
+    },
+    {
+      "gis_join": "G2701650"
+    },
+    {
+      "gis_join": "G2700970"
+    },
+    {
+      "gis_join": "G2700470"
+    },
+    {
+      "gis_join": "G2701270"
+    },
+    {
+      "gis_join": "G2701010"
+    },
+    {
+      "gis_join": "G2701110"
+    },
+    {
+      "gis_join": "G2701510"
+    },
+    {
+      "gis_join": "G2700050"
+    },
+    {
+      "gis_join": "G2700250"
+    },
+    {
+      "gis_join": "G2700910"
+    },
+    {
+      "gis_join": "G2701390"
+    },
+    {
+      "gis_join": "G2700090"
+    },
+    {
+      "gis_join": "G2700850"
+    },
+    {
+      "gis_join": "G2701130"
+    },
+    {
+      "gis_join": "G2701230"
+    },
+    {
+      "gis_join": "G2701330"
+    },
+    {
+      "gis_join": "G2700610"
+    },
+    {
+      "gis_join": "G2700770"
+    },
+    {
+      "gis_join": "G2700410"
+    },
+    {
+      "gis_join": "G2700450"
+    },
+    {
+      "gis_join": "G2700330"
+    },
+    {
+      "gis_join": "G2700390"
+    },
+    {
+      "gis_join": "G2701670"
+    },
+    {
+      "gis_join": "G2700350"
+    },
+    {
+      "gis_join": "G4500550"
+    },
+    {
+      "gis_join": "G4500470"
+    },
+    {
+      "gis_join": "G4500850"
+    },
+    {
+      "gis_join": "G4500670"
+    },
+    {
+      "gis_join": "G4500270"
+    },
+    {
+      "gis_join": "G4500490"
+    },
+    {
+      "gis_join": "G4500870"
+    },
+    {
+      "gis_join": "G4500830"
+    },
+    {
+      "gis_join": "G4500890"
+    },
+    {
+      "gis_join": "G4500070"
+    },
+    {
+      "gis_join": "G4500150"
+    },
+    {
+      "gis_join": "G4500750"
+    },
+    {
+      "gis_join": "G4500210"
+    },
+    {
+      "gis_join": "G4500790"
+    },
+    {
+      "gis_join": "G4500730"
+    },
+    {
+      "gis_join": "G4500350"
+    },
+    {
+      "gis_join": "G4500530"
+    },
+    {
+      "gis_join": "G4500650"
+    },
+    {
+      "gis_join": "G4500310"
+    },
+    {
+      "gis_join": "G4500090"
+    },
+    {
+      "gis_join": "G4500390"
+    },
+    {
+      "gis_join": "G4500690"
+    },
+    {
+      "gis_join": "G4500630"
+    },
+    {
+      "gis_join": "G4500110"
+    },
+    {
+      "gis_join": "G4500010"
+    },
+    {
+      "gis_join": "G4500370"
+    },
+    {
+      "gis_join": "G4500590"
+    },
+    {
+      "gis_join": "G4500130"
+    },
+    {
+      "gis_join": "G4500610"
+    },
+    {
+      "gis_join": "G4500290"
+    },
+    {
+      "gis_join": "G4500510"
+    },
+    {
+      "gis_join": "G4500230"
+    },
+    {
+      "gis_join": "G4500810"
+    },
+    {
+      "gis_join": "G4500430"
+    },
+    {
+      "gis_join": "G4500410"
+    },
+    {
+      "gis_join": "G4500710"
+    },
+    {
+      "gis_join": "G4500190"
+    },
+    {
+      "gis_join": "G4500450"
+    },
+    {
+      "gis_join": "G4500910"
+    },
+    {
+      "gis_join": "G4500050"
+    },
+    {
+      "gis_join": "G4500330"
+    },
+    {
+      "gis_join": "G4500170"
+    },
+    {
+      "gis_join": "G4500250"
+    },
+    {
+      "gis_join": "G4500570"
+    },
+    {
+      "gis_join": "G4500030"
+    },
+    {
+      "gis_join": "G4500770"
+    },
+    {
+      "gis_join": "G5105300"
+    },
+    {
+      "gis_join": "G5105100"
+    },
+    {
+      "gis_join": "G5106000"
+    },
+    {
+      "gis_join": "G5105400"
+    },
+    {
+      "gis_join": "G5105950"
+    },
+    {
+      "gis_join": "G5101690"
+    },
+    {
+      "gis_join": "G5100110"
+    },
+    {
+      "gis_join": "G5106100"
+    },
+    {
+      "gis_join": "G5100790"
+    },
+    {
+      "gis_join": "G5106800"
+    },
+    {
+      "gis_join": "G5106830"
+    },
+    {
+      "gis_join": "G5100050"
+    },
+    {
+      "gis_join": "G5101430"
+    },
+    {
+      "gis_join": "G5101010"
+    },
+    {
+      "gis_join": "G5108200"
+    },
+    {
+      "gis_join": "G5101850"
+    },
+    {
+      "gis_join": "G5107900"
+    },
+    {
+      "gis_join": "G5101830"
+    },
+    {
+      "gis_join": "G5101710"
+    },
+    {
+      "gis_join": "G5107500"
+    },
+    {
+      "gis_join": "G5106500"
+    },
+    {
+      "gis_join": "G5100590"
+    },
+    {
+      "gis_join": "G5100710"
+    },
+    {
+      "gis_join": "G5100270"
+    },
+    {
+      "gis_join": "G5106300"
+    },
+    {
+      "gis_join": "G5101410"
+    },
+    {
+      "gis_join": "G5101810"
+    },
+    {
+      "gis_join": "G5100690"
+    },
+    {
+      "gis_join": "G5100230"
+    },
+    {
+      "gis_join": "G5105200"
+    },
+    {
+      "gis_join": "G5107200"
+    },
+    {
+      "gis_join": "G5106200"
+    },
+    {
+      "gis_join": "G5106900"
+    },
+    {
+      "gis_join": "G5101330"
+    },
+    {
+      "gis_join": "G5101550"
+    },
+    {
+      "gis_join": "G5100410"
+    },
+    {
+      "gis_join": "G5101170"
+    },
+    {
+      "gis_join": "G5101490"
+    },
+    {
+      "gis_join": "G5101090"
+    },
+    {
+      "gis_join": "G5100010"
+    },
+    {
+      "gis_join": "G5101930"
+    },
+    {
+      "gis_join": "G5100830"
+    },
+    {
+      "gis_join": "G5100030"
+    },
+    {
+      "gis_join": "G5100650"
+    },
+    {
+      "gis_join": "G5105700"
+    },
+    {
+      "gis_join": "G5100730"
+    },
+    {
+      "gis_join": "G5101670"
+    },
+    {
+      "gis_join": "G5100310"
+    },
+    {
+      "gis_join": "G5101750"
+    },
+    {
+      "gis_join": "G5101110"
+    },
+    {
+      "gis_join": "G5101470"
+    },
+    {
+      "gis_join": "G5100750"
+    },
+    {
+      "gis_join": "G5100990"
+    },
+    {
+      "gis_join": "G5101270"
+    },
+    {
+      "gis_join": "G5101070"
+    },
+    {
+      "gis_join": "G5100530"
+    },
+    {
+      "gis_join": "G5106600"
+    },
+    {
+      "gis_join": "G5101390"
+    },
+    {
+      "gis_join": "G5101530"
+    },
+    {
+      "gis_join": "G5101950"
+    },
+    {
+      "gis_join": "G5100670"
+    },
+    {
+      "gis_join": "G5100350"
+    },
+    {
+      "gis_join": "G5106850"
+    },
+    {
+      "gis_join": "G5100430"
+    },
+    {
+      "gis_join": "G5107750"
+    },
+    {
+      "gis_join": "G5101250"
+    },
+    {
+      "gis_join": "G5100570"
+    },
+    {
+      "gis_join": "G5101590"
+    },
+    {
+      "gis_join": "G5101610"
+    },
+    {
+      "gis_join": "G5101790"
+    },
+    {
+      "gis_join": "G5108100"
+    },
+    {
+      "gis_join": "G5100950"
+    },
+    {
+      "gis_join": "G5107300"
+    },
+    {
+      "gis_join": "G5101450"
+    },
+    {
+      "gis_join": "G5107000"
+    },
+    {
+      "gis_join": "G5100370"
+    },
+    {
+      "gis_join": "G5107400"
+    },
+    {
+      "gis_join": "G5101730"
+    },
+    {
+      "gis_join": "G5105150"
+    },
+    {
+      "gis_join": "G5100130"
+    },
+    {
+      "gis_join": "G5101190"
+    },
+    {
+      "gis_join": "G5100250"
+    },
+    {
+      "gis_join": "G5106780"
+    },
+    {
+      "gis_join": "G5100450"
+    },
+    {
+      "gis_join": "G5101150"
+    },
+    {
+      "gis_join": "G5101350"
+    },
+    {
+      "gis_join": "G5101050"
+    },
+    {
+      "gis_join": "G5101870"
+    },
+    {
+      "gis_join": "G5100890"
+    },
+    {
+      "gis_join": "G5100360"
+    },
+    {
+      "gis_join": "G5107350"
+    },
+    {
+      "gis_join": "G5101130"
+    },
+    {
+      "gis_join": "G5100090"
+    },
+    {
+      "gis_join": "G5100870"
+    },
+    {
+      "gis_join": "G5108000"
+    },
+    {
+      "gis_join": "G5100190"
+    },
+    {
+      "gis_join": "G5107100"
+    },
+    {
+      "gis_join": "G5100470"
+    },
+    {
+      "gis_join": "G5100070"
+    },
+    {
+      "gis_join": "G5101570"
+    },
+    {
+      "gis_join": "G5101630"
+    },
+    {
+      "gis_join": "G5107600"
+    },
+    {
+      "gis_join": "G5101650"
+    },
+    {
+      "gis_join": "G5100330"
+    },
+    {
+      "gis_join": "G5100510"
+    },
+    {
+      "gis_join": "G5101030"
+    },
+    {
+      "gis_join": "G5100930"
+    },
+    {
+      "gis_join": "G5101990"
+    },
+    {
+      "gis_join": "G5100610"
+    },
+    {
+      "gis_join": "G5100910"
+    },
+    {
+      "gis_join": "G5105800"
+    },
+    {
+      "gis_join": "G5107700"
+    },
+    {
+      "gis_join": "G5100970"
+    },
+    {
+      "gis_join": "G5108400"
+    },
+    {
+      "gis_join": "G5101770"
+    },
+    {
+      "gis_join": "G5100630"
+    },
+    {
+      "gis_join": "G5100810"
+    },
+    {
+      "gis_join": "G5105900"
+    },
+    {
+      "gis_join": "G5101210"
+    },
+    {
+      "gis_join": "G5100170"
+    },
+    {
+      "gis_join": "G5101970"
+    },
+    {
+      "gis_join": "G5106700"
+    },
+    {
+      "gis_join": "G5100490"
+    },
+    {
+      "gis_join": "G5100150"
+    },
+    {
+      "gis_join": "G5105500"
+    },
+    {
+      "gis_join": "G5100210"
+    },
+    {
+      "gis_join": "G5101370"
+    },
+    {
+      "gis_join": "G5101910"
+    },
+    {
+      "gis_join": "G5106400"
+    },
+    {
+      "gis_join": "G5100850"
+    },
+    {
+      "gis_join": "G5108300"
+    },
+    {
+      "gis_join": "G5101310"
+    },
+    {
+      "gis_join": "G5100290"
+    },
+    {
+      "gis_join": "G5100770"
+    },
+    {
+      "gis_join": "G2300170"
+    },
+    {
+      "gis_join": "G2300070"
+    },
+    {
+      "gis_join": "G2300010"
+    },
+    {
+      "gis_join": "G2300230"
+    },
+    {
+      "gis_join": "G2300270"
+    },
+    {
+      "gis_join": "G2300210"
+    },
+    {
+      "gis_join": "G2300250"
+    },
+    {
+      "gis_join": "G2300310"
+    },
+    {
+      "gis_join": "G2300110"
+    },
+    {
+      "gis_join": "G2300150"
+    },
+    {
+      "gis_join": "G2300050"
+    },
+    {
+      "gis_join": "G2300130"
+    },
+    {
+      "gis_join": "G2300190"
+    },
+    {
+      "gis_join": "G2300290"
+    },
+    {
+      "gis_join": "G2300030"
+    },
+    {
+      "gis_join": "G2300090"
+    },
+    {
+      "gis_join": "G3701470"
+    },
+    {
+      "gis_join": "G3701850"
+    },
+    {
+      "gis_join": "G3700610"
+    },
+    {
+      "gis_join": "G3701910"
+    },
+    {
+      "gis_join": "G3700010"
+    },
+    {
+      "gis_join": "G3700590"
+    },
+    {
+      "gis_join": "G3701750"
+    },
+    {
+      "gis_join": "G3701150"
+    },
+    {
+      "gis_join": "G3701810"
+    },
+    {
+      "gis_join": "G3701670"
+    },
+    {
+      "gis_join": "G3701310"
+    },
+    {
+      "gis_join": "G3701950"
+    },
+    {
+      "gis_join": "G3701350"
+    },
+    {
+      "gis_join": "G3701130"
+    },
+    {
+      "gis_join": "G3701250"
+    },
+    {
+      "gis_join": "G3700050"
+    },
+    {
+      "gis_join": "G3701610"
+    },
+    {
+      "gis_join": "G3700070"
+    },
+    {
+      "gis_join": "G3701890"
+    },
+    {
+      "gis_join": "G3700350"
+    },
+    {
+      "gis_join": "G3700410"
+    },
+    {
+      "gis_join": "G3701390"
+    },
+    {
+      "gis_join": "G3700430"
+    },
+    {
+      "gis_join": "G3700530"
+    },
+    {
+      "gis_join": "G3700650"
+    },
+    {
+      "gis_join": "G3700190"
+    },
+    {
+      "gis_join": "G3701590"
+    },
+    {
+      "gis_join": "G3701450"
+    },
+    {
+      "gis_join": "G3700250"
+    },
+    {
+      "gis_join": "G3700930"
+    },
+    {
+      "gis_join": "G3700910"
+    },
+    {
+      "gis_join": "G3701170"
+    },
+    {
+      "gis_join": "G3700150"
+    },
+    {
+      "gis_join": "G3700470"
+    },
+    {
+      "gis_join": "G3701690"
+    },
+    {
+      "gis_join": "G3701770"
+    },
+    {
+      "gis_join": "G3700490"
+    },
+    {
+      "gis_join": "G3701510"
+    },
+    {
+      "gis_join": "G3701870"
+    },
+    {
+      "gis_join": "G3701730"
+    },
+    {
+      "gis_join": "G3700390"
+    },
+    {
+      "gis_join": "G3700730"
+    },
+    {
+      "gis_join": "G3701290"
+    },
+    {
+      "gis_join": "G3700110"
+    },
+    {
+      "gis_join": "G3700090"
+    },
+    {
+      "gis_join": "G3701970"
+    },
+    {
+      "gis_join": "G3701410"
+    },
+    {
+      "gis_join": "G3701050"
+    },
+    {
+      "gis_join": "G3701650"
+    },
+    {
+      "gis_join": "G3700750"
+    },
+    {
+      "gis_join": "G3700290"
+    },
+    {
+      "gis_join": "G3700210"
+    },
+    {
+      "gis_join": "G3701370"
+    },
+    {
+      "gis_join": "G3700770"
+    },
+    {
+      "gis_join": "G3701830"
+    },
+    {
+      "gis_join": "G3700850"
+    },
+    {
+      "gis_join": "G3700870"
+    },
+    {
+      "gis_join": "G3701990"
+    },
+    {
+      "gis_join": "G3700550"
+    },
+    {
+      "gis_join": "G3701930"
+    },
+    {
+      "gis_join": "G3700990"
+    },
+    {
+      "gis_join": "G3700450"
+    },
+    {
+      "gis_join": "G3700950"
+    },
+    {
+      "gis_join": "G3700170"
+    },
+    {
+      "gis_join": "G3701090"
+    },
+    {
+      "gis_join": "G3701030"
+    },
+    {
+      "gis_join": "G3701490"
+    },
+    {
+      "gis_join": "G3700710"
+    },
+    {
+      "gis_join": "G3700030"
+    },
+    {
+      "gis_join": "G3700330"
+    },
+    {
+      "gis_join": "G3701110"
+    },
+    {
+      "gis_join": "G3701570"
+    },
+    {
+      "gis_join": "G3701330"
+    },
+    {
+      "gis_join": "G3700970"
+    },
+    {
+      "gis_join": "G3701230"
+    },
+    {
+      "gis_join": "G3700630"
+    },
+    {
+      "gis_join": "G3700670"
+    },
+    {
+      "gis_join": "G3700690"
+    },
+    {
+      "gis_join": "G3701790"
+    },
+    {
+      "gis_join": "G3700790"
+    },
+    {
+      "gis_join": "G3701190"
+    },
+    {
+      "gis_join": "G3701530"
+    },
+    {
+      "gis_join": "G3700570"
+    },
+    {
+      "gis_join": "G3700230"
+    },
+    {
+      "gis_join": "G3701010"
+    },
+    {
+      "gis_join": "G3700270"
+    },
+    {
+      "gis_join": "G3701550"
+    },
+    {
+      "gis_join": "G3700510"
+    },
+    {
+      "gis_join": "G3700830"
+    },
+    {
+      "gis_join": "G3701630"
+    },
+    {
+      "gis_join": "G3701710"
+    },
+    {
+      "gis_join": "G3701070"
+    },
+    {
+      "gis_join": "G3700370"
+    },
+    {
+      "gis_join": "G3701210"
+    },
+    {
+      "gis_join": "G3701270"
+    },
+    {
+      "gis_join": "G3700810"
+    },
+    {
+      "gis_join": "G3701430"
+    },
+    {
+      "gis_join": "G3700890"
+    },
+    {
+      "gis_join": "G3700310"
+    },
+    {
+      "gis_join": "G3700130"
+    },
+    {
+      "gis_join": "G4800570"
+    },
+    {
+      "gis_join": "G4800730"
+    },
+    {
+      "gis_join": "G4801530"
+    },
+    {
+      "gis_join": "G4801550"
+    },
+    {
+      "gis_join": "G4800830"
+    },
+    {
+      "gis_join": "G4801310"
+    },
+    {
+      "gis_join": "G4804830"
+    },
+    {
+      "gis_join": "G4801130"
+    },
+    {
+      "gis_join": "G4802310"
+    },
+    {
+      "gis_join": "G4803250"
+    },
+    {
+      "gis_join": "G4802270"
+    },
+    {
+      "gis_join": "G4803510"
+    },
+    {
+      "gis_join": "G4800990"
+    },
+    {
+      "gis_join": "G4801590"
+    },
+    {
+      "gis_join": "G4801110"
+    },
+    {
+      "gis_join": "G4800430"
+    },
+    {
+      "gis_join": "G4803430"
+    },
+    {
+      "gis_join": "G4802790"
+    },
+    {
+      "gis_join": "G4802710"
+    },
+    {
+      "gis_join": "G4804510"
+    },
+    {
+      "gis_join": "G4802390"
+    },
+    {
+      "gis_join": "G4804270"
+    },
+    {
+      "gis_join": "G4800590"
+    },
+    {
+      "gis_join": "G4800870"
+    },
+    {
+      "gis_join": "G4801650"
+    },
+    {
+      "gis_join": "G4802890"
+    },
+    {
+      "gis_join": "G4803310"
+    },
+    {
+      "gis_join": "G4804010"
+    },
+    {
+      "gis_join": "G4804890"
+    },
+    {
+      "gis_join": "G4804810"
+    },
+    {
+      "gis_join": "G4804230"
+    },
+    {
+      "gis_join": "G4801330"
+    },
+    {
+      "gis_join": "G4804390"
+    },
+    {
+      "gis_join": "G4802850"
+    },
+    {
+      "gis_join": "G4802770"
+    },
+    {
+      "gis_join": "G4803470"
+    },
+    {
+      "gis_join": "G4800750"
+    },
+    {
+      "gis_join": "G4804030"
+    },
+    {
+      "gis_join": "G4800390"
+    },
+    {
+      "gis_join": "G4802590"
+    },
+    {
+      "gis_join": "G4803770"
+    },
+    {
+      "gis_join": "G4802090"
+    },
+    {
+      "gis_join": "G4802990"
+    },
+    {
+      "gis_join": "G4803170"
+    },
+    {
+      "gis_join": "G4801050"
+    },
+    {
+      "gis_join": "G4804490"
+    },
+    {
+      "gis_join": "G4804450"
+    },
+    {
+      "gis_join": "G4802070"
+    },
+    {
+      "gis_join": "G4802150"
+    },
+    {
+      "gis_join": "G4804730"
+    },
+    {
+      "gis_join": "G4802810"
+    },
+    {
+      "gis_join": "G4800810"
+    },
+    {
+      "gis_join": "G4801370"
+    },
+    {
+      "gis_join": "G4803270"
+    },
+    {
+      "gis_join": "G4803410"
+    },
+    {
+      "gis_join": "G4804750"
+    },
+    {
+      "gis_join": "G4802570"
+    },
+    {
+      "gis_join": "G4802250"
+    },
+    {
+      "gis_join": "G4804090"
+    },
+    {
+      "gis_join": "G4803830"
+    },
+    {
+      "gis_join": "G4804790"
+    },
+    {
+      "gis_join": "G4800330"
+    },
+    {
+      "gis_join": "G4804410"
+    },
+    {
+      "gis_join": "G4804250"
+    },
+    {
+      "gis_join": "G4803590"
+    },
+    {
+      "gis_join": "G4802690"
+    },
+    {
+      "gis_join": "G4800370"
+    },
+    {
+      "gis_join": "G4804150"
+    },
+    {
+      "gis_join": "G4804170"
+    },
+    {
+      "gis_join": "G4802510"
+    },
+    {
+      "gis_join": "G4804290"
+    },
+    {
+      "gis_join": "G4804710"
+    },
+    {
+      "gis_join": "G4803930"
+    },
+    {
+      "gis_join": "G4801170"
+    },
+    {
+      "gis_join": "G4802010"
+    },
+    {
+      "gis_join": "G4800490"
+    },
+    {
+      "gis_join": "G4803870"
+    },
+    {
+      "gis_join": "G4804650"
+    },
+    {
+      "gis_join": "G4802550"
+    },
+    {
+      "gis_join": "G4803630"
+    },
+    {
+      "gis_join": "G4803670"
+    },
+    {
+      "gis_join": "G4801730"
+    },
+    {
+      "gis_join": "G4804570"
+    },
+    {
+      "gis_join": "G4805050"
+    },
+    {
+      "gis_join": "G4804190"
+    },
+    {
+      "gis_join": "G4802610"
+    },
+    {
+      "gis_join": "G4804990"
+    },
+    {
+      "gis_join": "G4801790"
+    },
+    {
+      "gis_join": "G4803910"
+    },
+    {
+      "gis_join": "G4801610"
+    },
+    {
+      "gis_join": "G4800130"
+    },
+    {
+      "gis_join": "G4804370"
+    },
+    {
+      "gis_join": "G4804130"
+    },
+    {
+      "gis_join": "G4801970"
+    },
+    {
+      "gis_join": "G4803390"
+    },
+    {
+      "gis_join": "G4800890"
+    },
+    {
+      "gis_join": "G4802370"
+    },
+    {
+      "gis_join": "G4803550"
+    },
+    {
+      "gis_join": "G4803790"
+    },
+    {
+      "gis_join": "G4800630"
+    },
+    {
+      "gis_join": "G4801070"
+    },
+    {
+      "gis_join": "G4804050"
+    },
+    {
+      "gis_join": "G4804950"
+    },
+    {
+      "gis_join": "G4803710"
+    },
+    {
+      "gis_join": "G4800530"
+    },
+    {
+      "gis_join": "G4804310"
+    },
+    {
+      "gis_join": "G4800410"
+    },
+    {
+      "gis_join": "G4803690"
+    },
+    {
+      "gis_join": "G4803610"
+    },
+    {
+      "gis_join": "G4800790"
+    },
+    {
+      "gis_join": "G4804850"
+    },
+    {
+      "gis_join": "G4803110"
+    },
+    {
+      "gis_join": "G4801990"
+    },
+    {
+      "gis_join": "G4802050"
+    },
+    {
+      "gis_join": "G4802030"
+    },
+    {
+      "gis_join": "G4803350"
+    },
+    {
+      "gis_join": "G4801910"
+    },
+    {
+      "gis_join": "G4802830"
+    },
+    {
+      "gis_join": "G4802530"
+    },
+    {
+      "gis_join": "G4804690"
+    },
+    {
+      "gis_join": "G4802230"
+    },
+    {
+      "gis_join": "G4804350"
+    },
+    {
+      "gis_join": "G4803490"
+    },
+    {
+      "gis_join": "G4800510"
+    },
+    {
+      "gis_join": "G4803850"
+    },
+    {
+      "gis_join": "G4803030"
+    },
+    {
+      "gis_join": "G4803130"
+    },
+    {
+      "gis_join": "G4803090"
+    },
+    {
+      "gis_join": "G4803290"
+    },
+    {
+      "gis_join": "G4802290"
+    },
+    {
+      "gis_join": "G4801290"
+    },
+    {
+      "gis_join": "G4805070"
+    },
+    {
+      "gis_join": "G4801030"
+    },
+    {
+      "gis_join": "G4801670"
+    },
+    {
+      "gis_join": "G4801770"
+    },
+    {
+      "gis_join": "G4803070"
+    },
+    {
+      "gis_join": "G4802110"
+    },
+    {
+      "gis_join": "G4805030"
+    },
+    {
+      "gis_join": "G4801430"
+    },
+    {
+      "gis_join": "G4800690"
+    },
+    {
+      "gis_join": "G4802410"
+    },
+    {
+      "gis_join": "G4800470"
+    },
+    {
+      "gis_join": "G4804430"
+    },
+    {
+      "gis_join": "G4804470"
+    },
+    {
+      "gis_join": "G4802630"
+    },
+    {
+      "gis_join": "G4801490"
+    },
+    {
+      "gis_join": "G4804630"
+    },
+    {
+      "gis_join": "G4804670"
+    },
+    {
+      "gis_join": "G4801810"
+    },
+    {
+      "gis_join": "G4801390"
+    },
+    {
+      "gis_join": "G4804550"
+    },
+    {
+      "gis_join": "G4803050"
+    },
+    {
+      "gis_join": "G4800930"
+    },
+    {
+      "gis_join": "G4801250"
+    },
+    {
+      "gis_join": "G4802730"
+    },
+    {
+      "gis_join": "G4801710"
+    },
+    {
+      "gis_join": "G4800450"
+    },
+    {
+      "gis_join": "G4805010"
+    },
+    {
+      "gis_join": "G4803990"
+    },
+    {
+      "gis_join": "G4801850"
+    },
+    {
+      "gis_join": "G4803150"
+    },
+    {
+      "gis_join": "G4803890"
+    },
+    {
+      "gis_join": "G4800770"
+    },
+    {
+      "gis_join": "G4803210"
+    },
+    {
+      "gis_join": "G4801450"
+    },
+    {
+      "gis_join": "G4800650"
+    },
+    {
+      "gis_join": "G4804530"
+    },
+    {
+      "gis_join": "G4802430"
+    },
+    {
+      "gis_join": "G4803190"
+    },
+    {
+      "gis_join": "G4804910"
+    },
+    {
+      "gis_join": "G4801830"
+    },
+    {
+      "gis_join": "G4804970"
+    },
+    {
+      "gis_join": "G4804930"
+    },
+    {
+      "gis_join": "G4802950"
+    },
+    {
+      "gis_join": "G4802490"
+    },
+    {
+      "gis_join": "G4801090"
+    },
+    {
+      "gis_join": "G4803570"
+    },
+    {
+      "gis_join": "G4801410"
+    },
+    {
+      "gis_join": "G4804770"
+    },
+    {
+      "gis_join": "G4802190"
+    },
+    {
+      "gis_join": "G4800970"
+    },
+    {
+      "gis_join": "G4804590"
+    },
+    {
+      "gis_join": "G4800950"
+    },
+    {
+      "gis_join": "G4800190"
+    },
+    {
+      "gis_join": "G4800250"
+    },
+    {
+      "gis_join": "G4801190"
+    },
+    {
+      "gis_join": "G4800850"
+    },
+    {
+      "gis_join": "G4803650"
+    },
+    {
+      "gis_join": "G4802170"
+    },
+    {
+      "gis_join": "G4804330"
+    },
+    {
+      "gis_join": "G4800550"
+    },
+    {
+      "gis_join": "G4800030"
+    },
+    {
+      "gis_join": "G4800150"
+    },
+    {
+      "gis_join": "G4800270"
+    },
+    {
+      "gis_join": "G4800170"
+    },
+    {
+      "gis_join": "G4804110"
+    },
+    {
+      "gis_join": "G4804070"
+    },
+    {
+      "gis_join": "G4804210"
+    },
+    {
+      "gis_join": "G4801350"
+    },
+    {
+      "gis_join": "G4803230"
+    },
+    {
+      "gis_join": "G4803750"
+    },
+    {
+      "gis_join": "G4800230"
+    },
+    {
+      "gis_join": "G4800610"
+    },
+    {
+      "gis_join": "G4800090"
+    },
+    {
+      "gis_join": "G4801570"
+    },
+    {
+      "gis_join": "G4802350"
+    },
+    {
+      "gis_join": "G4801950"
+    },
+    {
+      "gis_join": "G4802130"
+    },
+    {
+      "gis_join": "G4800710"
+    },
+    {
+      "gis_join": "G4800010"
+    },
+    {
+      "gis_join": "G4802650"
+    },
+    {
+      "gis_join": "G4800070"
+    },
+    {
+      "gis_join": "G4803530"
+    },
+    {
+      "gis_join": "G4801870"
+    },
+    {
+      "gis_join": "G4800210"
+    },
+    {
+      "gis_join": "G4800310"
+    },
+    {
+      "gis_join": "G4800050"
+    },
+    {
+      "gis_join": "G4802210"
+    },
+    {
+      "gis_join": "G4803010"
+    },
+    {
+      "gis_join": "G4804870"
+    },
+    {
+      "gis_join": "G4801210"
+    },
+    {
+      "gis_join": "G4803950"
+    },
+    {
+      "gis_join": "G4801470"
+    },
+    {
+      "gis_join": "G4803810"
+    },
+    {
+      "gis_join": "G4800910"
+    },
+    {
+      "gis_join": "G4800110"
+    },
+    {
+      "gis_join": "G4803330"
+    },
+    {
+      "gis_join": "G4802470"
+    },
+    {
+      "gis_join": "G4800670"
+    },
+    {
+      "gis_join": "G4803970"
+    },
+    {
+      "gis_join": "G4801010"
+    },
+    {
+      "gis_join": "G4803730"
+    },
+    {
+      "gis_join": "G4802970"
+    },
+    {
+      "gis_join": "G4801750"
+    },
+    {
+      "gis_join": "G4802450"
+    },
+    {
+      "gis_join": "G4802670"
+    },
+    {
+      "gis_join": "G4801230"
+    },
+    {
+      "gis_join": "G4801630"
+    },
+    {
+      "gis_join": "G4800350"
+    },
+    {
+      "gis_join": "G4802750"
+    },
+    {
+      "gis_join": "G4803450"
+    },
+    {
+      "gis_join": "G4802870"
+    },
+    {
+      "gis_join": "G4802330"
+    },
+    {
+      "gis_join": "G4802910"
+    },
+    {
+      "gis_join": "G4801510"
+    },
+    {
+      "gis_join": "G4803370"
+    },
+    {
+      "gis_join": "G4804610"
+    },
+    {
+      "gis_join": "G4801270"
+    },
+    {
+      "gis_join": "G4801150"
+    },
+    {
+      "gis_join": "G4801930"
+    },
+    {
+      "gis_join": "G4800290"
+    },
+    {
+      "gis_join": "G4801690"
+    },
+    {
+      "gis_join": "G4802930"
+    },
+    {
+      "gis_join": "G4801890"
+    },
+    {
+      "gis_join": "G2200750"
+    },
+    {
+      "gis_join": "G2200650"
+    },
+    {
+      "gis_join": "G2200830"
+    },
+    {
+      "gis_join": "G2200970"
+    },
+    {
+      "gis_join": "G2200510"
+    },
+    {
+      "gis_join": "G2201130"
+    },
+    {
+      "gis_join": "G2201050"
+    },
+    {
+      "gis_join": "G2200530"
+    },
+    {
+      "gis_join": "G2200070"
+    },
+    {
+      "gis_join": "G2200690"
+    },
+    {
+      "gis_join": "G2200090"
+    },
+    {
+      "gis_join": "G2200890"
+    },
+    {
+      "gis_join": "G2201270"
+    },
+    {
+      "gis_join": "G2200270"
+    },
+    {
+      "gis_join": "G2200790"
+    },
+    {
+      "gis_join": "G2200210"
+    },
+    {
+      "gis_join": "G2200610"
+    },
+    {
+      "gis_join": "G2200730"
+    },
+    {
+      "gis_join": "G2200770"
+    },
+    {
+      "gis_join": "G2200290"
+    },
+    {
+      "gis_join": "G2200190"
+    },
+    {
+      "gis_join": "G2200010"
+    },
+    {
+      "gis_join": "G2201170"
+    },
+    {
+      "gis_join": "G2201110"
+    },
+    {
+      "gis_join": "G2200850"
+    },
+    {
+      "gis_join": "G2200570"
+    },
+    {
+      "gis_join": "G2200810"
+    },
+    {
+      "gis_join": "G2201010"
+    },
+    {
+      "gis_join": "G2200150"
+    },
+    {
+      "gis_join": "G2200450"
+    },
+    {
+      "gis_join": "G2200310"
+    },
+    {
+      "gis_join": "G2200550"
+    },
+    {
+      "gis_join": "G2200990"
+    },
+    {
+      "gis_join": "G2200930"
+    },
+    {
+      "gis_join": "G2201090"
+    },
+    {
+      "gis_join": "G2201070"
+    },
+    {
+      "gis_join": "G2201250"
+    },
+    {
+      "gis_join": "G2200670"
+    },
+    {
+      "gis_join": "G2200910"
+    },
+    {
+      "gis_join": "G2200170"
+    },
+    {
+      "gis_join": "G2200250"
+    },
+    {
+      "gis_join": "G2200030"
+    },
+    {
+      "gis_join": "G2200230"
+    },
+    {
+      "gis_join": "G2201190"
+    },
+    {
+      "gis_join": "G2200490"
+    },
+    {
+      "gis_join": "G2200130"
+    },
+    {
+      "gis_join": "G2200110"
+    },
+    {
+      "gis_join": "G2200370"
+    },
+    {
+      "gis_join": "G2200050"
+    },
+    {
+      "gis_join": "G2200390"
+    },
+    {
+      "gis_join": "G2201210"
+    },
+    {
+      "gis_join": "G2201150"
+    },
+    {
+      "gis_join": "G2200410"
+    },
+    {
+      "gis_join": "G2200430"
+    },
+    {
+      "gis_join": "G2200710"
+    },
+    {
+      "gis_join": "G2200350"
+    },
+    {
+      "gis_join": "G2200330"
+    },
+    {
+      "gis_join": "G2201230"
+    },
+    {
+      "gis_join": "G2201030"
+    },
+    {
+      "gis_join": "G2200470"
+    },
+    {
+      "gis_join": "G2200630"
+    },
+    {
+      "gis_join": "G2200950"
+    },
+    {
+      "gis_join": "G2200590"
+    },
+    {
+      "gis_join": "G2200870"
+    },
+    {
+      "gis_join": "G1200290"
+    },
+    {
+      "gis_join": "G1200090"
+    },
+    {
+      "gis_join": "G1200930"
+    },
+    {
+      "gis_join": "G1200370"
+    },
+    {
+      "gis_join": "G1200690"
+    },
+    {
+      "gis_join": "G1200110"
+    },
+    {
+      "gis_join": "G1200470"
+    },
+    {
+      "gis_join": "G1200810"
+    },
+    {
+      "gis_join": "G1200630"
+    },
+    {
+      "gis_join": "G1200650"
+    },
+    {
+      "gis_join": "G1200310"
+    },
+    {
+      "gis_join": "G1200710"
+    },
+    {
+      "gis_join": "G1200170"
+    },
+    {
+      "gis_join": "G1200330"
+    },
+    {
+      "gis_join": "G1201090"
+    },
+    {
+      "gis_join": "G1201010"
+    },
+    {
+      "gis_join": "G1200510"
+    },
+    {
+      "gis_join": "G1201170"
+    },
+    {
+      "gis_join": "G1200070"
+    },
+    {
+      "gis_join": "G1200190"
+    },
+    {
+      "gis_join": "G1200410"
+    },
+    {
+      "gis_join": "G1200970"
+    },
+    {
+      "gis_join": "G1200870"
+    },
+    {
+      "gis_join": "G1201150"
+    },
+    {
+      "gis_join": "G1200390"
+    },
+    {
+      "gis_join": "G1200550"
+    },
+    {
+      "gis_join": "G1201250"
+    },
+    {
+      "gis_join": "G1201070"
+    },
+    {
+      "gis_join": "G1200030"
+    },
+    {
+      "gis_join": "G1200530"
+    },
+    {
+      "gis_join": "G1200010"
+    },
+    {
+      "gis_join": "G1200270"
+    },
+    {
+      "gis_join": "G1200450"
+    },
+    {
+      "gis_join": "G1200830"
+    },
+    {
+      "gis_join": "G1200570"
+    },
+    {
+      "gis_join": "G1200790"
+    },
+    {
+      "gis_join": "G1200350"
+    },
+    {
+      "gis_join": "G1201050"
+    },
+    {
+      "gis_join": "G1200950"
+    },
+    {
+      "gis_join": "G1200990"
+    },
+    {
+      "gis_join": "G1200750"
+    },
+    {
+      "gis_join": "G1201290"
+    },
+    {
+      "gis_join": "G1201030"
+    },
+    {
+      "gis_join": "G1201210"
+    },
+    {
+      "gis_join": "G1200130"
+    },
+    {
+      "gis_join": "G1200590"
+    },
+    {
+      "gis_join": "G1200910"
+    },
+    {
+      "gis_join": "G1200730"
+    },
+    {
+      "gis_join": "G1200230"
+    },
+    {
+      "gis_join": "G1200670"
+    },
+    {
+      "gis_join": "G1201230"
+    },
+    {
+      "gis_join": "G1201310"
+    },
+    {
+      "gis_join": "G1200490"
+    },
+    {
+      "gis_join": "G1201110"
+    },
+    {
+      "gis_join": "G1200050"
+    },
+    {
+      "gis_join": "G1201190"
+    },
+    {
+      "gis_join": "G1200150"
+    },
+    {
+      "gis_join": "G1200860"
+    },
+    {
+      "gis_join": "G1200610"
+    },
+    {
+      "gis_join": "G1200850"
+    },
+    {
+      "gis_join": "G1200430"
+    },
+    {
+      "gis_join": "G1200770"
+    },
+    {
+      "gis_join": "G1201330"
+    },
+    {
+      "gis_join": "G1200890"
+    },
+    {
+      "gis_join": "G1201130"
+    },
+    {
+      "gis_join": "G1201270"
+    },
+    {
+      "gis_join": "G1200210"
+    },
+    {
+      "gis_join": "G0202400"
+    },
+    {
+      "gis_join": "G0200130"
+    },
+    {
+      "gis_join": "G0200700"
+    },
+    {
+      "gis_join": "G0201880"
+    },
+    {
+      "gis_join": "G0202300"
+    },
+    {
+      "gis_join": "G0201640"
+    },
+    {
+      "gis_join": "G0201000"
+    },
+    {
+      "gis_join": "G0200600"
+    },
+    {
+      "gis_join": "G0200160"
+    },
+    {
+      "gis_join": "G0202700"
+    },
+    {
+      "gis_join": "G0201300"
+    },
+    {
+      "gis_join": "G0201850"
+    },
+    {
+      "gis_join": "G0201500"
+    },
+    {
+      "gis_join": "G0201050"
+    },
+    {
+      "gis_join": "G0200900"
+    },
+    {
+      "gis_join": "G0201100"
+    },
+    {
+      "gis_join": "G0202200"
+    },
+    {
+      "gis_join": "G0201800"
+    },
+    {
+      "gis_join": "G0201700"
+    },
+    {
+      "gis_join": "G0202900"
+    },
+    {
+      "gis_join": "G0201950"
+    },
+    {
+      "gis_join": "G0201980"
+    },
+    {
+      "gis_join": "G0202820"
+    },
+    {
+      "gis_join": "G0202750"
+    },
+    {
+      "gis_join": "G0201220"
+    },
+    {
+      "gis_join": "G0200680"
+    },
+    {
+      "gis_join": "G0200200"
+    },
+    {
+      "gis_join": "G0200500"
+    },
+    {
+      "gis_join": "G0202610"
+    }
+  ]
+}
