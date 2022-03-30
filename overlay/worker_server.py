@@ -19,6 +19,8 @@ from overlay.tensorflow_validation.validation import TensorflowValidator
 from overlay.scikitlearn_validation.validation import ScikitLearnValidator
 from overlay.pytorch_validation.validation import PyTorchValidator
 
+
+# Loky shared, reusable ProcessPoolExecutor
 shared_executor = get_reusable_executor(max_workers=8, timeout=10)
 
 
@@ -164,6 +166,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
 def shutdown_gracefully(worker: Worker) -> None:
     worker.deregister()
+    shared_executor.shutdown()
     exit(0)
 
 
