@@ -52,8 +52,10 @@ message ValidationJobRequest {
   bool normalize_inputs = 13;
   ValidationBudget validation_budget = 14;
   LossFunction loss_function = 15;
-  repeated SpatialAllocation gis_joins = 16;
-  ModelFile model_file = 17;
+  SpatialCoverage spatial_coverage = 16;
+  repeated string gis_joins = 17;
+  repeated SpatialAllocation allocations = 18;
+  ModelFile model_file = 19;
 }
 
 message ValidationJobResponse {
@@ -167,4 +169,9 @@ enum LossFunction {
   ROOT_MEAN_SQUARED_ERROR = 2;
   NEGATIVE_LOG_LIKELIHOOD_LOSS = 3;
   CROSS_ENTROPY_LOSS = 4;
+}
+
+enum SpatialCoverage {
+  ALL = 0;
+  SUBSET = 1;
 }

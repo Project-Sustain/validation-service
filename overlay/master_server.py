@@ -11,7 +11,8 @@ from overlay.db import shards, locality
 from overlay.db.shards import ShardMetadata
 from overlay.profiler import Timer
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
-    ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, Allocation
+    ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
+    SpatialAllocation
 
 
 class JobMetadata:
@@ -178,7 +179,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         return hostname in self.tracked_workers
 
     def choose_worker_from_shard(self, shard: ShardMetadata, job_id: str) -> WorkerMetadata:
-
         # Find registered hostname in shard with the least current jobs
         min_gis_joins = 9999999
         selected_worker = None
@@ -194,6 +194,35 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         info(f"Selecting {selected_worker.hostname} for next GISJOIN in job={job_id}")
         return selected_worker
+
+    def set_request_allocations(self, request: ValidationJobRequest) -> (bool, str):  # ok
+        strata_limit, sample_rate = get_strata_limit_and_sample_rate(request)
+        spatial_allocations: list = []  # list(SpatialAllocation)
+
+        if request.spatial_coverage == SpatialCoverage.ALL:
+            if len(request.gis_joins) == 0:
+                for gis_join in self.gis_join_locations.keys():
+                    spatial_allocations.append(SpatialAllocation(
+                        gis_join=gis_join,
+                        strata_limit=strata_limit,
+                        sample_rate=sample_rate
+                    ))
+            else:
+                return False, "Cannot specify spatial_coverage=ALL but then supply a non-empty list of GISJOINs!"
+        elif request.spatial_coverage == SpatialCoverage.SUBSET:
+            for gis_join in request.gis_joins:
+                spatial_allocations.append(SpatialAllocation(
+                    gis_join=gis_join,
+                    strata_limit=strata_limit,
+                    sample_rate=sample_rate
+                ))
+        else:
+            return False, f"Unsupported spatial_coverage type {SpatialCoverage.Name(request.spatial_coverage)}"
+
+        request.spatial_allocations[:] = spatial_allocations
+        return True, ""
+
+
 
     def RegisterWorker(self, request: WorkerRegistrationRequest, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
@@ -232,19 +261,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         job: JobMetadata = JobMetadata(job_id, request.gis_joins)
         info(f"Created job id {job_id}")
 
-        # Find and select workers with GISJOINs local to them
-        for spatial_allocation in request.gis_joins:
-            gis_join = spatial_allocation.gis_join
-            shard_hosting_gis_join: ShardMetadata = self.gis_join_locations[gis_join]
-            worker: WorkerMetadata = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
-            if worker is None:
-                error(f"Unable to find registered worker for GISJOIN {gis_join}")
-                continue
 
-            # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
-            worker_job: WorkerJobMetadata = get_or_create_worker_job(worker, job_id)
-            worker_job.gis_joins.append(spatial_allocation)
-            job.worker_jobs[worker.hostname] = worker_job
 
 
         # Sets up all the initial allocations per GISJOIN
@@ -253,11 +270,21 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         else:  # Default or static budget
 
-            # Set limit and sample rate for all GISJOINs
-            strata_limit, sample_rate = get_strata_limit_and_sample_rate(request)
-            for spatial_allocation in request.gis_joins:
-                spatial_allocation.strata_limit = strata_limit
-                spatial_allocation.sample_rate = sample_rate
+            self.set_request_allocations(request)
+
+            # Find and select workers with GISJOINs local to them
+            for spatial_allocation in request.spatial_allocations:
+                gis_join = spatial_allocation.gis_join
+                shard_hosting_gis_join: ShardMetadata = self.gis_join_locations[gis_join]
+                worker: WorkerMetadata = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
+                if worker is None:
+                    error(f"Unable to find registered worker for GISJOIN {gis_join}")
+                    continue
+
+                # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
+                worker_job: WorkerJobMetadata = get_or_create_worker_job(worker, job_id)
+                worker_job.gis_joins.append(spatial_allocation)
+                job.worker_jobs[worker.hostname] = worker_job
 
             # Log selected workers
             for worker_hostname, worker_job in job.worker_jobs.items():
@@ -325,17 +352,17 @@ def process_job_with_variance_budget(request: ValidationJobRequest, job: JobMeta
     variance_budget: IncrementalVarianceBudget = request.validation_budget.variance_budget
 
     # Establish initial allocations
-    gis_join_allocations = []
-    for gis_join in request.gis_joins:
-        gis_join_allocations.append(Allocation(
-            gis_join=gis_join,
-            allocation=variance_budget.initial_allocation
-        ))
-    variance_budget.allocations[:] = gis_join_allocations
-    request.variance_budget = variance_budget
-
-    results_for_allocations = []
-    worker_responses = launch_worker_jobs(request, job)
+    # gis_join_allocations = []
+    # for gis_join in request.gis_joins:
+    #     gis_join_allocations.append(Allocation(
+    #         gis_join=gis_join,
+    #         allocation=variance_budget.initial_allocation
+    #     ))
+    # variance_budget.allocations[:] = gis_join_allocations
+    # request.variance_budget = variance_budget
+    #
+    # results_for_allocations = []
+    # worker_responses = launch_worker_jobs(request, job)
 
     return launch_worker_jobs(request, job)
 
