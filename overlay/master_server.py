@@ -219,10 +219,8 @@ class Master(validation_pb2_grpc.MasterServicer):
         else:
             return False, f"Unsupported spatial_coverage type {SpatialCoverage.Name(request.spatial_coverage)}"
 
-        request.allocations[:] = spatial_allocations
+        request.allocations.extend(spatial_allocations)
         return True, ""
-
-
 
     def RegisterWorker(self, request: WorkerRegistrationRequest, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
