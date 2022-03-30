@@ -272,7 +272,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             self.set_request_allocations(request)
 
             # Find and select workers with GISJOINs local to them
-            for spatial_allocation in request.spatial_allocations:
+            for spatial_allocation in request.allocations:
                 gis_join = spatial_allocation.gis_join
                 shard_hosting_gis_join: ShardMetadata = self.gis_join_locations[gis_join]
                 worker: WorkerMetadata = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
