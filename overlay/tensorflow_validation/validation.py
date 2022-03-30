@@ -2,10 +2,9 @@ import concurrent.futures
 import os
 
 from logging import info, error
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+from concurrent.futures import as_completed
 
-from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, JobMode, \
-    LossFunction, ModelFramework, ModelCategory, MongoReadConfig, ValidationBudget, IncrementalVarianceBudget
+from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, JobMode, LossFunction
 
 from overlay.profiler import Timer
 from overlay.constants import MODELS_DIR
@@ -35,151 +34,66 @@ class TensorflowValidator:
 
         metrics = []  # list of protobuf ValidationMetric objects to return
 
-        # Select job mode
+        # Synchronous job mode
         if self.request.worker_job_mode == JobMode.SYNCHRONOUS:
 
-            # Synchronous static budgeting
-            if self.request.validation_budget.budget_type == BudgetType.STATIC_BUDGET or \
-                    self.request.validation_budget.budget_type == BudgetType.DEFAULT_BUDGET:
-                budget: StaticBudget = self.request.validation_budget.static_budget
-                strata_limit: int = budget.strata_limit
-                sample_rate: float = budget.sample_rate
+            # Make requests serially using the gis_joins list in the request and the static strata limit/sample rate
+            for spatial_allocation in self.request.allocations:
+                returned_gis_join, allocation, loss, variance, ok, error_msg, duration_sec = validate_model(
+                    gis_join=spatial_allocation.gis_join,
+                    model_path=self.model_path,
+                    feature_fields=feature_fields,
+                    label_field=self.request.label_field,
+                    loss_function=LossFunction.Name(self.request.loss_function),
+                    mongo_host=self.request.mongo_host,
+                    mongo_port=self.request.mongo_port,
+                    read_preference=self.request.read_config.read_preference,
+                    read_concern=self.request.read_config.read_concern,
+                    database=self.request.database,
+                    collection=self.request.collection,
+                    limit=spatial_allocation.strata_limit,
+                    sample_rate=spatial_allocation.sample_rate,
+                    normalize_inputs=self.request.normalize_inputs,
+                    verbose=verbose
+                )
 
-                # Make requests serially using the gis_joins list in the request and the static strata limit/sample rate
-                for gis_join in self.request.gis_joins:
-                    returned_gis_join, allocation, loss, variance, ok, error_msg, duration_sec = validate_model(
-                        gis_join=gis_join,
-                        model_path=self.model_path,
-                        feature_fields=feature_fields,
-                        label_field=self.request.label_field,
-                        loss_function=LossFunction.Name(self.request.loss_function),
-                        mongo_host=self.request.mongo_host,
-                        mongo_port=self.request.mongo_port,
-                        read_preference=self.request.read_config.read_preference,
-                        read_concern=self.request.read_config.read_concern,
-                        database=self.request.database,
-                        collection=self.request.collection,
-                        limit=strata_limit,
-                        sample_rate=sample_rate,
-                        normalize_inputs=self.request.normalize_inputs,
-                        verbose=verbose
-                    )
-
-                    metrics.append(ValidationMetric(
-                        gis_join=returned_gis_join,
-                        allocation=allocation,
-                        loss=loss,
-                        variance=variance,
-                        duration_sec=duration_sec,
-                        ok=ok,
-                        error_msg=error_msg
-                    ))
-
-            # Synchronous variance budgeting
-            elif self.request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
-
-                budget: IncrementalVarianceBudget = self.request.validation_budget.variance_budget
-                for variance_allocation in budget.gis_join_allocations:
-                    gis_join: str = variance_allocation.gis_join
-                    allocation: int = variance_allocation.allocation
-
-                    returned_gis_join, allocation, loss, variance, ok, error_msg, duration_sec = validate_model(
-                        gis_join=gis_join,
-                        model_path=self.model_path,
-                        feature_fields=feature_fields,
-                        label_field=self.request.label_field,
-                        loss_function=LossFunction.Name(self.request.loss_function),
-                        mongo_host=self.request.mongo_host,
-                        mongo_port=self.request.mongo_port,
-                        read_preference=self.request.read_config.read_preference,
-                        read_concern=self.request.read_config.read_concern,
-                        database=self.request.database,
-                        collection=self.request.collection,
-                        limit=allocation,
-                        sample_rate=0.0,
-                        normalize_inputs=self.request.normalize_inputs,
-                        verbose=verbose
-                    )
-
-                    metrics.append(ValidationMetric(
-                        gis_join=returned_gis_join,
-                        allocation=allocation,
-                        loss=loss,
-                        variance=variance,
-                        duration_sec=duration_sec,
-                        ok=ok,
-                        error_msg=error_msg
-                    ))
-
-            else:
-                error(f"Unrecognized budget type '{self.request.validation_budget.budget_type}'")
-                return []
+                metrics.append(ValidationMetric(
+                    gis_join=returned_gis_join,
+                    allocation=allocation,
+                    loss=loss,
+                    variance=variance,
+                    duration_sec=duration_sec,
+                    ok=ok,
+                    error_msg=error_msg
+                ))
 
         # Job mode not single-threaded; use the shared ProcessPoolExecutor for multiprocessing
         else:
+
+            # Create a child process object for each GISJOIN validation job
             executors_list: list = []
-
-            # Multiprocessing static budgeting
-            if self.request.validation_budget.budget_type == BudgetType.STATIC_BUDGET or \
-                    self.request.validation_budget.budget_type == BudgetType.DEFAULT_BUDGET:
-
-                budget: StaticBudget = self.request.validation_budget.static_budget
-                strata_limit: int = budget.strata_limit
-                sample_rate: float = budget.sample_rate
-
-                # Create a child process object for each GISJOIN validation job
-                for gis_join in self.request.gis_joins:
-                    info(f"Launching validation job for GISJOIN {gis_join}")
-                    executors_list.append(
-                        self.shared_executor.submit(
-                            validate_model,
-                            gis_join,
-                            self.model_path,
-                            feature_fields,
-                            self.request.label_field,
-                            LossFunction.Name(self.request.loss_function),
-                            self.request.mongo_host,
-                            self.request.mongo_port,
-                            self.request.read_config.read_preference,
-                            self.request.read_config.read_concern,
-                            self.request.database,
-                            self.request.collection,
-                            strata_limit,
-                            sample_rate,
-                            self.request.normalize_inputs,
-                            False  # don't log summaries on concurrent model
-                        )
+            for spatial_allocation in self.request.allocations:
+                info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
+                executors_list.append(
+                    self.shared_executor.submit(
+                        validate_model,
+                        spatial_allocation.gis_join,
+                        self.model_path,
+                        feature_fields,
+                        self.request.label_field,
+                        LossFunction.Name(self.request.loss_function),
+                        self.request.mongo_host,
+                        self.request.mongo_port,
+                        self.request.read_config.read_preference,
+                        self.request.read_config.read_concern,
+                        self.request.database,
+                        self.request.collection,
+                        spatial_allocation.strata_limit,
+                        spatial_allocation.sample_rate,
+                        self.request.normalize_inputs,
+                        False  # don't log summaries on concurrent model
                     )
-
-            # Multiprocessing variance budgeting
-            elif self.request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
-
-                budget: IncrementalVarianceBudget = self.request.validation_budget.variance_budget
-                for variance_allocation in budget.gis_join_allocations:
-                    gis_join: str = variance_allocation.gis_join
-                    allocation: int = variance_allocation.allocation
-
-                    info(f"Launching validation job for GISJOIN {gis_join}")
-                    executors_list.append(
-                        self.shared_executor.submit(
-                            validate_model,
-                            gis_join,
-                            self.model_path,
-                            feature_fields,
-                            self.request.label_field,
-                            LossFunction.Name(self.request.loss_function),
-                            self.request.mongo_host,
-                            self.request.mongo_port,
-                            self.request.read_config.read_preference,
-                            self.request.read_config.read_concern,
-                            self.request.database,
-                            self.request.collection,
-                            allocation,
-                            0.0,
-                            self.request.normalize_inputs,
-                            False  # don't log summaries on concurrent model
-                        )
-                    )
+                )
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
@@ -193,7 +107,6 @@ class TensorflowValidator:
                     ok=ok,
                     error_msg=error_msg
                 ))
-
 
         info(f"metrics: {len(metrics)} responses")
         return metrics

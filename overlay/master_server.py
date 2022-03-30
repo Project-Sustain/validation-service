@@ -289,14 +289,6 @@ class Master(validation_pb2_grpc.MasterServicer):
             for worker_hostname, worker_job in job.worker_jobs.items():
                 info(f"{worker_hostname}: {worker_job}")
 
-            return ValidationJobResponse(
-                id="test",
-                ok=True,
-                error_msg="",
-                duration_sec=0.0,
-                worker_responses=[]
-            )
-
             # Gather all the WorkerValidationJobResponses and check for errors
             worker_responses = launch_worker_jobs(request, job)
             errors = []

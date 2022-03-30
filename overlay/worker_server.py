@@ -74,13 +74,18 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
-            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
+            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor)
             metrics = skl_validator.validate_gis_joins(request)
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
-            pytorch_validator: PyTorchValidator = PyTorchValidator(request)
+            pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor)
             metrics = pytorch_validator.validate_gis_joins(request)
+
+        else:
+            err_msg = f"Unsupported model framework type {ModelFramework.Name(request.model_framework)}"
+            error(err_msg)
+            return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
 
         # Create and return response from aggregated metrics
         profiler.stop()
