@@ -72,7 +72,7 @@ def train_and_evaluate(GISJOIN: str):
     client = MongoClient("mongodb://lattice-150:27018/")
     database = client["sustaindb"]
     collection = database["noaa_nam"]
-    match = {"GISJOIN": "G3500170"}
+    match = {"GISJOIN": GISJOIN}
     projection = {"_id": 0, "TEMPERATURE_AT_SURFACE_KELVIN": 1, "PRESSURE_AT_SURFACE_PASCAL": 1, "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT": 1}
     documents = collection.find(match, projection)
     features_df = pd.DataFrame(list(documents))
@@ -108,9 +108,9 @@ def test_synchronous():
         data = json.load(f)
 
     for GISJOIN in data.keys():
-        print(GISJOIN)
-    # for i in range(3):
-    #     train_and_evaluate("")
+        print(f"Validating GISJOIN={GISJOIN}")
+        train_and_evaluate(GISJOIN)
+
 
 
 def test_multithreaded():
