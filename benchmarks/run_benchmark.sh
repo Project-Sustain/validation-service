@@ -17,11 +17,11 @@ echo "Starting omni for $BENCHMARK_NAME benchmark..."
 ./start_omni.sh "$BENCHMARK_NAME"
 ./start_free.sh
 
-sleep 2
+sleep 5
 
 python3.8 make_request.py "$BENCHMARK_NAME" > "$BENCHMARK_NAME/response.json"
 
-sleep 2
+sleep 5
 
 ./stop_omni.sh
 ./stop_free.sh "$BENCHMARK_NAME"
