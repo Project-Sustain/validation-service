@@ -77,6 +77,11 @@ def train_and_evaluate(GISJOIN: str):
     documents = collection.find(match, projection)
     features_df = pd.DataFrame(list(documents))
     client.close()
+
+    if len(features_df.index) == 0:
+        print(f"No records found for GISJOIN={GISJOIN}")
+        return
+
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop("TEMPERATURE_AT_SURFACE_KELVIN")
