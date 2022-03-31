@@ -7,4 +7,4 @@ function print_usage {
 
 [[ $# -eq 1 ]] || (print_usage; exit 1)
 
-"$PROJECT_MANAGEMENT/monitoring/free/stop_all.sh" "$1"
+"$PROJECT_MANAGEMENT/cluster/monitoring/free/stop_all.sh" "$1"
