@@ -54,7 +54,7 @@ class PyTorchValidator:
 
             # Make requests serially
             for gis_join in self.request.gis_joins:
-                gis_join, loss, ok, error_msg, duration_sec = validate_model(
+                gis_join, loss, variance, ok, error_msg, duration_sec = validate_model(
                     gis_join=gis_join,
                     model_path=self.model_path,
                     feature_fields=feature_fields,

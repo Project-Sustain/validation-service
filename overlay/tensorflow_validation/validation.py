@@ -140,6 +140,9 @@ def validate_model(
 
     from overlay.db.querier import Querier
 
+    ok = True
+    error_msg = ""
+
     profiler: Timer = Timer()
     profiler.start()
 
@@ -177,7 +180,7 @@ def validate_model(
     if allocation == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
         error(error_msg)
-        return gis_join, 0, -1.0, -1.0, False, error_msg, 0.0
+        return gis_join, 0, -1.0, -1.0, not ok, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
@@ -199,27 +202,43 @@ def validate_model(
 
     # Use labels and predictions to evaluate the model
     y_true = np.array(label_df).reshape(-1, 1)
-    absolute_error_variance: float = np.absolute(y_pred - y_true).var()
 
     if verbose:
         info(f"y_true: {y_true}")
 
-    loss: float = 0.0
     if loss_function == "MEAN_SQUARED_ERROR":
         info("MEAN_SQUARED_ERROR...")
         loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
+
+        e_k = np.square(y_pred - y_true)
+
+        sum_e_k_squared = np.sum(e_k) ** 2
+
+        
+
+        squared_errors = np.square(np.square(y_pred - y_true))
+        mean_of_all_errors = np.mean(np.square(y_pred - y_true))
+
+        variance: float = np.square(y_pred - y_true).var()
+
+
+
+
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
+        variance: float = np.square(y_pred - y_true).var()
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         info("MEAN_ABSOLUTE_ERROR...")
         loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
+        variance: float = np.absolute(y_pred - y_true).var()
     else:
         profiler.stop()
         error_msg = f"Unsupported loss function {loss_function}"
         error(error_msg)
-        return gis_join, allocation, absolute_error_variance, -1.0, False, error_msg, profiler.elapsed
+        return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
     profiler.stop()
+
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return gis_join, allocation, loss, absolute_error_variance, True, "", profiler.elapsed
+    return gis_join, allocation, loss, variance, ok, "", profiler.elapsed

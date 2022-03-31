@@ -283,6 +283,9 @@ class Master(validation_pb2_grpc.MasterServicer):
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
         resulting_metrics: list = launch_worker_jobs(request, job)
 
+
+
+
         return job.job_id, resulting_metrics
 
     # Processes a job with either a default budget or static budget.

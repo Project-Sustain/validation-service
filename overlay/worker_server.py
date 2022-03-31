@@ -59,7 +59,6 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
         info(f"Received BeginValidationJob Request: {request}")
         info(f"BeginValidationJob: validation_budget={request.validation_budget}")
-        metrics = None
 
         # Save model
         if not self.save_model(request):

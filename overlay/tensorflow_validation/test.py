@@ -1,5 +1,6 @@
 import os
 import pymongo
+import json
 import tensorflow as tf
 import pandas as pd
 import logging
@@ -65,7 +66,7 @@ EPOCHS = 3
 BATCH_SIZE = 32
 
 
-def train_and_evaluate(model_id: int):
+def train_and_evaluate(GISJOIN: str):
 
     # Pull in data from MongoDB into Pandas DataFrame
     client = MongoClient("mongodb://lattice-150:27018/")
@@ -102,8 +103,14 @@ def train_and_evaluate(model_id: int):
 
 
 def test_synchronous():
-    for i in range(3):
-        train_and_evaluate(i)
+
+    with open("../resources/gis_join_counts.json", "r") as f:
+        data = json.load(f)
+
+    for GISJOIN in data.keys():
+        print(GISJOIN)
+    # for i in range(3):
+    #     train_and_evaluate("")
 
 
 def test_multithreaded():
@@ -111,7 +118,7 @@ def test_multithreaded():
     executors_list = []
     with ThreadPoolExecutor(max_workers=10) as executor:
         for i in range(3):
-            executors_list.append(executor.submit(train_and_evaluate, i))
+            executors_list.append(executor.submit(train_and_evaluate, ""))
 
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
@@ -123,7 +130,7 @@ def test_multiprocessed():
     executors_list = []
     with ProcessPoolExecutor(max_workers=8) as executor:
         for i in range(25):
-            executors_list.append(executor.submit(train_and_evaluate, i))
+            executors_list.append(executor.submit(train_and_evaluate, ""))
 
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
@@ -134,11 +141,11 @@ def main():
     logging.basicConfig(level=logging.INFO)
     profiler: Timer = Timer()
 
-    # profiler.start()
-    # test_synchronous()
-    # profiler.stop()
-    # info(f"Single-threaded time elapsed: {profiler.elapsed}")
-    # profiler.reset()
+    profiler.start()
+    test_synchronous()
+    profiler.stop()
+    info(f"Single-threaded time elapsed: {profiler.elapsed}")
+    profiler.reset()
     #
     # profiler.start()
     # test_multithreaded()
@@ -146,17 +153,17 @@ def main():
     # info(f"Multi-threaded time elapsed: {profiler.elapsed}")
     # profiler.reset()
 
-    profiler.start()
-    test_multiprocessed()
-    profiler.stop()
-    info(f"Multi-processed time elapsed: {profiler.elapsed}")
-    profiler.reset()
+    # profiler.start()
+    # test_multiprocessed()
+    # profiler.stop()
+    # info(f"Multi-processed time elapsed: {profiler.elapsed}")
+    # profiler.reset()
 
-    profiler.start()
-    test_multiprocessed()
-    profiler.stop()
-    info(f"Multi-processed time elapsed: {profiler.elapsed}")
-    profiler.reset()
+    # profiler.start()
+    # test_multiprocessed()
+    # profiler.stop()
+    # info(f"Multi-processed time elapsed: {profiler.elapsed}")
+    # profiler.reset()
 
 
 if __name__ == "__main__":
