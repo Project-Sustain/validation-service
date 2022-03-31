@@ -2,7 +2,7 @@ import concurrent.futures
 import os
 
 from logging import info, error
-from concurrent.futures import as_completed
+from concurrent.futures import as_completed, ThreadPoolExecutor
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, JobMode, LossFunction
 
@@ -67,33 +67,58 @@ class TensorflowValidator:
                     error_msg=error_msg
                 ))
 
-        # Job mode not single-threaded; use the shared ProcessPoolExecutor for multiprocessing
+        # Job mode not single-threaded; use either the shared ProcessPoolExecutor or ThreadPoolExecutor
         else:
-
-            # Create a child process object for each GISJOIN validation job
+            # Create a child process object or thread object for each GISJOIN validation job
             executors_list: list = []
-            for spatial_allocation in self.request.allocations:
-                info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
-                executors_list.append(
-                    self.shared_executor.submit(
-                        validate_model,
-                        spatial_allocation.gis_join,
-                        self.model_path,
-                        feature_fields,
-                        self.request.label_field,
-                        LossFunction.Name(self.request.loss_function),
-                        self.request.mongo_host,
-                        self.request.mongo_port,
-                        self.request.read_config.read_preference,
-                        self.request.read_config.read_concern,
-                        self.request.database,
-                        self.request.collection,
-                        spatial_allocation.strata_limit,
-                        spatial_allocation.sample_rate,
-                        self.request.normalize_inputs,
-                        False  # don't log summaries on concurrent model
+
+            if self.request.worker_job_mode == JobMode.MULTITHREADED:
+                with ThreadPoolExecutor(max_workers=10) as executor:
+                    for spatial_allocation in self.request.allocations:
+                        info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
+                        executors_list.append(
+                            executor.submit(
+                                validate_model,
+                                spatial_allocation.gis_join,
+                                self.model_path,
+                                feature_fields,
+                                self.request.label_field,
+                                LossFunction.Name(self.request.loss_function),
+                                self.request.mongo_host,
+                                self.request.mongo_port,
+                                self.request.read_config.read_preference,
+                                self.request.read_config.read_concern,
+                                self.request.database,
+                                self.request.collection,
+                                spatial_allocation.strata_limit,
+                                spatial_allocation.sample_rate,
+                                self.request.normalize_inputs,
+                                False  # don't log summaries on concurrent model
+                            )
+                        )
+            else:  # JobMode.MULTIPROCESSING
+                for spatial_allocation in self.request.allocations:
+                    info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
+                    executors_list.append(
+                        self.shared_executor.submit(
+                            validate_model,
+                            spatial_allocation.gis_join,
+                            self.model_path,
+                            feature_fields,
+                            self.request.label_field,
+                            LossFunction.Name(self.request.loss_function),
+                            self.request.mongo_host,
+                            self.request.mongo_port,
+                            self.request.read_config.read_preference,
+                            self.request.read_config.read_concern,
+                            self.request.database,
+                            self.request.collection,
+                            spatial_allocation.strata_limit,
+                            spatial_allocation.sample_rate,
+                            self.request.normalize_inputs,
+                            False  # don't log summaries on concurrent model
+                        )
                     )
-                )
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
