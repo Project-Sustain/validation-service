@@ -210,19 +210,13 @@ def validate_model(
         info("MEAN_SQUARED_ERROR...")
         loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
 
-        e_k = np.square(y_pred - y_true)
+        # e_k = np.square(y_true - y_pred)
+        # sum_e_k_squared = np.sum(e_k) ** 2
+        #
+        # squared_errors = np.square(np.square(y_true - y_pred))
+        # mean_of_all_errors = np.mean(np.square(y_true - y_pred))
 
-        sum_e_k_squared = np.sum(e_k) ** 2
-
-        
-
-        squared_errors = np.square(np.square(y_pred - y_true))
-        mean_of_all_errors = np.mean(np.square(y_pred - y_true))
-
-        variance: float = np.square(y_pred - y_true).var()
-
-
-
+        variance: float = np.square(y_true - y_pred).var()
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
