@@ -33,7 +33,6 @@ def main():
         node_type_arg = None
         port_arg = None
         master_uri_arg = None
-        local_testing = False
 
         for opt, arg in opts:
             if opt in ['-m', '--master']:
