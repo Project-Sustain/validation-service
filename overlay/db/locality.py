@@ -16,7 +16,8 @@ widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
 GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 
 
-# Finds all the GISJOINs belonging to the local mongod instance and their document counts
+# Finds all the GISJOINs belonging to the local mongod instance and their document counts.
+# Returns a dict { gis_join -> count }
 def discover_gis_joins() -> dict:
     # Connect to local mongod instance; connecting to mongos instance will find all GISJOINs in entire cluster,
     # rather than just the local shards.

@@ -11,9 +11,9 @@ from overlay.validation_pb2 import ReplicaSetMembership
 class ShardMetadata:
 
     def __init__(self, shard_name: str, shard_servers: list, gis_join_metadata: dict):
-        self.shard_name = shard_name
-        self.shard_servers = shard_servers
-        self.gis_join_metadata = gis_join_metadata
+        self.shard_name: str = shard_name                   # shard7rs
+        self.shard_servers: list = shard_servers            # list(<shard_server_hostnames>)
+        self.gis_join_metadata: dict = gis_join_metadata    # dict { gis_join -> count }
 
     def __repr__(self):
         return f"ShardMetadata: shard_name={self.shard_name}, shard_servers={self.shard_servers}, gis_joins={self.gis_joins}"

@@ -6,11 +6,9 @@ import zipfile
 import signal
 from concurrent import futures
 from loky import get_reusable_executor
-from pymongo import MongoClient
 
 import socket
 
-from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
     ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata
@@ -38,11 +36,14 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.jobs = []
         self.saved_models_path = MODELS_DIR
         self.is_registered = False
-        self.local_gis_joins = discover_gis_joins()
-        self.rs_name, self.rs_member = get_rs_member_state()
+        self.local_gis_joins = discover_gis_joins()  # { gis_join -> count }
+        self.rs_name, self.rs_member = get_rs_member_state()  # shard7rs, ReplicaSetMembership.PRIMARY
+        self.register()
 
-        # Register ourselves with the master
-        with grpc.insecure_channel(f"{master_hostname}:{master_port}") as channel:
+    # Register ourselves with the master
+    def register(self):
+        with grpc.insecure_channel(f"{self.master_hostname}:{self.master_port}") as channel:
+            # Create gRPC GisJoinMetadata objects from discovered GISJOIN counts
             gis_join_metadata = []
             for gis_join, count in self.local_gis_joins.items():
                 gis_join_metadata.append(GisJoinMetadata(
@@ -53,8 +54,8 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             stub = validation_pb2_grpc.MasterStub(channel)
             registration_response: WorkerRegistrationResponse = stub.RegisterWorker(
                 WorkerRegistrationRequest(
-                    hostname=hostname,
-                    port=port,
+                    hostname=self.hostname,
+                    port=self.port,
                     rs_name=self.rs_name,
                     rs_member=self.rs_member,
                     local_gis_joins=gis_join_metadata)
@@ -70,12 +71,10 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
     def BeginValidationJob(self, request: ValidationJobRequest, context) -> WorkerValidationJobResponse:
-
         profiler: Timer = Timer()
         profiler.start()
 
         info(f"Received BeginValidationJob Request: {request}")
-        info(f"BeginValidationJob: validation_budget={request.validation_budget}")
 
         # Save model
         if not self.save_model(request):
@@ -180,8 +179,6 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             info("We are not registered, no need to deregister")
 
 
-
-
 def shutdown_gracefully(worker: Worker) -> None:
     worker.deregister()
     shared_executor.shutdown()
@@ -204,7 +201,7 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> No
 
     # Initialize server and worker
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
+    worker: Worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
 
     # Set up Ctrl-C signal handling
     def call_shutdown(signum, frame):

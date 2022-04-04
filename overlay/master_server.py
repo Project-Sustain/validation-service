@@ -187,14 +187,17 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
 
 class Master(validation_pb2_grpc.MasterServicer):
 
-    def __init__(self, shard_metadata: dict, local_testing=False):
+    def __init__(self, hostname: str, port: int):
         super(Master, self).__init__()
-        self.tracked_workers = {}  # Mapping of { hostname -> WorkerMetadata }
-        self.tracked_jobs = []  # List of JobMetadata
+        self.hostname = hostname
+        self.port = port
         self.saved_models_path = "testing/master/saved_models"
-        self.gis_join_locations = {}  # Mapping of { gis_join -> ShardMetadata }
-        self.shard_metadata = shard_metadata  # Mapping of { shard_name -> ShardMetadata }
-        self.local_testing = local_testing
+
+        # Data structures
+        self.tracked_workers = {}       # Mapping of { hostname -> WorkerMetadata }
+        self.tracked_jobs = []          # list(JobMetadata)
+        self.gis_join_locations = {}    # Mapping of { gis_join -> ShardMetadata }
+        self.shard_metadata = {}        # Mapping of { shard_name -> ShardMetadata }
 
     def is_worker_registered(self, hostname):
         return hostname in self.tracked_workers
@@ -283,8 +286,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
         resulting_metrics: list = launch_worker_jobs(request, job)
 
-
-
+        # TODO: Complete variance budget process
 
         return job.job_id, resulting_metrics
 
@@ -322,22 +324,31 @@ class Master(validation_pb2_grpc.MasterServicer):
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
         return job.job_id, launch_worker_jobs(request, job)
 
-    # Registers a Worker
+    # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
+    # for the ShardMetadata objects.
     def RegisterWorker(self, request: WorkerRegistrationRequest, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
-        for shard in self.shard_metadata.values():
-            for shard_server in shard.shard_servers:
-                if shard_server == request.hostname:
-                    for gis_join_metadata in request.local_gis_joins:
-                        shard.gis_joins[gis_join_metadata.gis_join] = gis_join_metadata.count
-                    worker = WorkerMetadata(request.hostname, request.port, shard)
-                    info(f"Successfully added Worker: {worker}, responsible for GISJOINs {shard.gis_joins}")
-                    self.tracked_workers[request.hostname] = worker
-                    return WorkerRegistrationResponse(success=True)
+        # Create a ShardMetadata for the registered worker if its shard is not already known
+        if request.rs_name not in self.shard_metadata:
 
-        error(f"Failed to find a shard that {request.hostname} belongs to")
-        return WorkerRegistrationResponse(success=False)
+            # Create a dict { gis_join -> count }
+            gis_join_metadata: dict = {}
+            for local_gis_join in request.local_gis_joins:
+                gis_join_metadata[local_gis_join.gis_join] = local_gis_join.count
+
+            self.shard_metadata[request.rs_name] = ShardMetadata(request.rs_name, [request.hostname], gis_join_metadata)
+
+        # Otherwise, just add the registered worker's hostname to the known ShardMetadata object
+        else:
+            self.shard_metadata[request.rs_name].shard_servers.append(request.hostname)
+
+        # Create a WorkerMetadata object for tracking
+        shard: ShardMetadata = self.shard_metadata[request.rs_name]
+        worker: WorkerMetadata = WorkerMetadata(request.hostname, request.port, shard)
+        info(f"Successfully added Worker: {worker}, responsible for {len(shard.gis_join_metadata)} GISJOINs")
+        self.tracked_workers[request.hostname] = worker
+        return WorkerRegistrationResponse(success=True)
 
     def DeregisterWorker(self, request, context):
         info(f"Received Worker(De)RegistrationRequest: hostname={request.hostname}, port={request.port}")
@@ -362,7 +373,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         else:
             info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
 
-        # Sets up all the initial allocations per GISJOIN
+        # Process the job with either a variance budget or static/default budget
         if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
             job_id, worker_responses = self.process_job_with_variance_budget(request)
 
@@ -396,35 +407,16 @@ class Master(validation_pb2_grpc.MasterServicer):
         )
 
 
-def run(master_port=50051, local_testing=False):
-
-    # Emulated environment
-    if local_testing:
-        shard_metadata: dict = {
-            "shard1rs": shards.ShardMetadata("shard1rs", [socket.gethostname()])
-        }
-        gis_join_locations: dict = {"G2000010": shard_metadata["shard1rs"]}
-
-    # Production environment -- discover chunk/shard locations
-    else:
-        shard_metadata: dict = shards.discover_shards()
-        if shard_metadata is None:
-            error("Shard discovery returned None. Exiting...")
-            exit(1)
-
-        # locality.discover_gis_join_counts()
-        # gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
-        for shard in shard_metadata.values():
-            info(shard)
+def run(master_port=50051):
 
     # Initialize server and master
+    master_hostname: str = socket.gethostname()
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    master = Master(shard_metadata, local_testing)
+    master: Master = Master(master_hostname, master_port)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
-    hostname = socket.gethostname()
 
     # Start the server
-    info(f"Starting master server on {hostname}:{master_port}")
-    server.add_insecure_port(f"{hostname}:{master_port}")
+    info(f"Starting master server on {master_hostname}:{master_port}")
+    server.add_insecure_port(f"{master_hostname}:{master_port}")
     server.start()
     server.wait_for_termination()
