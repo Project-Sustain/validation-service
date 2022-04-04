@@ -19,8 +19,11 @@ service Master {
 
 // Worker registration request that gets sent to the master, to be tracked
 message WorkerRegistrationRequest {
-  string hostname = 1;
-  int32  port = 2;
+  string hostname = 1;  // Might look like lattice-153
+  int32  port = 2;  // Default 50055
+  string rs_name = 3;  // Might look like shard7rs
+  ReplicaSetMembership rs_member = 4;  // local mongo replica set designation (SECONDARY or PRIMARY)
+  repeated GisJoinMetadata local_gis_joins = 5;  // List of local GISJOINs and their document counts
 }
 
 // Worker registration response message the master sends back to the worker
@@ -123,6 +126,11 @@ message StaticBudget {
   float sample_rate = 3; // Specifies a fixed sampling rate for each GISJOIN
 }
 
+message GisJoinMetadata {
+  string gis_join = 1;
+  int64  count = 2;
+}
+
 // --- enum definitions ---
 
 enum UploadStatusCode {
@@ -174,4 +182,9 @@ enum LossFunction {
 enum SpatialCoverage {
   ALL = 0;
   SUBSET = 1;
+}
+
+enum ReplicaSetMembership {
+  SECONDARY = 0;
+  PRIMARY = 1;
 }

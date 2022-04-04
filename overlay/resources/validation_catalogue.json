@@ -2,15 +2,15 @@
   "model_frameworks": {
     "description": "Supported model validation frameworks",
     "values": [
-      "Tensorflow",
-      "Scikit-Learn",
-      "PyTorch"
+      "TENSORFLOW",
+      "SCIKIT_LEARN",
+      "PYTORCH"
     ]
   },
   "model_categories": {
     "description": "Supported categories of models to be evaluated",
     "values": [
-      "Regression"
+      "REGRESSION"
     ]
   },
   "supported_collections": {
@@ -69,7 +69,7 @@
           "TOTAL_CLOUD_COVER_PERCENT"
         ],
         "model_categories_supported": [
-          "Regression"
+          "REGRESSION"
         ]
       },
       {
@@ -85,7 +85,7 @@
           "median_age"
         ],
         "model_categories_supported": [
-          "Regression"
+          "REGRESSION"
         ]
       }
     ]
@@ -95,37 +95,6 @@
     "values": [
       "loss",
       "accuracy"
-    ]
-  },
-  "validation_budgets": {
-    "description": "Sampling and limiting budgets for validating a model",
-    "values": [
-      {
-        "budget": "limit",
-        "description": "Limits the number of records returned for a given GISJOIN to a specified amount",
-        "type": "Integer",
-        "min": 1,
-        "max": 100000
-      },
-      {
-        "budget": "sample",
-        "description": "Samples the records returned for a given GISJOIN at a specified rate",
-        "type": "Double",
-        "min": 0.1,
-        "max": 1.0
-      }
-    ]
-  },
-  "mongo_read_preference": {
-    "description": "Defines the read preference for MongoDB, controlling how read operations are routed to replica set members",
-    "values": [
-
-    ]
-  },
-  "mongo_read_concern": {
-    "description": "Defines the read concern for the MongoDB connections, controlling the consistency and isolation properties of the data",
-    "values": [
-
     ]
   }
 }

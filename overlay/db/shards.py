@@ -5,14 +5,15 @@ from logging import info, error
 
 
 from overlay.constants import DB_HOST, DB_PORT
+from overlay.validation_pb2 import ReplicaSetMembership
 
 
 class ShardMetadata:
 
-    def __init__(self, shard_name: str, shard_servers: list, gis_joins: list):
+    def __init__(self, shard_name: str, shard_servers: list, gis_join_metadata: dict):
         self.shard_name = shard_name
         self.shard_servers = shard_servers
-        self.gis_joins = gis_joins
+        self.gis_join_metadata = gis_join_metadata
 
     def __repr__(self):
         return f"ShardMetadata: shard_name={self.shard_name}, shard_servers={self.shard_servers}, gis_joins={self.gis_joins}"
@@ -27,7 +28,10 @@ class ShardMetadata:
 #       "shard10rs": ShardMetadata{
 #                                   shard_name="shard10rs",
 #                                   shard_servers=["lattice-132", "lattice-133", "lattice-134"],
-#                                   gis_joins=[]
+#                                   gis_joins=[
+#                                       {"G1234567": 12345},
+#                                       ...
+#                                   ]
 #                                  }
 #       }
 def discover_shards():
@@ -54,3 +58,19 @@ def discover_shards():
 
     client.close()
     return shard_metadata
+
+
+# Discovers and returns the replica set name and membership state of the local mongod instance
+# Example return value: ("shard7rs", ReplicaSetMembership.SECONDARY)
+def get_rs_member_state() -> (str, ReplicaSetMembership):
+    info("Discovering MongoDB shards...")
+    client = MongoClient(f"mongodb://localhost:27017")
+    rs_status = client.admin.command({"replSetGetStatus": 1})
+    rs_name: str = rs_status["set"]
+    rs_state: int = rs_status["myState"]  # https://www.mongodb.com/docs/manual/reference/replica-states/
+    client.close()
+
+    if rs_state == 1:
+        return rs_name, ReplicaSetMembership.PRIMARY
+    else:
+        return rs_name, ReplicaSetMembership.SECONDARY

@@ -187,13 +187,13 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
 
 class Master(validation_pb2_grpc.MasterServicer):
 
-    def __init__(self, gis_join_locations: dict, shard_metadata: dict, local_testing=False):
+    def __init__(self, shard_metadata: dict, local_testing=False):
         super(Master, self).__init__()
         self.tracked_workers = {}  # Mapping of { hostname -> WorkerMetadata }
         self.tracked_jobs = []  # List of JobMetadata
         self.saved_models_path = "testing/master/saved_models"
-        self.gis_join_locations = gis_join_locations  # Mapping of { gis_join -> ShardMetadata }
-        self.shard_metadata = shard_metadata
+        self.gis_join_locations = {}  # Mapping of { gis_join -> ShardMetadata }
+        self.shard_metadata = shard_metadata  # Mapping of { shard_name -> ShardMetadata }
         self.local_testing = local_testing
 
     def is_worker_registered(self, hostname):
@@ -322,12 +322,15 @@ class Master(validation_pb2_grpc.MasterServicer):
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
         return job.job_id, launch_worker_jobs(request, job)
 
+    # Registers a Worker
     def RegisterWorker(self, request: WorkerRegistrationRequest, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
         for shard in self.shard_metadata.values():
             for shard_server in shard.shard_servers:
                 if shard_server == request.hostname:
+                    for gis_join_metadata in request.local_gis_joins:
+                        shard.gis_joins[gis_join_metadata.gis_join] = gis_join_metadata.count
                     worker = WorkerMetadata(request.hostname, request.port, shard)
                     info(f"Successfully added Worker: {worker}, responsible for GISJOINs {shard.gis_joins}")
                     self.tracked_workers[request.hostname] = worker
@@ -409,14 +412,14 @@ def run(master_port=50051, local_testing=False):
             error("Shard discovery returned None. Exiting...")
             exit(1)
 
-        locality.discover_gis_join_counts()
-        gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
+        # locality.discover_gis_join_counts()
+        # gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
         for shard in shard_metadata.values():
             info(shard)
 
     # Initialize server and master
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    master = Master(gis_join_locations, shard_metadata, local_testing)
+    master = Master(shard_metadata, local_testing)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
     hostname = socket.gethostname()
 

@@ -16,6 +16,24 @@ widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
 GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 
 
+# Finds all the GISJOINs belonging to the local mongod instance and their document counts
+def discover_gis_joins() -> dict:
+    # Connect to local mongod instance; connecting to mongos instance will find all GISJOINs in entire cluster,
+    # rather than just the local shards.
+    gis_join_counts: dict = {}  # { gis_join -> count }
+    client: MongoClient = MongoClient("mongodb://localhost:27017")
+    db = client["sustaindb"]
+    coll = db["noaa_nam"]
+    distinct_gis_joins: list = coll.distinct("GISJOIN")
+    for gis_join in distinct_gis_joins:
+        count = coll.count_documents({"GISJOIN": gis_join})
+        gis_join_counts[gis_join] = count
+        info(f"gis_join={gis_join}, count={count}")
+
+    client.close()
+    return gis_join_counts
+
+
 # Decides whether to load in cached GISJOIN locations from a saved file,
 # or discover them via mongo
 def get_gis_join_chunk_locations(shard_metadata: dict) -> dict:

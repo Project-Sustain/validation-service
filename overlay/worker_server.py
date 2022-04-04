@@ -6,18 +6,21 @@ import zipfile
 import signal
 from concurrent import futures
 from loky import get_reusable_executor
+from pymongo import MongoClient
 
 import socket
 
 from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
-    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType
+    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.profiler import Timer
 from overlay.tensorflow_validation.validation import TensorflowValidator
 from overlay.scikitlearn_validation.validation import ScikitLearnValidator
 from overlay.pytorch_validation.validation import PyTorchValidator
+from overlay.db.shards import get_rs_member_state
+from overlay.db.locality import discover_gis_joins
 
 
 # Loky shared, reusable ProcessPoolExecutor
@@ -35,12 +38,26 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.jobs = []
         self.saved_models_path = MODELS_DIR
         self.is_registered = False
+        self.local_gis_joins = discover_gis_joins()
+        self.rs_name, self.rs_member = get_rs_member_state()
 
         # Register ourselves with the master
         with grpc.insecure_channel(f"{master_hostname}:{master_port}") as channel:
+            gis_join_metadata = []
+            for gis_join, count in self.local_gis_joins.items():
+                gis_join_metadata.append(GisJoinMetadata(
+                    gis_join=gis_join,
+                    count=count
+                ))
+
             stub = validation_pb2_grpc.MasterStub(channel)
             registration_response: WorkerRegistrationResponse = stub.RegisterWorker(
-                WorkerRegistrationRequest(hostname=hostname, port=port)
+                WorkerRegistrationRequest(
+                    hostname=hostname,
+                    port=port,
+                    rs_name=self.rs_name,
+                    rs_member=self.rs_member,
+                    local_gis_joins=gis_join_metadata)
             )
 
             if registration_response.success:
@@ -161,6 +178,8 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                     error(f"Failed to deregister worker: {registration_response}")
         else:
             info("We are not registered, no need to deregister")
+
+
 
 
 def shutdown_gracefully(worker: Worker) -> None:
