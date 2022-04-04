@@ -10,9 +10,12 @@ from overlay import worker_server
 
 def print_usage():
     print("USAGE\n\tpython3 overlay [OPTIONS]\n")
-    print("OPTIONS\n\t--master\t\tStarts the master server")
-    print("\t--worker <master_hostname>\tStarts the worker server, connecting to the master specified\n")
-    print("\t--flaskserver <master_hostname>\tStarts the flask server, connecting to the master specified\n")
+    print("OPTIONS\n\t--master <master_port>\t\tStarts the master server")
+    print("\tExample: python3 overlay --master 50051\n")
+    print("\t--worker <master_uri> <worker_port>\tStarts the worker server, connecting to the master specified")
+    print("\tExample: python3 overlay --worker lattice-150:50051 50055\n")
+    print("\t--flaskserver <master_uri> <flask_port>\tStarts the flask server, connecting to the master specified\n")
+    print("\tExample: python3 overlay --flaskserver lattice-150:50051 5000\n")
 
 
 def print_usage_and_exit():
@@ -25,7 +28,7 @@ def main():
 
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, "mwfp:u:l", ["master", "worker", "flaskserver", "port=", "master_uri=", "local"])
+        opts, args = getopt.getopt(argv, "mwfp:u:", ["master", "worker", "flaskserver", "port=", "master_uri="])
 
         node_type_arg = None
         port_arg = None
@@ -43,12 +46,9 @@ def main():
                 master_uri_arg = arg
             elif opt in ['-p', '--port']:
                 port_arg = int(arg)
-            elif opt in ['-l', '--local']:
-                local_testing = True
 
         if node_type_arg == "master":
-            master_server.run(master_port=port_arg, local_testing=local_testing) \
-                if port_arg is not None else master_server.run(local_testing=local_testing)
+            master_server.run(master_port=port_arg) if port_arg is not None else master_server.run()
         elif node_type_arg == "worker":
             ok, master_hostname, master_port = is_valid_master_uri(master_uri_arg)
             if ok:
