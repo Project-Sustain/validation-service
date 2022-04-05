@@ -337,7 +337,10 @@ class Master(validation_pb2_grpc.MasterServicer):
             for local_gis_join in request.local_gis_joins:
                 gis_join_metadata[local_gis_join.gis_join] = local_gis_join.count
 
+
             self.shard_metadata[request.rs_name] = ShardMetadata(request.rs_name, [request.hostname], gis_join_metadata)
+            for local_gis_join in request.local_gis_joins:
+                self.gis_join_locations[local_gis_join.gis_join] = self.shard_metadata[request.rs_name]
 
         # Otherwise, just add the registered worker's hostname to the known ShardMetadata object
         else:
