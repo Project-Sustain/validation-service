@@ -82,9 +82,10 @@ message ValidationMetric {
   double loss = 3;
   double accuracy = 4;
   double variance = 5;
-  double duration_sec = 6;
-  bool ok = 7;
-  string error_msg = 8;
+  double proportional_allocation = 6;
+  double duration_sec = 7;
+  bool ok = 8;
+  string error_msg = 9;
 }
 
 message ModelFile {

@@ -1,5 +1,6 @@
 import concurrent.futures
 import os
+from math import sqrt
 
 from logging import info, error
 from concurrent.futures import as_completed, ThreadPoolExecutor
@@ -12,10 +13,11 @@ from overlay.constants import MODELS_DIR
 
 class TensorflowValidator:
 
-    def __init__(self, request: ValidationJobRequest, shared_executor):
+    def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         self.request: ValidationJobRequest = request
         self.model_path = self.get_model_path()
         self.shared_executor = shared_executor
+        self.gis_join_counts = gis_join_counts  # { gis_join -> count }
 
     def get_model_path(self):
         model_path = f"{MODELS_DIR}/{self.request.id}/"
@@ -39,29 +41,34 @@ class TensorflowValidator:
 
             # Make requests serially using the gis_joins list in the request and the static strata limit/sample rate
             for spatial_allocation in self.request.allocations:
-                returned_gis_join, allocation, loss, variance, ok, error_msg, duration_sec = validate_model(
-                    gis_join=spatial_allocation.gis_join,
-                    model_path=self.model_path,
-                    feature_fields=feature_fields,
-                    label_field=self.request.label_field,
-                    loss_function=LossFunction.Name(self.request.loss_function),
-                    mongo_host=self.request.mongo_host,
-                    mongo_port=self.request.mongo_port,
-                    read_preference=self.request.read_config.read_preference,
-                    read_concern=self.request.read_config.read_concern,
-                    database=self.request.database,
-                    collection=self.request.collection,
-                    limit=spatial_allocation.strata_limit,
-                    sample_rate=spatial_allocation.sample_rate,
-                    normalize_inputs=self.request.normalize_inputs,
-                    verbose=verbose
-                )
+                gis_join: str = spatial_allocation.gis_join
+                gis_join_count: int = self.gis_join_counts[gis_join]
+                returned_gis_join, allocation, loss, variance, proportional_allocation, ok, error_msg, duration_sec = \
+                    validate_model(
+                        gis_join=gis_join,
+                        gis_join_count=gis_join_count,
+                        model_path=self.model_path,
+                        feature_fields=feature_fields,
+                        label_field=self.request.label_field,
+                        loss_function=LossFunction.Name(self.request.loss_function),
+                        mongo_host=self.request.mongo_host,
+                        mongo_port=self.request.mongo_port,
+                        read_preference=self.request.read_config.read_preference,
+                        read_concern=self.request.read_config.read_concern,
+                        database=self.request.database,
+                        collection=self.request.collection,
+                        limit=spatial_allocation.strata_limit,
+                        sample_rate=spatial_allocation.sample_rate,
+                        normalize_inputs=self.request.normalize_inputs,
+                        verbose=verbose
+                    )
 
                 metrics.append(ValidationMetric(
                     gis_join=returned_gis_join,
                     allocation=allocation,
                     loss=loss,
                     variance=variance,
+                    proportional_allocation=proportional_allocation,
                     duration_sec=duration_sec,
                     ok=ok,
                     error_msg=error_msg
@@ -75,11 +82,14 @@ class TensorflowValidator:
             if self.request.worker_job_mode == JobMode.MULTITHREADED:
                 with ThreadPoolExecutor(max_workers=10) as executor:
                     for spatial_allocation in self.request.allocations:
+                        gis_join: str = spatial_allocation.gis_join
+                        gis_join_count: int = self.gis_join_counts[gis_join]
                         info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
                         executors_list.append(
                             executor.submit(
                                 validate_model,
-                                spatial_allocation.gis_join,
+                                gis_join,
+                                gis_join_count,
                                 self.model_path,
                                 feature_fields,
                                 self.request.label_field,
@@ -98,11 +108,14 @@ class TensorflowValidator:
                         )
             else:  # JobMode.MULTIPROCESSING
                 for spatial_allocation in self.request.allocations:
+                    gis_join: str = spatial_allocation.gis_join
+                    gis_join_count: int = self.gis_join_counts[gis_join]
                     info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
                     executors_list.append(
                         self.shared_executor.submit(
                             validate_model,
-                            spatial_allocation.gis_join,
+                            gis_join,
+                            gis_join_count,
                             self.model_path,
                             feature_fields,
                             self.request.label_field,
@@ -122,12 +135,14 @@ class TensorflowValidator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                gis_join, allocation, loss, variance, ok, error_msg, duration_sec = future.result()
+                gis_join, allocation, loss, variance, proportional_allocation, ok, error_msg, duration_sec = \
+                    future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
                     allocation=allocation,
                     loss=loss,
                     variance=variance,
+                    proportional_allocation=proportional_allocation,
                     duration_sec=duration_sec,
                     ok=ok,
                     error_msg=error_msg
@@ -142,6 +157,7 @@ class TensorflowValidator:
 # with their own Global Interpreter Lock. Thus, all parameters have to be serializable.
 def validate_model(
         gis_join: str,
+        gis_join_count: int,
         model_path: str,
         feature_fields: list,
         label_field: str,
@@ -155,7 +171,7 @@ def validate_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, float, float, bool, str, float):
+        verbose: bool = True) -> (str, int, float, float, float, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
 
     import tensorflow as tf
@@ -235,12 +251,23 @@ def validate_model(
         info("MEAN_SQUARED_ERROR...")
         loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
 
+        N_h = gis_join_count
         e_k = np.square(y_true - y_pred)
-        sum_e_k_squared = np.sum(e_k) ** 2
-        squared_errors = np.square(np.square(y_true - y_pred))
-        mean_of_all_errors = np.mean(np.square(y_true - y_pred))
+        sum_e_k = np.sum(e_k)
+        squared_sum_e_k = sum_e_k ** 2
+        squared_sum_e_k_div_by_N_h = squared_sum_e_k / N_h
+        e_k_squared = np.square(e_k)
+        sum_e_k_squared = np.sum(e_k_squared)
+        S_h_squared = (sum_e_k_squared - squared_sum_e_k_div_by_N_h) / (N_h - 1)
+        S_h = sqrt(S_h_squared)
 
-        variance: float = np.square(y_true - y_pred).var()
+        # squared_errors = np.square(e_k)
+        # mean_of_all_errors = np.mean(np.square(y_true - y_pred))
+
+        variance: float = S_h
+        proportional_allocation: float = N_h * S_h
+
+        # variance: float = np.square(y_true - y_pred).var()
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
@@ -259,4 +286,4 @@ def validate_model(
     profiler.stop()
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return gis_join, allocation, loss, variance, ok, "", profiler.elapsed
+    return gis_join, allocation, loss, variance, proportional_allocation, ok, "", profiler.elapsed
