@@ -7,19 +7,21 @@ import torch.nn as nn
 from logging import info, warning, error
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
+from sklearn.preprocessing import MinMaxScaler
+
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, BudgetType, StaticBudget, BudgetType, \
     JobMode, LossFunction
 from overlay.db.querier import Querier
 from overlay.constants import MODELS_DIR
-from overlay.tensorflow_validation.validation import normalize_dataframe
 from overlay.profiler import Timer
 
 
 class PyTorchValidator:
 
-    def __init__(self, request: ValidationJobRequest):
+    def __init__(self, request: ValidationJobRequest, shared_executor):
         self.request: ValidationJobRequest = request
         self.model_path = self.get_model_path()
+        self.shared_executor = shared_executor
 
     def get_model_path(self):
         model_path = f"{MODELS_DIR}/{self.request.id}/"
@@ -52,7 +54,7 @@ class PyTorchValidator:
 
             # Make requests serially
             for gis_join in self.request.gis_joins:
-                loss, ok, error_msg, duration_sec = validate_model(
+                gis_join, loss, variance, ok, error_msg, duration_sec = validate_model(
                     gis_join=gis_join,
                     model_path=self.model_path,
                     feature_fields=feature_fields,
@@ -78,43 +80,38 @@ class PyTorchValidator:
                     error_msg=error_msg
                 ))
 
-        # Job mode not single-threaded; either multi-thread or multi-processed
+        # Job mode not single-threaded; use the shared ProcessPoolExecutor for multiprocessing
         else:
 
-            # Choose executor type
-            executor_type = ProcessPoolExecutor if self.request.worker_job_mode == JobMode.MULTIPROCESSING \
-                or self.request.worker_job_mode == JobMode.DEFAULT_JOB_MODE else ThreadPoolExecutor
-
             executors_list: list = []
-            with executor_type(max_workers=8) as executor:
 
-                # Create either a thread or child process object for each GISJOIN validation job
-                for gis_join in self.request.gis_joins:
-                    info(f"Launching validation job for GISJOIN {gis_join}")
-                    executors_list.append(
-                        executor.submit(
-                            validate_model,
-                            gis_join,
-                            self.model_path,
-                            feature_fields,
-                            self.request.label_field,
-                            LossFunction.Name(self.request.loss_function),
-                            self.request.mongo_host,
-                            self.request.mongo_port,
-                            self.request.read_config.read_preference,
-                            self.request.read_config.read_concern,
-                            self.request.database,
-                            self.request.collection,
-                            strata_limit,
-                            sample_rate,
-                            self.request.normalize_inputs,
-                            verbose
-                        )
+            # Create a child process object for each GISJOIN validation job
+            for gis_join in self.request.gis_joins:
+                info(f"Launching validation job for GISJOIN {gis_join}")
+                executors_list.append(
+                    self.shared_executor.submit(
+                        validate_model,
+                        gis_join,
+                        self.model_path,
+                        feature_fields,
+                        self.request.label_field,
+                        LossFunction.Name(self.request.loss_function),
+                        self.request.mongo_host,
+                        self.request.mongo_port,
+                        self.request.read_config.read_preference,
+                        self.request.read_config.read_concern,
+                        self.request.database,
+                        self.request.collection,
+                        strata_limit,
+                        sample_rate,
+                        self.request.normalize_inputs,
+                        verbose
                     )
+                )
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                loss, ok, error_msg, duration_sec = future.result()
+                gis_join, loss, ok, error_msg, duration_sec = future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
                     loss=loss,
@@ -141,7 +138,7 @@ def validate_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (float, bool, str, float):
+        verbose: bool = True) -> (str, float, bool, str, float):  # Returns the gis_join, loss, ok status, error message, and duration
 
     profiler: Timer = Timer()
     profiler.start()
@@ -180,12 +177,14 @@ def validate_model(
     info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
     if len(features_df.index) == 0:
-        error("DataFrame is empty! Returning -1.0 for loss")
-        return -1.0
+        error_msg = f"No records found for GISJOIN {gis_join}"
+        error(error_msg)
+        return gis_join, -1.0, False, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
-        features_df = normalize_dataframe(features_df)
+        scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        features_df = pd.DataFrame(scaled, columns=features_df.columns)
         info(f"Normalized Pandas DataFrame")
 
     # Pop the label column off into its own DataFrame
@@ -211,12 +210,13 @@ def validate_model(
     elif loss_function == "CROSS_ENTROPY_LOSS":
         criterion = nn.CrossEntropyLoss()
     else:
-        warning(f"PyTorch validation: Unknown loss function: {loss_function}")
-        return -1.0
+        error_msg = f"PyTorch validation: Unknown loss function: {loss_function}"
+        warning(error_msg)
+        return gis_join, -1.0, False, error_msg, 0.0
 
     y_predicted = model(X)
     loss = criterion(y_predicted, y)
     profiler.stop()
     info(f"Model validation results: {loss}")
 
-    return loss, True, "", profiler.elapsed
+    return gis_join, loss, True, "", profiler.elapsed

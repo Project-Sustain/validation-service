@@ -19,8 +19,11 @@ service Master {
 
 // Worker registration request that gets sent to the master, to be tracked
 message WorkerRegistrationRequest {
-  string hostname = 1;
-  int32  port = 2;
+  string hostname = 1;  // Might look like lattice-153
+  int32  port = 2;  // Default 50055
+  string rs_name = 3;  // Might look like shard7rs
+  ReplicaSetMembership rs_member = 4;  // local mongo replica set designation (SECONDARY or PRIMARY)
+  repeated GisJoinMetadata local_gis_joins = 5;  // List of local GISJOINs and their document counts
 }
 
 // Worker registration response message the master sends back to the worker
@@ -52,8 +55,10 @@ message ValidationJobRequest {
   bool normalize_inputs = 13;
   ValidationBudget validation_budget = 14;
   LossFunction loss_function = 15;
-  repeated string gis_joins = 16;
-  ModelFile model_file = 17;
+  SpatialCoverage spatial_coverage = 16;
+  repeated string gis_joins = 17;
+  repeated SpatialAllocation allocations = 18;
+  ModelFile model_file = 19;
 }
 
 message ValidationJobResponse {
@@ -73,11 +78,13 @@ message WorkerValidationJobResponse {
 
 message ValidationMetric {
   string gis_join = 1;
-  double loss = 2;
-  double accuracy = 3;
-  double duration_sec = 4;
-  bool ok = 5;
-  string error_msg = 6;
+  int64  allocation = 2;
+  double loss = 3;
+  double accuracy = 4;
+  double variance = 5;
+  double duration_sec = 6;
+  bool ok = 7;
+  string error_msg = 8;
 }
 
 message ModelFile {
@@ -97,6 +104,12 @@ message MongoReadConfig {
   string read_concern = 2;
 }
 
+message SpatialAllocation {
+  string gis_join = 1;
+  int64  strata_limit = 2;
+  float  sample_rate = 3;
+}
+
 message ValidationBudget {
   BudgetType budget_type = 1;
   StaticBudget static_budget = 2;
@@ -104,13 +117,19 @@ message ValidationBudget {
 }
 
 message IncrementalVarianceBudget {
-  int64 initial_allocation = 1; // What every GISJOIN starts with, before more gets allocated
+  int64 total_budget = 1; // Total budget
+  int64 initial_allocation = 2; // Initial equal allocation for all GISJOINs
 }
 
 message StaticBudget {
   int64 total_limit = 1; // Gets translated into a equal-proportion limit on each GISJOIN
   int64 strata_limit = 2; // Specifies a limit each GISJOIN
   float sample_rate = 3; // Specifies a fixed sampling rate for each GISJOIN
+}
+
+message GisJoinMetadata {
+  string gis_join = 1;
+  int64  count = 2;
 }
 
 // --- enum definitions ---
@@ -159,4 +178,14 @@ enum LossFunction {
   ROOT_MEAN_SQUARED_ERROR = 2;
   NEGATIVE_LOG_LIKELIHOOD_LOSS = 3;
   CROSS_ENTROPY_LOSS = 4;
+}
+
+enum SpatialCoverage {
+  ALL = 0;
+  SUBSET = 1;
+}
+
+enum ReplicaSetMembership {
+  SECONDARY = 0;
+  PRIMARY = 1;
 }

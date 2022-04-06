@@ -5,37 +5,111 @@ import io
 import zipfile
 import signal
 from concurrent import futures
+from loky import get_reusable_executor
 
 import socket
 
-from overlay import validation_pb2
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
-    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType
+    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.profiler import Timer
 from overlay.tensorflow_validation.validation import TensorflowValidator
 from overlay.scikitlearn_validation.validation import ScikitLearnValidator
 from overlay.pytorch_validation.validation import PyTorchValidator
+from overlay.db.shards import get_rs_member_state
+from overlay.db.locality import discover_gis_joins
+
+
+# Loky shared, reusable ProcessPoolExecutor
+shared_executor = get_reusable_executor(max_workers=8, timeout=10)
+
+
+# Administrative boundary hierarchical structure.
+# Top level is a mapping of State GISJOINs to a mapping of County GISJOINs to their counts.
+#
+#   {
+#       G050 -> {
+#                 G0500001 -> 16809,
+#                 G0500002 -> 8405,
+#                 ...
+#               }
+#   },
+#   ...
+#
+class GisTree(object):
+
+    def __init__(self):
+        self.tree = {}
+        self.state_prefix_length: int = 4
+        self.county_prefix_length: int = self.state_prefix_length + 4
+
+    def insert_county(self, gis_join: str, count: int) -> None:
+        state_gis_join: str = gis_join[:self.state_prefix_length]
+        if state_gis_join not in self.tree:
+            self.insert_state(state_gis_join)
+        state: dict = self.tree[state_gis_join]
+        state[gis_join] = count
+
+    def insert_state(self, gis_join: str) -> None:
+        self.tree[gis_join] = {}
+
+    def get_county(self, gis_join: str) -> (str, int):
+        county_gis_join: str = gis_join[:self.county_prefix_length]
+        state: dict = self.get_state(gis_join)
+        return county_gis_join, state[county_gis_join]
+
+    def get_state(self, gis_join: str) -> dict:
+        state_gis_join: str = gis_join[:self.state_prefix_length]
+        return self.tree[state_gis_join]
+
+    def get_county_count(self, gis_join: str) -> int:
+        return self.get_county(gis_join)[1]
+
+    def get_state_count(self, gis_join: str) -> int:
+        state_gis_join: str = gis_join[:self.state_prefix_length]
+        state: dict = self.tree[state_gis_join]
+        return sum(state.values())
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
 
-    def __init__(self, master_hostname, master_port, hostname, port):
+    def __init__(self, master_hostname: str, master_port: int, hostname: str, port: int):
         super(Worker, self).__init__()
-        self.master_hostname = master_hostname
-        self.master_port = master_port
-        self.hostname = hostname
-        self.port = port
-        self.jobs = []
-        self.saved_models_path = MODELS_DIR
+        self.master_hostname: str = master_hostname
+        self.master_port: int = master_port
+        self.hostname: str = hostname
+        self.port: int = port
+        self.jobs: list = []
+        self.saved_models_path: str = MODELS_DIR
         self.is_registered = False
+        self.gis_tree: GisTree = GisTree()
+        self.local_gis_joins: dict = discover_gis_joins()  # { gis_join -> count }
+        for gis_join, count in self.local_gis_joins.items():
+            self.gis_tree.insert_county(gis_join, count)
 
-        # Register ourselves with the master
-        with grpc.insecure_channel(f"{master_hostname}:{master_port}") as channel:
+        self.rs_name, self.rs_member = get_rs_member_state()  # shard7rs, ReplicaSetMembership.PRIMARY
+        self.register()
+
+    # Register ourselves with the master
+    def register(self):
+        with grpc.insecure_channel(f"{self.master_hostname}:{self.master_port}") as channel:
+            # Create gRPC GisJoinMetadata objects from discovered GISJOIN counts
+            gis_join_metadata = []
+            for gis_join, count in self.local_gis_joins.items():
+                gis_join_metadata.append(GisJoinMetadata(
+                    gis_join=gis_join,
+                    count=count
+                ))
+
             stub = validation_pb2_grpc.MasterStub(channel)
             registration_response: WorkerRegistrationResponse = stub.RegisterWorker(
-                WorkerRegistrationRequest(hostname=hostname, port=port)
+                WorkerRegistrationRequest(
+                    hostname=self.hostname,
+                    port=self.port,
+                    rs_name=self.rs_name,
+                    rs_member=self.rs_member,
+                    local_gis_joins=gis_join_metadata)
             )
 
             if registration_response.success:
@@ -48,13 +122,10 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
     def BeginValidationJob(self, request: ValidationJobRequest, context) -> WorkerValidationJobResponse:
-
         profiler: Timer = Timer()
         profiler.start()
 
         info(f"Received BeginValidationJob Request: {request}")
-        info(f"BeginValidationJob: validation_budget={request.validation_budget}")
-        metrics = None
 
         # Save model
         if not self.save_model(request):
@@ -66,18 +137,23 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
 
-            tf_validator: TensorflowValidator = TensorflowValidator(request)
+            tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
             metrics = tf_validator.validate_gis_joins()
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
-            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request)
+            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor)
             metrics = skl_validator.validate_gis_joins(request)
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
-            pytorch_validator: PyTorchValidator = PyTorchValidator(request)
+            pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor)
             metrics = pytorch_validator.validate_gis_joins(request)
+
+        else:
+            err_msg = f"Unsupported model framework type {ModelFramework.Name(request.model_framework)}"
+            error(err_msg)
+            return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
 
         # Create and return response from aggregated metrics
         profiler.stop()
@@ -156,6 +232,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
 def shutdown_gracefully(worker: Worker) -> None:
     worker.deregister()
+    shared_executor.shutdown()
     exit(0)
 
 
@@ -175,7 +252,7 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> No
 
     # Initialize server and worker
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
+    worker: Worker = Worker(master_hostname, master_port, socket.gethostname(), worker_port)
 
     # Set up Ctrl-C signal handling
     def call_shutdown(signum, frame):

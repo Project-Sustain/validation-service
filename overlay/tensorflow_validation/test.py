@@ -1,5 +1,6 @@
 import os
 import pymongo
+import json
 import tensorflow as tf
 import pandas as pd
 import logging
@@ -65,36 +66,41 @@ EPOCHS = 3
 BATCH_SIZE = 32
 
 
-def train_and_evaluate(model_id: int):
+def train_and_evaluate(GISJOIN: str):
 
     # Pull in data from MongoDB into Pandas DataFrame
-    client = MongoClient(URI, connect=False)
+    client = MongoClient("mongodb://lattice-150:27018/")
     database = client["sustaindb"]
     collection = database["noaa_nam"]
-    match = {"GISJOIN": "G3500170"}
+    match = {"GISJOIN": GISJOIN}
     projection = {"_id": 0, "TEMPERATURE_AT_SURFACE_KELVIN": 1, "PRESSURE_AT_SURFACE_PASCAL": 1, "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT": 1}
     documents = collection.find(match, projection)
     features_df = pd.DataFrame(list(documents))
     client.close()
+
+    if len(features_df.index) == 0:
+        print(f"No records found for GISJOIN={GISJOIN}")
+        return
+
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     label_df = features_df.pop("TEMPERATURE_AT_SURFACE_KELVIN")
 
     # Create and train Keras model
-    model = tf.keras.Sequential()
-    model.add(tf.keras.Input(shape=(2,)))
-    model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
-    model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
-    model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(0.001))
-    model.summary()
+    # model = tf.keras.Sequential()
+    # model.add(tf.keras.Input(shape=(2,)))
+    # model.add(tf.keras.layers.Dense(units=16, activation="relu", name="first_layer"))
+    # model.add(tf.keras.layers.Dense(units=4, activation="relu", name="second_layer"))
+    # model.compile(loss="mean_squared_error", optimizer=tf.keras.optimizers.Adam(0.001))
+    # model.summary()
+    #
+    # history = model.fit(features_df, label_df, epochs=3, validation_split=0.2)
+    # hist = pd.DataFrame(history.history)
+    # hist["epoch"] = history.epoch
+    # pprint(hist)
 
-    history = model.fit(features_df, label_df, epochs=3, validation_split=0.2)
-    hist = pd.DataFrame(history.history)
-    hist["epoch"] = history.epoch
-    pprint(hist)
-
-    model.save(f"my_model_{model_id}.h5")
-    loaded_model: tf.keras.Model = tf.keras.models.load_model(f"my_model_{model_id}.h5")
+    # model.save(f"my_model_0.h5")
+    loaded_model: tf.keras.Model = tf.keras.models.load_model(f"my_model_0.h5")
     loaded_model.summary()
 
     validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
@@ -102,8 +108,14 @@ def train_and_evaluate(model_id: int):
 
 
 def test_synchronous():
-    for i in range(3):
-        train_and_evaluate(i)
+
+    with open("../resources/gis_join_counts.json", "r") as f:
+        data = json.load(f)
+
+    for GISJOIN in data.keys():
+        print(f"Validating GISJOIN={GISJOIN}")
+        train_and_evaluate(GISJOIN)
+
 
 
 def test_multithreaded():
@@ -111,7 +123,7 @@ def test_multithreaded():
     executors_list = []
     with ThreadPoolExecutor(max_workers=10) as executor:
         for i in range(3):
-            executors_list.append(executor.submit(train_and_evaluate, i))
+            executors_list.append(executor.submit(train_and_evaluate, ""))
 
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
@@ -121,9 +133,9 @@ def test_multithreaded():
 def test_multiprocessed():
     # Iterate over all gis_joins and submit them for validation to the thread pool executor
     executors_list = []
-    with ProcessPoolExecutor(max_workers=10) as executor:
-        for i in range(3):
-            executors_list.append(executor.submit(train_and_evaluate, i))
+    with ProcessPoolExecutor(max_workers=8) as executor:
+        for i in range(25):
+            executors_list.append(executor.submit(train_and_evaluate, ""))
 
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
@@ -134,11 +146,11 @@ def main():
     logging.basicConfig(level=logging.INFO)
     profiler: Timer = Timer()
 
-    # profiler.start()
-    # test_synchronous()
-    # profiler.stop()
-    # info(f"Single-threaded time elapsed: {profiler.elapsed}")
-    # profiler.reset()
+    profiler.start()
+    test_synchronous()
+    profiler.stop()
+    info(f"Single-threaded time elapsed: {profiler.elapsed}")
+    profiler.reset()
     #
     # profiler.start()
     # test_multithreaded()
@@ -146,11 +158,17 @@ def main():
     # info(f"Multi-threaded time elapsed: {profiler.elapsed}")
     # profiler.reset()
 
-    profiler.start()
-    test_multiprocessed()
-    profiler.stop()
-    info(f"Multi-processed time elapsed: {profiler.elapsed}")
-    profiler.reset()
+    # profiler.start()
+    # test_multiprocessed()
+    # profiler.stop()
+    # info(f"Multi-processed time elapsed: {profiler.elapsed}")
+    # profiler.reset()
+
+    # profiler.start()
+    # test_multiprocessed()
+    # profiler.stop()
+    # info(f"Multi-processed time elapsed: {profiler.elapsed}")
+    # profiler.reset()
 
 
 if __name__ == "__main__":

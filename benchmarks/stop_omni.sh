@@ -14,5 +14,3 @@ omni stop "$MON_ID"
 
 echo -e "Collecting..."
 omni collect "$MON_ID" "./$BENCHMARK_NAME"
-
-mv ./response.json "$BENCHMARK_NAME/response.json"

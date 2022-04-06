@@ -154,3 +154,4 @@ overlay/resources/gis_join_chunk_locations.json*
 # Benchmarking monitor IDs
 *.benchmark_name
 *.mon_id
+*/**/nohup.out

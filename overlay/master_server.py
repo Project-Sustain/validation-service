@@ -1,6 +1,7 @@
 import uuid
 import asyncio
 import socket
+import json
 import grpc
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,15 +12,22 @@ from overlay.db import shards, locality
 from overlay.db.shards import ShardMetadata
 from overlay.profiler import Timer
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
-    ValidationJobRequest, JobMode, BudgetType, ValidationBudget
+    ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
+    SpatialAllocation
 
 
 class JobMetadata:
 
-    def __init__(self, job_id, gis_joins):
+    # Takes a job ID and a list of SpatialAllocations
+    # Example: [
+    #           {gis_join: "G5600050", strata_limit: 2000, sample_rate: 0.0},
+    #           {gis_join: "G5600170", strata_limit: 2300, sample_rate: 0.0},
+    #           ...
+    #          ]
+    def __init__(self, job_id: str, gis_joins: list):
         self.job_id = job_id
         self.worker_jobs = {}  # Mapping of { worker_hostname -> WorkerJobMetadata }
-        self.gis_joins = gis_joins
+        self.gis_joins = gis_joins  # list of SpatialAllocation objects
         self.status = "NEW"
 
 
@@ -28,14 +36,19 @@ class WorkerJobMetadata:
     def __init__(self, job_id, worker_ref):
         self.job_id = job_id
         self.worker = worker_ref
-        self.gis_joins = []
+        self.gis_joins = []  # list of SpatialAllocation objects
         self.status = "NEW"
 
     def complete(self):
         self.status = "DONE"
 
     def __repr__(self):
-        return f"WorkerJobMetadata: job_id={self.job_id}, worker={self.worker.hostname}, status={self.status}, gis_joins={self.gis_joins}"
+        gis_joins_str = ""
+        for gis_join in self.gis_joins:
+            gis_joins_str += "  {gis_join=%s, strata_limit=%d, sample_rate=%.2f}\n" \
+                             % (gis_join.gis_join, gis_join.strata_limit, gis_join.sample_rate)
+        return f"WorkerJobMetadata: job_id={self.job_id}, worker={self.worker.hostname}, status={self.status}, " \
+               f"gis_joins=[\n{gis_joins_str}\n]"
 
 
 class WorkerMetadata:
@@ -67,6 +80,24 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
     return worker.jobs[job_id]
 
 
+# Launches a round of worker jobs based on the master job mode selected.
+# Returns a list of WorkerValidationJobResponse objects.
+def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> list:
+    # Select strategy for submitting the job from the master
+    if request.master_job_mode == JobMode.MULTITHREADED:
+        info("Launching jobs in multi-threaded mode")
+        worker_validation_job_responses = launch_worker_jobs_multithreaded(job, request)
+    elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
+        info("Launching jobs in asynchronous mode")
+        worker_validation_job_responses = launch_worker_jobs_asynchronously(job, request)
+    else:
+        info("Launching jobs in synchronous mode")
+        worker_validation_job_responses = launch_worker_jobs_synchronously(job, request)
+
+    info("Received all validation responses, returning...")
+    return worker_validation_job_responses
+
+
 # Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
     responses = []
@@ -80,7 +111,8 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 stub = validation_pb2_grpc.WorkerStub(channel)
                 request_copy = ValidationJobRequest()
                 request_copy.CopyFrom(request)
-                request_copy.gis_joins[:] = job.gis_joins
+                del request_copy.allocations[:]
+                request_copy.allocations.extend(job.gis_joins)
                 request_copy.id = worker_job.job_id
 
                 responses.append(stub.BeginValidationJob(request_copy))
@@ -100,7 +132,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             stub = validation_pb2_grpc.WorkerStub(channel)
             request_copy = ValidationJobRequest()
             request_copy.CopyFrom(_request)
-            request_copy.gis_joins[:] = _worker_job.gis_joins
+            del request_copy.allocations[:]
+            request_copy.allocations.extend(_worker_job.gis_joins)
             request_copy.id = _worker_job.job_id
 
             return stub.BeginValidationJob(request_copy)
@@ -131,7 +164,8 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
             stub = validation_pb2_grpc.WorkerStub(channel)
             request_copy = ValidationJobRequest()
             request_copy.CopyFrom(_request)
-            request_copy.gis_joins[:] = _worker_job.gis_joins
+            del request_copy.allocations[:]
+            request_copy.allocations.extend(_worker_job.gis_joins)
             request_copy.id = _worker_job.job_id
 
             return await stub.BeginValidationJob(request_copy)
@@ -152,22 +186,53 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
     return list(responses)
 
 
+def save_intermediate_response_data(total_budget: int, initial_allocation: int, initial_response_metrics: list) -> None:
+    total_gis_joins = len(initial_response_metrics)
+    budget_used = initial_allocation * total_gis_joins
+    remaining_budget = total_budget - budget_used
+    save_obj = {
+        "total_budget": total_budget,
+        "initial_allocation": initial_allocation,
+        "budget_used": budget_used,
+        "remaining_budget": remaining_budget,
+        "initial_response_metrics": []
+    }
+
+    for metric in initial_response_metrics:
+        save_obj["initial_response_metrics"].append(
+            {
+                "gis_join": metric.gis_join,
+                "variance": metric.variance,
+                "loss": metric.loss,
+                "duration_sec": metric.duration_sec
+            }
+        )
+
+    filename = "/s/parsons/b/others/sustain/local-disk/a/tmp/intermediate_response.json"
+    with open(filename, "w") as f:
+        json.dump(save_obj, f)
+
+    info(f"Saved {filename}")
+
+
 class Master(validation_pb2_grpc.MasterServicer):
 
-    def __init__(self, gis_join_locations: dict, shard_metadata: dict, local_testing=False):
+    def __init__(self, hostname: str, port: int):
         super(Master, self).__init__()
-        self.tracked_workers = {}  # Mapping of { hostname -> WorkerMetadata }
-        self.tracked_jobs = []  # List of JobMetadata
+        self.hostname = hostname
+        self.port = port
         self.saved_models_path = "testing/master/saved_models"
-        self.gis_join_locations = gis_join_locations  # Mapping of { gis_join -> ShardMetadata }
-        self.shard_metadata = shard_metadata
-        self.local_testing = local_testing
+
+        # Data structures
+        self.tracked_workers = {}       # Mapping of { hostname -> WorkerMetadata }
+        self.tracked_jobs = []          # list(JobMetadata)
+        self.gis_join_locations = {}    # Mapping of { gis_join -> ShardMetadata }
+        self.shard_metadata = {}        # Mapping of { shard_name -> ShardMetadata }
 
     def is_worker_registered(self, hostname):
         return hostname in self.tracked_workers
 
     def choose_worker_from_shard(self, shard: ShardMetadata, job_id: str) -> WorkerMetadata:
-
         # Find registered hostname in shard with the least current jobs
         min_gis_joins = 9999999
         selected_worker = None
@@ -175,28 +240,180 @@ class Master(validation_pb2_grpc.MasterServicer):
             if self.is_worker_registered(worker_host):
                 worker_job = get_worker_job(self.tracked_workers[worker_host], job_id)
                 if worker_job is None:
-                    info(f"Worker {worker_host} currently has no job, defaulting to it for next GISJOIN in job={job_id}")
+                    # info(f"Worker {worker_host} currently has no job, defaulting to it for next GISJOIN in job={job_id}")
                     return self.tracked_workers[worker_host]
                 elif len(worker_job.gis_joins) < min_gis_joins:
                     min_gis_joins = len(worker_job.gis_joins)
                     selected_worker = self.tracked_workers[worker_host]
 
-        info(f"Selecting {selected_worker.hostname} for next GISJOIN in job={job_id}")
+        # info(f"Selecting {selected_worker.hostname} for next GISJOIN in job={job_id}")
         return selected_worker
 
+    # Generates a JobMetadata object from the set of GISJOIN allocations
+    def create_job_from_allocations(self, spatial_allocations: list) -> JobMetadata:
+
+        job_id: str = generate_job_id()  # Random UUID for the job
+        job: JobMetadata = JobMetadata(job_id, [allocation.gis_join for allocation in spatial_allocations])
+        info(f"Created job id {job_id}")
+
+        # Find and select workers with GISJOINs local to them
+        for spatial_allocation in spatial_allocations:
+            gis_join = spatial_allocation.gis_join
+            shard_hosting_gis_join: ShardMetadata = self.gis_join_locations[gis_join]
+            worker: WorkerMetadata = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
+            if worker is None:
+                error(f"Unable to find registered worker for GISJOIN {gis_join}")
+                continue
+
+            # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
+            worker_job: WorkerJobMetadata = get_or_create_worker_job(worker, job_id)
+            worker_job.gis_joins.append(spatial_allocation)
+            job.worker_jobs[worker.hostname] = worker_job
+
+        return job
+
+    def get_request_allocations(self, request: ValidationJobRequest, strata_limit: int, sample_rate: float) -> \
+            (list, bool, str):  # Returns list(SpatialAllocation), ok, err_msg
+
+        spatial_allocations: list = []  # list(SpatialAllocation)
+        if request.spatial_coverage == SpatialCoverage.ALL:
+            if len(request.gis_joins) == 0:
+                for gis_join in self.gis_join_locations.keys():
+                    spatial_allocations.append(SpatialAllocation(
+                        gis_join=gis_join,
+                        strata_limit=strata_limit,
+                        sample_rate=sample_rate
+                    ))
+            else:
+                return [], False, "Cannot specify spatial_coverage=ALL but then supply a non-empty list of GISJOINs!"
+        elif request.spatial_coverage == SpatialCoverage.SUBSET:
+            for gis_join in request.gis_joins:
+                spatial_allocations.append(SpatialAllocation(
+                    gis_join=gis_join,
+                    strata_limit=strata_limit,
+                    sample_rate=sample_rate
+                ))
+        else:
+            return [], False, f"Unsupported spatial_coverage type {SpatialCoverage.Name(request.spatial_coverage)}"
+
+        return spatial_allocations, True, ""
+
+    # Processes a job with an incremental variance validation budget.
+    # Returns a list of WorkerValidationJobResponse objects.
+    def process_job_with_variance_budget(self, request: ValidationJobRequest) -> (str, list):
+
+        # Establish initial allocations for request
+        variance_budget: IncrementalVarianceBudget = request.validation_budget.variance_budget
+        total_budget: int = variance_budget.total_budget
+        initial_allocation: int = variance_budget.initial_allocation
+        info(f"Establishing initial allocation of {initial_allocation} for {len(self.gis_join_locations)} GISJOINs")
+        spatial_allocations, ok, err_msg = self.get_request_allocations(
+            request, initial_allocation, 0.0
+        )
+        if not ok:
+            error(err_msg)
+            return "", []
+
+        budget_used: int = initial_allocation * len(self.gis_join_locations)
+        budget_left: int = total_budget - budget_used
+        info(f"This leaves us with a leftover budget of {total_budget} - {budget_used} = {budget_left}")
+        request.allocations.extend(spatial_allocations)
+
+        # Create and launch a job from allocations, gather worker responses
+        job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
+        worker_responses: list = launch_worker_jobs(request, job)  # list(WorkerValidationJobResponse)
+
+        # Compute optimal allocations from remaining budget using Neyman Allocation
+        gis_join_metrics: dict = {}  # { gis_join -> ValidationMetric }
+        sum_of_variances: int = 0
+        for worker_response in worker_responses:
+            for metric in worker_response.metrics:
+                gis_join_metrics[metric.gis_join] = metric
+                sum_of_variances += metric.variance
+
+        save_intermediate_response_data(total_budget, initial_allocation, list(gis_join_metrics.values()))
+
+        # Create list of new allocations
+        new_allocations: list = []  # list(SpatialAllocations)
+        for gis_join, metric in gis_join_metrics.items():
+            new_optimal_allocation: int = int((budget_left * metric.variance) / sum_of_variances)  # Neyman Allocation
+            new_allocations.append(SpatialAllocation(
+                gis_join=gis_join,
+                strata_limit=initial_allocation + new_optimal_allocation,  # Should we reuse the initial allocation?
+                sample_rate=0.0  # Might need to infer this to do random sampling instead of first N samples?
+            ))
+
+        # Replace total list of SpatialAllocations with new allocations
+        del request.allocations[:]
+        request.allocations.extend(new_allocations)
+
+        # Create and launch 2nd job from allocations
+        job: JobMetadata = self.create_job_from_allocations(new_allocations)
+        worker_responses = launch_worker_jobs(request, job)
+        return job.job_id, worker_responses
+
+    # Processes a job with either a default budget or static budget.
+    # Returns a list of WorkerValidationJobResponse objects.
+    def process_job_with_normal_budget(self, request: ValidationJobRequest) -> (str, list):
+
+        # Defaults
+        strata_limit = 0
+        sample_rate = 0.0
+
+        if request.validation_budget.budget_type == BudgetType.STATIC_BUDGET:
+            static_budget = request.validation_budget.static_budget
+            if 0.0 < static_budget.sample_rate <= 1.0:
+                sample_rate = static_budget.sample_rate
+
+            if static_budget.strata_limit > 0:
+                strata_limit = static_budget.strata_limit
+
+            if static_budget.total_limit > 0:
+                # Choose an equal limit per GISJOIN/strata that sums to the total budget limit
+                if static_budget.total_limit > len(request.gis_joins):
+                    strata_limit = static_budget.total_limit // len(request.gis_joins)
+                else:
+                    info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
+                    strata_limit = 1
+
+        spatial_allocations, ok, err_msg = self.get_request_allocations(request, strata_limit, sample_rate)
+        if not ok:
+            error(err_msg)
+            return "", []
+        request.allocations.extend(spatial_allocations)
+
+        # Create and launch a job from allocations
+        job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
+        return job.job_id, launch_worker_jobs(request, job)
+
+    # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
+    # for the ShardMetadata objects.
     def RegisterWorker(self, request: WorkerRegistrationRequest, context):
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
-        for shard in self.shard_metadata.values():
-            for shard_server in shard.shard_servers:
-                if shard_server == request.hostname:
-                    worker = WorkerMetadata(request.hostname, request.port, shard)
-                    info(f"Successfully added Worker: {worker}, responsible for GISJOINs {shard.gis_joins}")
-                    self.tracked_workers[request.hostname] = worker
-                    return WorkerRegistrationResponse(success=True)
+        # Create a ShardMetadata for the registered worker if its shard is not already known
+        if request.rs_name not in self.shard_metadata:
 
-        error(f"Failed to find a shard that {request.hostname} belongs to")
-        return WorkerRegistrationResponse(success=False)
+            # Create a dict { gis_join -> count }
+            gis_join_metadata: dict = {}
+            for local_gis_join in request.local_gis_joins:
+                gis_join_metadata[local_gis_join.gis_join] = local_gis_join.count
+
+
+            self.shard_metadata[request.rs_name] = ShardMetadata(request.rs_name, [request.hostname], gis_join_metadata)
+            for local_gis_join in request.local_gis_joins:
+                self.gis_join_locations[local_gis_join.gis_join] = self.shard_metadata[request.rs_name]
+
+        # Otherwise, just add the registered worker's hostname to the known ShardMetadata object
+        else:
+            self.shard_metadata[request.rs_name].shard_servers.append(request.hostname)
+
+        # Create a WorkerMetadata object for tracking
+        shard: ShardMetadata = self.shard_metadata[request.rs_name]
+        worker: WorkerMetadata = WorkerMetadata(request.hostname, request.port, shard)
+        info(f"Successfully added Worker: {worker}, responsible for {len(shard.gis_join_metadata)} GISJOINs")
+        self.tracked_workers[request.hostname] = worker
+        return WorkerRegistrationResponse(success=True)
 
     def DeregisterWorker(self, request, context):
         info(f"Received Worker(De)RegistrationRequest: hostname={request.hostname}, port={request.port}")
@@ -216,112 +433,55 @@ class Master(validation_pb2_grpc.MasterServicer):
         profiler: Timer = Timer()
         profiler.start()
 
-        info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
-        job_id = generate_job_id()  # Random UUID for the job
-        job = JobMetadata(job_id, request.gis_joins)
-        info(f"Created job id {job_id}")
-
-        # Find and select workers with GISJOINs local to them
-        for gis_join in request.gis_joins:
-            shard_hosting_gis_join = self.gis_join_locations[gis_join]
-            worker = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
-            if worker is None:
-                error(f"Unable to find registered worker for GISJOIN {gis_join}")
-                continue
-
-            # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
-            worker_job = get_or_create_worker_job(worker, job_id)
-            worker_job.gis_joins.append(gis_join)
-            job.worker_jobs[worker.hostname] = worker_job
-
-        # Log selected workers
-        for worker_hostname, worker_job in job.worker_jobs.items():
-            info(f"{worker_hostname}: {worker_job}")
-
-        # Validation budget inference
-        budget_type: BudgetType = request.validation_budget.budget_type
-        if budget_type == BudgetType.STATIC_BUDGET:
-            static_budget: ValidationBudget = request.validation_budget.static_budget
-            if static_budget.total_limit > 0:
-                # Choose an equal limit per GISJOIN/strata that sums to the total budget limit
-                if static_budget.total_limit > len(request.gis_joins):
-                    static_budget.strata_limit = static_budget.total_limit // len(request.gis_joins)
-                else:
-                    info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
-                    static_budget.strata_limit = 1
-
-        elif budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
-            err_msg = "Incremental variance budget not yet implemented!"
-            error(err_msg)
-            return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
+        if request.spatial_coverage == SpatialCoverage.ALL:
+            info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
         else:
-            err_msg = f"Unknown budget type {request.validation_budget.budget_type}!"
-            error(err_msg)
-            return ValidationJobResponse(id=job_id, ok=False, err_msg=err_msg)
+            info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
 
-        # Select strategy for submitting the job from the master
-        if request.master_job_mode == JobMode.MULTITHREADED:
-            info("Launching jobs in multi-threaded mode")
-            validation_job_responses = launch_worker_jobs_multithreaded(job, request)
-        elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
-            info("Launching jobs in asynchronous mode")
-            validation_job_responses = launch_worker_jobs_asynchronously(job, request)
-        else:
-            info("Launching jobs in synchronous mode")
-            validation_job_responses = launch_worker_jobs_synchronously(job, request)
+        # Process the job with either a variance budget or static/default budget
+        if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+            job_id, worker_responses = self.process_job_with_variance_budget(request)
 
-        info("Received all validation responses, returning...")
+        else:  # Default or static budget
+            job_id, worker_responses = self.process_job_with_normal_budget(request)
 
-        # Gather all the WorkerValidationJobResponses
-        worker_job_responses = []
         errors = []
         ok = True
-        for worker_response in validation_job_responses:
-            if not worker_response.ok:
-                ok = False
-                error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
-                errors.append(error_msg)
-            worker_job_responses.append(worker_response)
+
+        if len(worker_responses) == 0:
+            error_msg = "Did not receive any responses from workers"
+            ok = False
+            error(error_msg)
+            errors.append(error_msg)
+        else:
+            for worker_response in worker_responses:
+                if not worker_response.ok:
+                    ok = False
+                    error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
+                    errors.append(error_msg)
 
         error_msg = f"errors: {errors}"
         profiler.stop()
+
         return ValidationJobResponse(
             id=job_id,
             ok=ok,
             error_msg=error_msg,
             duration_sec=profiler.elapsed,
-            worker_responses=worker_job_responses
+            worker_responses=worker_responses
         )
 
 
-def run(master_port=50051, local_testing=False):
-
-    # Emulated environment
-    if local_testing:
-        shard_metadata: dict = {
-            "shard1rs": shards.ShardMetadata("shard1rs", [socket.gethostname()])
-        }
-        gis_join_locations: dict = {"G2000010": shard_metadata["shard1rs"]}
-
-    # Production environment -- discover chunk/shard locations
-    else:
-        shard_metadata: dict = shards.discover_shards()
-        if shard_metadata is None:
-            error("Shard discovery returned None. Exiting...")
-            exit(1)
-
-        gis_join_locations: dict = locality.get_gis_join_chunk_locations(shard_metadata)
-        for shard in shard_metadata.values():
-            info(shard)
+def run(master_port=50051):
 
     # Initialize server and master
+    master_hostname: str = socket.gethostname()
     server = grpc.server(ThreadPoolExecutor(max_workers=10))
-    master = Master(gis_join_locations, shard_metadata, local_testing)
+    master: Master = Master(master_hostname, master_port)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
-    hostname = socket.gethostname()
 
     # Start the server
-    info(f"Starting master server on {hostname}:{master_port}")
-    server.add_insecure_port(f"{hostname}:{master_port}")
+    info(f"Starting master server on {master_hostname}:{master_port}")
+    server.add_insecure_port(f"{master_hostname}:{master_port}")
     server.start()
     server.wait_for_termination()

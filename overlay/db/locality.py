@@ -16,6 +16,25 @@ widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
 GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 
 
+# Finds all the GISJOINs belonging to the local mongod instance and their document counts.
+# Returns a dict { gis_join -> count }
+def discover_gis_joins() -> dict:
+    # Connect to local mongod instance; connecting to mongos instance will find all GISJOINs in entire cluster,
+    # rather than just the local shards.
+    gis_join_counts: dict = {}  # { gis_join -> count }
+    client: MongoClient = MongoClient("mongodb://localhost:27017")
+    db = client["sustaindb"]
+    coll = db["noaa_nam"]
+    distinct_gis_joins: list = coll.distinct("GISJOIN")
+    for gis_join in distinct_gis_joins:
+        count = coll.count_documents({"GISJOIN": gis_join})
+        gis_join_counts[gis_join] = count
+        info(f"gis_join={gis_join}, count={count}")
+
+    client.close()
+    return gis_join_counts
+
+
 # Decides whether to load in cached GISJOIN locations from a saved file,
 # or discover them via mongo
 def get_gis_join_chunk_locations(shard_metadata: dict) -> dict:
@@ -65,6 +84,36 @@ def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     save_gis_join_chunk_locations(gis_joins_to_shards)
 
     return gis_joins_to_shards
+
+
+# Discovers the number of records for each GISJOIN
+def discover_gis_join_counts():
+    resources_dir = 'overlay/resources'
+    gis_join_counts_filename = f"{resources_dir}/gis_join_counts.json"
+    if os.path.exists(gis_join_counts_filename):
+        info(f"Cached file {gis_join_counts_filename} already exists, skipping discovering counts")
+        return
+
+    info(f"No cached {gis_join_counts_filename} file exists, discovering counts...")
+    gis_join_counts = {}
+    county_gis_joins = load_gis_joins(resources_dir)
+    mongo_client = MongoClient(f"mongodb://{DB_HOST}:{DB_PORT}")
+    db = mongo_client[DB_NAME]
+    collection = db["noaa_nam"]
+    counter = 0
+    bar = ProgressBar(maxval=len(county_gis_joins), widgets=widgets).start()
+    for gis_join in county_gis_joins:
+        count = collection.find({"GISJOIN": gis_join}).count()
+        gis_join_counts[gis_join] = count
+        counter += 1
+        bar.update(counter)
+
+    bar.finish()
+
+    info(f"Saving GISJOIN counts to {gis_join_counts_filename}")
+    with open(gis_join_counts_filename, "w") as json_file:
+        json.dump(gis_join_counts, json_file)
+    info("Success")
 
 
 # Loads all county GISJOIN values from gis_joins.json as a list.
