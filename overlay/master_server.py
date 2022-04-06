@@ -240,13 +240,13 @@ class Master(validation_pb2_grpc.MasterServicer):
             if self.is_worker_registered(worker_host):
                 worker_job = get_worker_job(self.tracked_workers[worker_host], job_id)
                 if worker_job is None:
-                    info(f"Worker {worker_host} currently has no job, defaulting to it for next GISJOIN in job={job_id}")
+                    # info(f"Worker {worker_host} currently has no job, defaulting to it for next GISJOIN in job={job_id}")
                     return self.tracked_workers[worker_host]
                 elif len(worker_job.gis_joins) < min_gis_joins:
                     min_gis_joins = len(worker_job.gis_joins)
                     selected_worker = self.tracked_workers[worker_host]
 
-        info(f"Selecting {selected_worker.hostname} for next GISJOIN in job={job_id}")
+        # info(f"Selecting {selected_worker.hostname} for next GISJOIN in job={job_id}")
         return selected_worker
 
     # Generates a JobMetadata object from the set of GISJOIN allocations
