@@ -137,7 +137,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
 
-            tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor)
+            tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
             metrics = tf_validator.validate_gis_joins()
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
