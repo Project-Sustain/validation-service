@@ -334,7 +334,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Create list of new allocations
         new_allocations: list = []  # list(SpatialAllocations)
         for gis_join, metric in gis_join_metrics.items():
-            new_optimal_allocation: int = (budget_left * metric.variance) // sum_of_variances  # Neyman Allocation
+            new_optimal_allocation: int = int((budget_left * metric.variance) / sum_of_variances)  # Neyman Allocation
             new_allocations.append(SpatialAllocation(
                 gis_join=gis_join,
                 strata_limit=initial_allocation + new_optimal_allocation,  # Should we reuse the initial allocation?
