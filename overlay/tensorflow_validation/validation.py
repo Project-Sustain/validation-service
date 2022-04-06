@@ -43,7 +43,7 @@ class TensorflowValidator:
             for spatial_allocation in self.request.allocations:
                 gis_join: str = spatial_allocation.gis_join
                 gis_join_count: int = self.gis_join_counts[gis_join]
-                returned_gis_join, allocation, loss, variance, proportional_allocation, ok, error_msg, duration_sec = \
+                returned_gis_join, allocation, loss, variance, ok, error_msg, duration_sec = \
                     validate_model(
                         gis_join=gis_join,
                         gis_join_count=gis_join_count,
@@ -68,7 +68,6 @@ class TensorflowValidator:
                     allocation=allocation,
                     loss=loss,
                     variance=variance,
-                    proportional_allocation=proportional_allocation,
                     duration_sec=duration_sec,
                     ok=ok,
                     error_msg=error_msg
@@ -135,14 +134,13 @@ class TensorflowValidator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                gis_join, allocation, loss, variance, proportional_allocation, ok, error_msg, duration_sec = \
+                gis_join, allocation, loss, variance, ok, error_msg, duration_sec = \
                     future.result()
                 metrics.append(ValidationMetric(
                     gis_join=gis_join,
                     allocation=allocation,
                     loss=loss,
                     variance=variance,
-                    proportional_allocation=proportional_allocation,
                     duration_sec=duration_sec,
                     ok=ok,
                     error_msg=error_msg
@@ -171,7 +169,7 @@ def validate_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, float, float, float, bool, str, float):
+        verbose: bool = True) -> (str, int, float, float, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
 
     import tensorflow as tf
@@ -265,7 +263,6 @@ def validate_model(
         # mean_of_all_errors = np.mean(np.square(y_true - y_pred))
 
         variance: float = S_h
-        proportional_allocation: float = N_h * S_h
 
         # variance: float = np.square(y_true - y_pred).var()
 
@@ -286,4 +283,4 @@ def validate_model(
     profiler.stop()
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return gis_join, allocation, loss, variance, proportional_allocation, ok, "", profiler.elapsed
+    return gis_join, allocation, loss, variance, ok, "", profiler.elapsed
