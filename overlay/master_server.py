@@ -342,7 +342,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             ))
 
         # Replace total list of SpatialAllocations with new allocations
-        del request.allocations
+        del request.allocations[:]
         request.allocations.extend(new_allocations)
 
         # Create and launch 2nd job from allocations
