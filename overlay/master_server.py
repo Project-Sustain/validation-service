@@ -331,6 +331,8 @@ class Master(validation_pb2_grpc.MasterServicer):
                 gis_join_metrics[metric.gis_join] = metric
                 sum_of_variances += metric.variance
 
+        save_intermediate_response_data(total_budget, initial_allocation, list(gis_join_metrics.values()))
+
         # Create list of new allocations
         new_allocations: list = []  # list(SpatialAllocations)
         for gis_join, metric in gis_join_metrics.items():
