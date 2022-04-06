@@ -28,6 +28,7 @@
   "validation_budget": {
     "budget_type": "INCREMENTAL_VARIANCE_BUDGET",
     "variance_budget": {
+      "total_budget": 20000000,
       "initial_allocation": 2000
     }
   },
