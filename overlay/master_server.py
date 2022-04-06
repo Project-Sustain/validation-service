@@ -348,7 +348,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         request.allocations.extend(new_allocations)
 
         # Create and launch 2nd job from allocations
-        job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
+        job: JobMetadata = self.create_job_from_allocations(new_allocations)
         worker_responses = launch_worker_jobs(request, job)
         return job.job_id, worker_responses
 
