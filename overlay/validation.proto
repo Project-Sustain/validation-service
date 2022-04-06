@@ -82,10 +82,9 @@ message ValidationMetric {
   double loss = 3;
   double accuracy = 4;
   double variance = 5;
-  double proportional_allocation = 6;
-  double duration_sec = 7;
-  bool ok = 8;
-  string error_msg = 9;
+  double duration_sec = 6;
+  bool ok = 7;
+  string error_msg = 8;
 }
 
 message ModelFile {
@@ -118,7 +117,8 @@ message ValidationBudget {
 }
 
 message IncrementalVarianceBudget {
-  int64 initial_allocation = 1; // Initial equal allocation for all GISJOINs
+  int64 total_budget = 1; // Total budget
+  int64 initial_allocation = 2; // Initial equal allocation for all GISJOINs
 }
 
 message StaticBudget {

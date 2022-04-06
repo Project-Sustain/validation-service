@@ -25,3 +25,7 @@ sleep 5
 
 ./stop_omni.sh
 ./stop_free.sh "$BENCHMARK_NAME"
+
+if [[ -f "/s/parsons/b/others/sustain/local-disk/a/tmp/intermediate_response.json" ]]; then
+  mv "/s/parsons/b/others/sustain/local-disk/a/tmp/intermediate_response.json" "$BENCHMARK_NAME/intermediate_response.json"
+fi

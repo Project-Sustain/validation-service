@@ -1,6 +1,7 @@
 import uuid
 import asyncio
 import socket
+import json
 import grpc
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -185,6 +186,35 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
     return list(responses)
 
 
+def save_intermediate_response_data(total_budget: int, initial_allocation: int, initial_response_metrics: list) -> None:
+    total_gis_joins = len(initial_response_metrics)
+    budget_used = initial_allocation * total_gis_joins
+    remaining_budget = total_budget - budget_used
+    save_obj = {
+        "total_budget": total_budget,
+        "initial_allocation": initial_allocation,
+        "budget_used": budget_used,
+        "remaining_budget": remaining_budget,
+        "initial_response_metrics": []
+    }
+
+    for metric in initial_response_metrics:
+        save_obj["initial_response_metrics"].append(
+            {
+                "gis_join": metric.gis_join,
+                "variance": metric.variance,
+                "loss": metric.loss,
+                "duration_sec": metric.duration_sec
+            }
+        )
+
+    filename = "/s/parsons/b/others/sustain/local-disk/a/tmp/intermediate_response.json"
+    with open(filename, "w") as f:
+        json.dump(save_obj, f)
+
+    info(f"Saved {filename}")
+
+
 class Master(validation_pb2_grpc.MasterServicer):
 
     def __init__(self, hostname: str, port: int):
@@ -274,21 +304,51 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Establish initial allocations for request
         variance_budget: IncrementalVarianceBudget = request.validation_budget.variance_budget
+        total_budget: int = variance_budget.total_budget
+        initial_allocation: int = variance_budget.initial_allocation
+        info(f"Establishing initial allocation of {initial_allocation} for {len(self.gis_join_locations)} GISJOINs")
         spatial_allocations, ok, err_msg = self.get_request_allocations(
-            request, variance_budget.initial_allocation, 0.0
+            request, initial_allocation, 0.0
         )
         if not ok:
             error(err_msg)
             return "", []
+
+        budget_used: int = initial_allocation * len(self.gis_join_locations)
+        budget_left: int = total_budget - budget_used
+        info(f"This leaves us with a leftover budget of {total_budget} - {budget_used} = {budget_left}")
         request.allocations.extend(spatial_allocations)
 
-        # Create and launch a job from allocations
+        # Create and launch a job from allocations, gather worker responses
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
-        resulting_metrics: list = launch_worker_jobs(request, job)
+        worker_responses: list = launch_worker_jobs(request, job)  # list(WorkerValidationJobResponse)
 
-        # TODO: Complete variance budget process
+        # Compute optimal allocations from remaining budget using Neyman Allocation
+        gis_join_metrics: dict = {}  # { gis_join -> ValidationMetric }
+        sum_of_variances: int = 0
+        for worker_response in worker_responses:
+            for metric in worker_response.metrics:
+                gis_join_metrics[metric.gis_join] = metric
+                sum_of_variances += metric.variance
 
-        return job.job_id, resulting_metrics
+        # Create list of new allocations
+        new_allocations: list = []  # list(SpatialAllocations)
+        for gis_join, metric in gis_join_metrics.items():
+            new_optimal_allocation: int = (budget_left * metric.variance) // sum_of_variances  # Neyman Allocation
+            new_allocations.append(SpatialAllocation(
+                gis_join=gis_join,
+                strata_limit=initial_allocation + new_optimal_allocation,  # Should we reuse the initial allocation?
+                sample_rate=0.0  # Might need to infer this to do random sampling instead of first N samples?
+            ))
+
+        # Replace total list of SpatialAllocations with new allocations
+        del request.allocations
+        request.allocations.extend(new_allocations)
+
+        # Create and launch 2nd job from allocations
+        job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
+        worker_responses = launch_worker_jobs(request, job)
+        return job.job_id, worker_responses
 
     # Processes a job with either a default budget or static budget.
     # Returns a list of WorkerValidationJobResponse objects.
