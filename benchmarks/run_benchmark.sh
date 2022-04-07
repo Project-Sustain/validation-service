@@ -28,4 +28,5 @@ sleep 5
 
 if [[ -f "/s/parsons/b/others/sustain/local-disk/a/tmp/intermediate_response.json" ]]; then
   mv "/s/parsons/b/others/sustain/local-disk/a/tmp/intermediate_response.json" "$BENCHMARK_NAME/intermediate_response.json"
+  mv "/s/parsons/b/others/sustain/local-disk/a/tmp/optimal_allocations.json" "$BENCHMARK_NAME/optimal_allocations.json"
 fi
