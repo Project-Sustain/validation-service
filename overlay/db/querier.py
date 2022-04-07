@@ -59,9 +59,10 @@ class Querier:
 
         if limit > 0:
             info(f"Limiting GISJOIN {gis_join} query to {limit} records")
+            sample = {"size": limit}
             return collection.aggregate([
                 {"$match": query},
-                {"$sample": limit},
+                {"$sample": sample},
                 {"$project": projection}
             ])
         else:
