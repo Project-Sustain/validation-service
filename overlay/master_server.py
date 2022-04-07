@@ -215,6 +215,14 @@ def save_intermediate_response_data(total_budget: int, initial_allocation: int, 
     info(f"Saved {filename}")
 
 
+def save_optimal_allocations(allocations: dict) -> None:
+    filename = "/s/parsons/b/others/sustain/local-disk/a/tmp/optimal_allocations.json"
+    with open(filename, "w") as f:
+        json.dump(allocations, f)
+
+    info(f"Saved {filename}")
+
+
 class Master(validation_pb2_grpc.MasterServicer):
 
     def __init__(self, hostname: str, port: int):
@@ -333,10 +341,13 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         save_intermediate_response_data(total_budget, initial_allocation, list(gis_join_metrics.values()))
 
+
         # Create list of new allocations
         new_allocations: list = []  # list(SpatialAllocations)
+        allocation_stats = {}
         for gis_join, metric in gis_join_metrics.items():
             new_optimal_allocation: int = int((budget_left * metric.variance) / sum_of_variances)  # Neyman Allocation
+            allocation_stats[gis_join] = {"intermediate": metric.allocation, "final": new_optimal_allocation}
             new_allocations.append(SpatialAllocation(
                 gis_join=gis_join,
                 strata_limit=initial_allocation + new_optimal_allocation,  # Should we reuse the initial allocation?
