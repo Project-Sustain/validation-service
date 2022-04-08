@@ -331,9 +331,6 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(err_msg)
             return "", []
 
-        budget_used: int = initial_allocation * len(self.gis_join_locations)
-        budget_left: int = total_budget - budget_used
-        info(f"This leaves us with a leftover budget of {total_budget} - {budget_used} = {budget_left}")
         request.allocations.extend(spatial_allocations)
 
         # Create and launch a job from allocations, gather worker responses
@@ -344,11 +341,16 @@ class Master(validation_pb2_grpc.MasterServicer):
         all_gis_join_metrics: list = []  # list(ValidationMetric)
         all_gis_join_variances: list = []
         sum_of_all_variances: int = 0
+        budget_used: int = 0
         for worker_response in worker_responses:
             for metric in worker_response.metrics:
                 all_gis_join_metrics.append(metric)
                 all_gis_join_variances.append(metric.variance)
+                budget_used += metric.allocation  # True allocation, incase GISJOIN had < initial_allocation records
                 sum_of_all_variances += metric.variance
+
+        budget_left: int = total_budget - budget_used
+        info(f"This leaves us with a leftover budget of {total_budget} - {budget_used} = {budget_left}")
 
         # Calculate mean of all variances
         mean_of_all_variances = sum_of_all_variances / len(all_gis_join_variances)
@@ -365,15 +367,30 @@ class Master(validation_pb2_grpc.MasterServicer):
         save_intermediate_response_data(total_budget, initial_allocation, all_gis_join_metrics)
         save_numpy_array(std_devs_away)
 
+        filtered_gis_join_metrics: list = []
+        sum_of_filtered_variances = 0.0
+        for metric in all_gis_join_metrics:
+            # If variance > 2 standard deviations above mean
+            if (metric.variance - mean_of_all_variances) / std_dev_all_variances >= 2.0:
+                filtered_gis_join_metrics.append(metric)
+                sum_of_filtered_variances += metric.variance
+
         # Create list of new allocations
         new_allocations: list = []  # list(SpatialAllocations)
         allocation_stats = {}
-        for metric in all_gis_join_metrics:
-            new_optimal_allocation: int = int((budget_left * metric.variance) / sum_of_all_variances)  # Neyman Allocation
-            allocation_stats[metric.gis_join] = {"intermediate": metric.allocation, "final": new_optimal_allocation}
+        for metric in filtered_gis_join_metrics:
+
+            # Neyman Allocation + initial allocation
+            new_optimal_allocation = int((budget_left * metric.variance) / sum_of_filtered_variances) + initial_allocation
+
+            # Cap new allocation at size of GISJOIN; don't allocate more than that GISJOIN has
+            if new_optimal_allocation > self.gis_join_metadata[metric.gis_join]:
+                new_optimal_allocation = self.gis_join_metadata[metric.gis_join]
+
+            allocation_stats[metric.gis_join] = {"initial": metric.allocation, "final": new_optimal_allocation}
             new_allocations.append(SpatialAllocation(
                 gis_join=metric.gis_join,
-                strata_limit=initial_allocation + new_optimal_allocation,  # Should we reuse the initial allocation?
+                strata_limit=new_optimal_allocation,
                 sample_rate=0.0
             ))
 
