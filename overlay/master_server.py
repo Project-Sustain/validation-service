@@ -3,6 +3,7 @@ import asyncio
 import socket
 import json
 import grpc
+import numpy as np
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import info, error
@@ -222,6 +223,13 @@ def save_optimal_allocations(allocations: dict) -> None:
 
     info(f"Saved {filename}")
 
+def save_numpy_array(numpy_array) -> None:
+    filename = "/s/parsons/b/others/sustain/local-disk/a/tmp/numpy_array.json"
+    with open(filename, "w") as f:
+        json.dump(numpy_array.tolist(), f)
+
+    info(f"Saved {filename}")
+
 
 class Master(validation_pb2_grpc.MasterServicer):
 
@@ -235,6 +243,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         self.tracked_workers = {}       # Mapping of { hostname -> WorkerMetadata }
         self.tracked_jobs = []          # list(JobMetadata)
         self.gis_join_locations = {}    # Mapping of { gis_join -> ShardMetadata }
+        self.gis_join_metadata = {}     # Mapping of { gis_join -> count }
         self.shard_metadata = {}        # Mapping of { shard_name -> ShardMetadata }
 
     def is_worker_registered(self, hostname):
@@ -332,26 +341,40 @@ class Master(validation_pb2_grpc.MasterServicer):
         worker_responses: list = launch_worker_jobs(request, job)  # list(WorkerValidationJobResponse)
 
         # Compute optimal allocations from remaining budget using Neyman Allocation
-        gis_join_metrics: dict = {}  # { gis_join -> ValidationMetric }
-        sum_of_variances: int = 0
+        all_gis_join_metrics: list = []  # list(ValidationMetric)
+        all_gis_join_variances: list = []
+        sum_of_all_variances: int = 0
         for worker_response in worker_responses:
             for metric in worker_response.metrics:
-                gis_join_metrics[metric.gis_join] = metric
-                sum_of_variances += metric.variance
+                all_gis_join_metrics.append(metric)
+                all_gis_join_variances.append(metric.variance)
+                sum_of_all_variances += metric.variance
 
-        save_intermediate_response_data(total_budget, initial_allocation, list(gis_join_metrics.values()))
+        # Calculate mean of all variances
+        mean_of_all_variances = sum_of_all_variances / len(all_gis_join_variances)
+        info(f"Mean of all variances: {mean_of_all_variances}")
 
+        # Calculate standard deviation of all variances
+        variances_numpy = np.array(all_gis_join_variances)
+        std_dev_all_variances = variances_numpy.std()
+        info(f"Standard deviation of all variances: {std_dev_all_variances}")
+        sorted_variances = variances_numpy.sort(axis=-1)[::-1]
+        std_devs_away = (sorted_variances - mean_of_all_variances) / std_dev_all_variances
+        info(f"Std devs away: {std_devs_away}")
+
+        save_intermediate_response_data(total_budget, initial_allocation, all_gis_join_metrics)
+        save_numpy_array(std_devs_away)
 
         # Create list of new allocations
         new_allocations: list = []  # list(SpatialAllocations)
         allocation_stats = {}
-        for gis_join, metric in gis_join_metrics.items():
-            new_optimal_allocation: int = int((budget_left * metric.variance) / sum_of_variances)  # Neyman Allocation
-            allocation_stats[gis_join] = {"intermediate": metric.allocation, "final": new_optimal_allocation}
+        for metric in all_gis_join_metrics:
+            new_optimal_allocation: int = int((budget_left * metric.variance) / sum_of_all_variances)  # Neyman Allocation
+            allocation_stats[metric.gis_join] = {"intermediate": metric.allocation, "final": new_optimal_allocation}
             new_allocations.append(SpatialAllocation(
-                gis_join=gis_join,
+                gis_join=metric.gis_join,
                 strata_limit=initial_allocation + new_optimal_allocation,  # Should we reuse the initial allocation?
-                sample_rate=0.0  # Might need to infer this to do random sampling instead of first N samples?
+                sample_rate=0.0
             ))
 
         # Replace total list of SpatialAllocations with new allocations
@@ -405,13 +428,17 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Create a ShardMetadata for the registered worker if its shard is not already known
         if request.rs_name not in self.shard_metadata:
 
-            # Create a dict { gis_join -> count }
-            gis_join_metadata: dict = {}
+            shard_gis_join_metadata = {}
             for local_gis_join in request.local_gis_joins:
-                gis_join_metadata[local_gis_join.gis_join] = local_gis_join.count
+                self.gis_join_metadata[local_gis_join.gis_join] = local_gis_join.count
+                shard_gis_join_metadata[local_gis_join.gis_join] = local_gis_join.count
 
+            self.shard_metadata[request.rs_name] = ShardMetadata(
+                request.rs_name,
+                [request.hostname],
+                shard_gis_join_metadata
+            )
 
-            self.shard_metadata[request.rs_name] = ShardMetadata(request.rs_name, [request.hostname], gis_join_metadata)
             for local_gis_join in request.local_gis_joins:
                 self.gis_join_locations[local_gis_join.gis_join] = self.shard_metadata[request.rs_name]
 
