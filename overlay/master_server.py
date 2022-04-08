@@ -358,7 +358,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         variances_numpy = np.array(all_gis_join_variances)
         std_dev_all_variances = variances_numpy.std()
         info(f"Standard deviation of all variances: {std_dev_all_variances}")
-        sorted_variances = variances_numpy.sort(axis=-1)[::-1]
+        sorted_variances = np.sort(variances_numpy, axis=-1)[::-1]
         std_devs_away = (sorted_variances - mean_of_all_variances) / std_dev_all_variances
         info(f"Std devs away: {std_devs_away}")
 
