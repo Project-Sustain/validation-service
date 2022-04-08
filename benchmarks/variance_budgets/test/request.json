@@ -28,8 +28,8 @@
   "validation_budget": {
     "budget_type": "INCREMENTAL_VARIANCE_BUDGET",
     "variance_budget": {
-      "total_budget": 20000000,
-      "initial_allocation": 2000
+      "total_budget": 10000000,
+      "initial_allocation": 500
     }
   },
   "loss_function": "MEAN_SQUARED_ERROR",
