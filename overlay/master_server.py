@@ -205,6 +205,7 @@ def save_intermediate_response_data(total_budget: int, initial_allocation: int, 
                 "gis_join": metric.gis_join,
                 "variance": metric.variance,
                 "loss": metric.loss,
+                "allocation": metric.allocation,
                 "duration_sec": metric.duration_sec
             }
         )
