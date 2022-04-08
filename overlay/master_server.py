@@ -224,10 +224,19 @@ def save_optimal_allocations(allocations: dict) -> None:
 
     info(f"Saved {filename}")
 
+
 def save_numpy_array(numpy_array) -> None:
     filename = "/s/parsons/b/others/sustain/local-disk/a/tmp/numpy_array.json"
     with open(filename, "w") as f:
         json.dump(numpy_array.tolist(), f)
+
+    info(f"Saved {filename}")
+
+
+def save_gis_join_counts(counts) -> None:
+    filename = "/s/parsons/b/others/sustain/local-disk/a/tmp/gis_join_counts.json"
+    with open(filename, "w") as f:
+        json.dump(counts, f)
 
     info(f"Saved {filename}")
 
@@ -319,6 +328,8 @@ class Master(validation_pb2_grpc.MasterServicer):
     # Processes a job with an incremental variance validation budget.
     # Returns a list of WorkerValidationJobResponse objects.
     def process_job_with_variance_budget(self, request: ValidationJobRequest) -> (str, list):
+
+        save_gis_join_counts(self.gis_join_metadata)
 
         # Establish initial allocations for request
         variance_budget: IncrementalVarianceBudget = request.validation_budget.variance_budget
