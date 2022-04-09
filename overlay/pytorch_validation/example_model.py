@@ -155,7 +155,7 @@ def train_deep_model(dataloader: DataLoader):
                 print(f'Epoch: {epoch + 1}, loss={loss.item():.4f}')
 
     # save model
-    filename = './pytorch_deep_model_regression.pth'
+    filename = '../../testing/test_models/pytorch/neural_network/model.pth'
     torch.save(model, filename)  # using TorchScript
 
 
