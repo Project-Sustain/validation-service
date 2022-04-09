@@ -113,7 +113,7 @@ def train_linear_regression_model(dataloader: DataLoader):
                 print(f'Epoch: {epoch + 1}, loss={loss.item():.4f}')
 
     # save model
-    filename = './pytorch_linear_regression.pth'
+    filename = '../../testing/test_models/pytorch/linear_regression/model.pth'
     torch.save(model, filename)  # using TorchScript
 
 
