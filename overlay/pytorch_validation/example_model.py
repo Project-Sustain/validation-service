@@ -49,7 +49,7 @@ def exports():
 
 
 def load_from_disk() -> (pd.DataFrame, pd.DataFrame):
-    path_to_noaa_csv: str = "/home/inf0rmatiker/noaa_nam_normalized.csv"
+    path_to_noaa_csv: str = "~/noaa_nam_normalized.csv"
     all_df: pd.DataFrame = pd.read_csv(path_to_noaa_csv, header=0)
     features: pd.DataFrame = all_df[REGRESSION_FEATURE_FIELDS]
     labels: pd.DataFrame = all_df[REGRESSION_LABEL_FIELD]
