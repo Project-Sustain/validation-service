@@ -440,7 +440,7 @@ class Master(validation_pb2_grpc.MasterServicer):
                     requested_gis_join_count = len(request.gis_joins)
 
                 if static_budget.total_limit > requested_gis_join_count:
-                    strata_limit = static_budget.total_limit // len(request.gis_joins)
+                    strata_limit = static_budget.total_limit // requested_gis_join_count
                 else:
                     info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
                     strata_limit = 1
