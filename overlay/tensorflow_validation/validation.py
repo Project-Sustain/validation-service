@@ -249,22 +249,20 @@ def validate_model(
         info("MEAN_SQUARED_ERROR...")
         loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
 
-        N_h = gis_join_count
-        e_k = np.square(y_true - y_pred)
-        sum_e_k = np.sum(e_k)
-        squared_sum_e_k = sum_e_k ** 2
-        squared_sum_e_k_div_by_N_h = squared_sum_e_k / N_h
-        e_k_squared = np.square(e_k)
-        sum_e_k_squared = np.sum(e_k_squared)
-        S_h_squared = (sum_e_k_squared - squared_sum_e_k_div_by_N_h) / (N_h - 1)
-        S_h = sqrt(S_h_squared)
+        # Empirical Variance implementation for MSE
+        # N_h = gis_join_count
+        # e_k = np.square(y_true - y_pred)
+        # sum_e_k = np.sum(e_k)
+        # squared_sum_e_k = sum_e_k ** 2
+        # squared_sum_e_k_div_by_N_h = squared_sum_e_k / N_h
+        # e_k_squared = np.square(e_k)
+        # sum_e_k_squared = np.sum(e_k_squared)
+        # S_h_squared = (sum_e_k_squared - squared_sum_e_k_div_by_N_h) / (N_h - 1)
+        # S_h = sqrt(S_h_squared)
+        # variance: float = S_h
 
-        # squared_errors = np.square(e_k)
-        # mean_of_all_errors = np.mean(np.square(y_true - y_pred))
-
-        variance: float = S_h
-
-        # variance: float = np.square(y_true - y_pred).var()
+        # Numpy's built-in variance function for MSE
+        variance: float = np.square(y_true - y_pred).var()
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
