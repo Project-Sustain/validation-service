@@ -105,6 +105,10 @@ def train_linear_regression_model(dataloader: DataLoader):
 
             optimizer.zero_grad()
             outputs = model(data)
+
+            print(outputs.cpu().numpy())
+
+            break
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -112,9 +116,11 @@ def train_linear_regression_model(dataloader: DataLoader):
             if i % 1000 == 0:
                 print(f'Epoch: {epoch + 1}, loss={loss.item():.4f}')
 
+        break
+
     # save model
-    filename = '../../testing/test_models/pytorch/linear_regression/model.pth'
-    torch.save(model, filename)  # using TorchScript
+    #filename = '../../testing/test_models/pytorch/linear_regression/model.pth'
+    #torch.save(model, filename)  # using TorchScript
 
 
 
@@ -182,8 +188,8 @@ def main():
     features_df, label_df = load_from_disk()
     noaa_ds = NoaaNamDataset(features_df, label_df)
     train_loader = DataLoader(noaa_ds, batch_size=BATCH_SIZE, shuffle=True)
-    #train_linear_regression_model(train_loader)
-    train_deep_model(train_loader)
+    train_linear_regression_model(train_loader)
+    #train_deep_model(train_loader)
 
 if __name__ == "__main__":
     main()

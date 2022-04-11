@@ -16,3 +16,4 @@ pyyaml
 h5py
 requests
 loky
+welford
