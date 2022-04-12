@@ -28,7 +28,7 @@ conn = http.client.HTTPConnection("lattice-150.cs.colostate.edu", 5000)
 dataList = []
 boundary = 'wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T'
 dataList.append(encode('--' + boundary))
-dataList.append(encode('Content-Disposition: form-data; name=file; filename=my_model.h5'))
+dataList.append(encode(f"Content-Disposition: form-data; name=file; filename={model_file}"))
 
 fileType = mimetypes.guess_type(model_file)[0] or 'application/octet-stream'
 dataList.append(encode('Content-Type: {}'.format(fileType)))
