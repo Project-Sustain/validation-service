@@ -188,14 +188,16 @@ def main():
     #train_linear_regression_model(train_loader)
     #train_deep_model(train_loader)
 
-    loaded_model: DeepModel = torch.load('../../testing/test_models/pytorch/linear_regression/model.pth')
+    loaded_model: DeepModel = torch.load('../../testing/test_models/pytorch/neural_network/model.pth')
     cpu_model = loaded_model.cpu()
     for data, label in sample_loader:
         sample_input_cpu = data.cpu()
         traced_cpu = torch.jit.trace(cpu_model, sample_input_cpu)
 
-    model_scripted = torch.jit.script(loaded_model)
-    model_scripted.save('../../testing/test_models/pytorch/linear_regression/model.pt')  # Save
+        model_scripted = torch.jit.script(traced_cpu)
+        model_scripted.save('../../testing/test_models/pytorch/neural_network/model.pt')  # Save
+
+
 
 
 if __name__ == "__main__":
