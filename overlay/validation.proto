@@ -52,13 +52,14 @@ message ValidationJobRequest {
   string collection = 10;
   repeated string feature_fields = 11;
   string label_field = 12;
-  bool normalize_inputs = 13;
-  ValidationBudget validation_budget = 14;
-  LossFunction loss_function = 15;
-  SpatialCoverage spatial_coverage = 16;
-  repeated string gis_joins = 17;
-  repeated SpatialAllocation allocations = 18;
-  ModelFile model_file = 19;
+  SpatialResolution spatial_resolution = 13;
+  bool normalize_inputs = 14;
+  ValidationBudget validation_budget = 15;
+  LossFunction loss_function = 16;
+  SpatialCoverage spatial_coverage = 17;
+  repeated string gis_joins = 18;
+  repeated SpatialAllocation allocations = 19;
+  ModelFile model_file = 20;
 }
 
 message ValidationJobResponse {
@@ -71,9 +72,10 @@ message ValidationJobResponse {
 
 message WorkerValidationJobResponse {
   bool ok = 1;
-  string hostname = 2;
-  double duration_sec = 3;
-  repeated ValidationMetric metrics = 4;
+  string error_msg = 2;
+  string hostname = 3;
+  double duration_sec = 4;
+  repeated ValidationMetric metrics = 5;
 }
 
 message ValidationMetric {
@@ -169,7 +171,7 @@ enum ModelFileType {
   SCIKIT_LEARN_PICKLE = 1;
   TENSORFLOW_HDF5 = 2;
   TENSORFLOW_SAVED_MODEL_ZIP = 3;
-  PYTORCH_ZIPFILE = 4;
+  PYTORCH_TORCHSCRIPT = 4;
 }
 
 enum LossFunction {
@@ -188,4 +190,9 @@ enum SpatialCoverage {
 enum ReplicaSetMembership {
   SECONDARY = 0;
   PRIMARY = 1;
+}
+
+enum SpatialResolution {
+  COUNTY = 0;
+  STATE = 1;
 }

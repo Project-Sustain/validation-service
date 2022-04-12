@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x10validation.proto\"\xa1\x01\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x0f\n\x07rs_name\x18\x03 \x01(\t\x12(\n\trs_member\x18\x04 \x01(\x0e\x32\x15.ReplicaSetMembership\x12)\n\x0flocal_gis_joins\x18\x05 \x03(\x0b\x32\x10.GisJoinMetadata\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\xd2\x04\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12!\n\x0fmaster_job_mode\x18\x02 \x01(\x0e\x32\x08.JobMode\x12!\n\x0fworker_job_mode\x18\x03 \x01(\x0e\x32\x08.JobMode\x12(\n\x0fmodel_framework\x18\x04 \x01(\x0e\x32\x0f.ModelFramework\x12&\n\x0emodel_category\x18\x05 \x01(\x0e\x32\x0e.ModelCategory\x12\x12\n\nmongo_host\x18\x06 \x01(\t\x12\x12\n\nmongo_port\x18\x07 \x01(\x05\x12%\n\x0bread_config\x18\x08 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\t \x01(\t\x12\x12\n\ncollection\x18\n \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x0b \x03(\t\x12\x13\n\x0blabel_field\x18\x0c \x01(\t\x12\x18\n\x10normalize_inputs\x18\r \x01(\x08\x12,\n\x11validation_budget\x18\x0e \x01(\x0b\x32\x11.ValidationBudget\x12$\n\rloss_function\x18\x0f \x01(\x0e\x32\r.LossFunction\x12*\n\x10spatial_coverage\x18\x10 \x01(\x0e\x32\x10.SpatialCoverage\x12\x11\n\tgis_joins\x18\x11 \x03(\t\x12\'\n\x0b\x61llocations\x18\x12 \x03(\x0b\x32\x12.SpatialAllocation\x12\x1e\n\nmodel_file\x18\x13 \x01(\x0b\x32\n.ModelFile\"\x90\x01\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\n\n\x02ok\x18\x02 \x01(\x08\x12\x11\n\terror_msg\x18\x03 \x01(\t\x12\x14\n\x0c\x64uration_sec\x18\x04 \x01(\x01\x12\x36\n\x10worker_responses\x18\x05 \x03(\x0b\x32\x1c.WorkerValidationJobResponse\"u\n\x1bWorkerValidationJobResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x10\n\x08hostname\x18\x02 \x01(\t\x12\x14\n\x0c\x64uration_sec\x18\x03 \x01(\x01\x12\"\n\x07metrics\x18\x04 \x03(\x0b\x32\x11.ValidationMetric\"\x9f\x01\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x12\n\nallocation\x18\x02 \x01(\x03\x12\x0c\n\x04loss\x18\x03 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x04 \x01(\x01\x12\x10\n\x08variance\x18\x05 \x01(\x01\x12\x14\n\x0c\x64uration_sec\x18\x06 \x01(\x01\x12\n\n\x02ok\x18\x07 \x01(\x08\x12\x11\n\terror_msg\x18\x08 \x01(\t\"I\n\tModelFile\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.ModelFileType\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t\"P\n\x11SpatialAllocation\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02\"\x8f\x01\n\x10ValidationBudget\x12 \n\x0b\x62udget_type\x18\x01 \x01(\x0e\x32\x0b.BudgetType\x12$\n\rstatic_budget\x18\x02 \x01(\x0b\x32\r.StaticBudget\x12\x33\n\x0fvariance_budget\x18\x03 \x01(\x0b\x32\x1a.IncrementalVarianceBudget\"M\n\x19IncrementalVarianceBudget\x12\x14\n\x0ctotal_budget\x18\x01 \x01(\x03\x12\x1a\n\x12initial_allocation\x18\x02 \x01(\x03\"N\n\x0cStaticBudget\x12\x13\n\x0btotal_limit\x18\x01 \x01(\x03\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02\"2\n\x0fGisJoinMetadata\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x03*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02*T\n\nBudgetType\x12\x12\n\x0e\x44\x45\x46\x41ULT_BUDGET\x10\x00\x12\x11\n\rSTATIC_BUDGET\x10\x01\x12\x1f\n\x1bINCREMENTAL_VARIANCE_BUDGET\x10\x02*j\n\x07JobMode\x12\x14\n\x10\x44\x45\x46\x41ULT_JOB_MODE\x10\x00\x12\x0f\n\x0bSYNCHRONOUS\x10\x01\x12\x10\n\x0c\x41SYNCHRONOUS\x10\x02\x12\x11\n\rMULTITHREADED\x10\x03\x12\x13\n\x0fMULTIPROCESSING\x10\x04*?\n\x0eModelFramework\x12\x0e\n\nTENSORFLOW\x10\x00\x12\x10\n\x0cSCIKIT_LEARN\x10\x01\x12\x0b\n\x07PYTORCH\x10\x02*\x1f\n\rModelCategory\x12\x0e\n\nREGRESSION\x10\x00*\x8f\x01\n\rModelFileType\x12\x1b\n\x17UNKNOWN_MODEL_FILE_TYPE\x10\x00\x12\x17\n\x13SCIKIT_LEARN_PICKLE\x10\x01\x12\x13\n\x0fTENSORFLOW_HDF5\x10\x02\x12\x1e\n\x1aTENSORFLOW_SAVED_MODEL_ZIP\x10\x03\x12\x13\n\x0fPYTORCH_ZIPFILE\x10\x04*\x96\x01\n\x0cLossFunction\x12\x16\n\x12MEAN_SQUARED_ERROR\x10\x00\x12\x17\n\x13MEAN_ABSOLUTE_ERROR\x10\x01\x12\x1b\n\x17ROOT_MEAN_SQUARED_ERROR\x10\x02\x12 \n\x1cNEGATIVE_LOG_LIKELIHOOD_LOSS\x10\x03\x12\x16\n\x12\x43ROSS_ENTROPY_LOSS\x10\x04*&\n\x0fSpatialCoverage\x12\x07\n\x03\x41LL\x10\x00\x12\n\n\x06SUBSET\x10\x01*2\n\x14ReplicaSetMembership\x12\r\n\tSECONDARY\x10\x00\x12\x0b\n\x07PRIMARY\x10\x01\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32U\n\x06Worker\x12K\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x1c.WorkerValidationJobResponse\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x10validation.proto\"\xa1\x01\n\x19WorkerRegistrationRequest\x12\x10\n\x08hostname\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x12\x0f\n\x07rs_name\x18\x03 \x01(\t\x12(\n\trs_member\x18\x04 \x01(\x0e\x32\x15.ReplicaSetMembership\x12)\n\x0flocal_gis_joins\x18\x05 \x03(\x0b\x32\x10.GisJoinMetadata\"-\n\x1aWorkerRegistrationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"\x82\x05\n\x14ValidationJobRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12!\n\x0fmaster_job_mode\x18\x02 \x01(\x0e\x32\x08.JobMode\x12!\n\x0fworker_job_mode\x18\x03 \x01(\x0e\x32\x08.JobMode\x12(\n\x0fmodel_framework\x18\x04 \x01(\x0e\x32\x0f.ModelFramework\x12&\n\x0emodel_category\x18\x05 \x01(\x0e\x32\x0e.ModelCategory\x12\x12\n\nmongo_host\x18\x06 \x01(\t\x12\x12\n\nmongo_port\x18\x07 \x01(\x05\x12%\n\x0bread_config\x18\x08 \x01(\x0b\x32\x10.MongoReadConfig\x12\x10\n\x08\x64\x61tabase\x18\t \x01(\t\x12\x12\n\ncollection\x18\n \x01(\t\x12\x16\n\x0e\x66\x65\x61ture_fields\x18\x0b \x03(\t\x12\x13\n\x0blabel_field\x18\x0c \x01(\t\x12.\n\x12spatial_resolution\x18\r \x01(\x0e\x32\x12.SpatialResolution\x12\x18\n\x10normalize_inputs\x18\x0e \x01(\x08\x12,\n\x11validation_budget\x18\x0f \x01(\x0b\x32\x11.ValidationBudget\x12$\n\rloss_function\x18\x10 \x01(\x0e\x32\r.LossFunction\x12*\n\x10spatial_coverage\x18\x11 \x01(\x0e\x32\x10.SpatialCoverage\x12\x11\n\tgis_joins\x18\x12 \x03(\t\x12\'\n\x0b\x61llocations\x18\x13 \x03(\x0b\x32\x12.SpatialAllocation\x12\x1e\n\nmodel_file\x18\x14 \x01(\x0b\x32\n.ModelFile\"\x90\x01\n\x15ValidationJobResponse\x12\n\n\x02id\x18\x01 \x01(\t\x12\n\n\x02ok\x18\x02 \x01(\x08\x12\x11\n\terror_msg\x18\x03 \x01(\t\x12\x14\n\x0c\x64uration_sec\x18\x04 \x01(\x01\x12\x36\n\x10worker_responses\x18\x05 \x03(\x0b\x32\x1c.WorkerValidationJobResponse\"\x88\x01\n\x1bWorkerValidationJobResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x11\n\terror_msg\x18\x02 \x01(\t\x12\x10\n\x08hostname\x18\x03 \x01(\t\x12\x14\n\x0c\x64uration_sec\x18\x04 \x01(\x01\x12\"\n\x07metrics\x18\x05 \x03(\x0b\x32\x11.ValidationMetric\"\x9f\x01\n\x10ValidationMetric\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x12\n\nallocation\x18\x02 \x01(\x03\x12\x0c\n\x04loss\x18\x03 \x01(\x01\x12\x10\n\x08\x61\x63\x63uracy\x18\x04 \x01(\x01\x12\x10\n\x08variance\x18\x05 \x01(\x01\x12\x14\n\x0c\x64uration_sec\x18\x06 \x01(\x01\x12\n\n\x02ok\x18\x07 \x01(\x08\x12\x11\n\terror_msg\x18\x08 \x01(\t\"I\n\tModelFile\x12\x1c\n\x04type\x18\x01 \x01(\x0e\x32\x0e.ModelFileType\x12\x10\n\x08md5_hash\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\x0c\"a\n\x0cUploadStatus\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x11\n\tfile_hash\x18\x02 \x01(\t\x12-\n\x12upload_status_code\x18\x03 \x01(\x0e\x32\x11.UploadStatusCode\"@\n\x0fMongoReadConfig\x12\x17\n\x0fread_preference\x18\x01 \x01(\t\x12\x14\n\x0cread_concern\x18\x02 \x01(\t\"P\n\x11SpatialAllocation\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02\"\x8f\x01\n\x10ValidationBudget\x12 \n\x0b\x62udget_type\x18\x01 \x01(\x0e\x32\x0b.BudgetType\x12$\n\rstatic_budget\x18\x02 \x01(\x0b\x32\r.StaticBudget\x12\x33\n\x0fvariance_budget\x18\x03 \x01(\x0b\x32\x1a.IncrementalVarianceBudget\"M\n\x19IncrementalVarianceBudget\x12\x14\n\x0ctotal_budget\x18\x01 \x01(\x03\x12\x1a\n\x12initial_allocation\x18\x02 \x01(\x03\"N\n\x0cStaticBudget\x12\x13\n\x0btotal_limit\x18\x01 \x01(\x03\x12\x14\n\x0cstrata_limit\x18\x02 \x01(\x03\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x02\"2\n\x0fGisJoinMetadata\x12\x10\n\x08gis_join\x18\x01 \x01(\t\x12\r\n\x05\x63ount\x18\x02 \x01(\x03*l\n\x10UploadStatusCode\x12\x1e\n\x1aUPLOAD_STATUS_CODE_UNKNOWN\x10\x00\x12\x19\n\x15UPLOAD_STATUS_CODE_OK\x10\x01\x12\x1d\n\x19UPLOAD_STATUS_CODE_FAILED\x10\x02*T\n\nBudgetType\x12\x12\n\x0e\x44\x45\x46\x41ULT_BUDGET\x10\x00\x12\x11\n\rSTATIC_BUDGET\x10\x01\x12\x1f\n\x1bINCREMENTAL_VARIANCE_BUDGET\x10\x02*j\n\x07JobMode\x12\x14\n\x10\x44\x45\x46\x41ULT_JOB_MODE\x10\x00\x12\x0f\n\x0bSYNCHRONOUS\x10\x01\x12\x10\n\x0c\x41SYNCHRONOUS\x10\x02\x12\x11\n\rMULTITHREADED\x10\x03\x12\x13\n\x0fMULTIPROCESSING\x10\x04*?\n\x0eModelFramework\x12\x0e\n\nTENSORFLOW\x10\x00\x12\x10\n\x0cSCIKIT_LEARN\x10\x01\x12\x0b\n\x07PYTORCH\x10\x02*\x1f\n\rModelCategory\x12\x0e\n\nREGRESSION\x10\x00*\x93\x01\n\rModelFileType\x12\x1b\n\x17UNKNOWN_MODEL_FILE_TYPE\x10\x00\x12\x17\n\x13SCIKIT_LEARN_PICKLE\x10\x01\x12\x13\n\x0fTENSORFLOW_HDF5\x10\x02\x12\x1e\n\x1aTENSORFLOW_SAVED_MODEL_ZIP\x10\x03\x12\x17\n\x13PYTORCH_TORCHSCRIPT\x10\x04*\x96\x01\n\x0cLossFunction\x12\x16\n\x12MEAN_SQUARED_ERROR\x10\x00\x12\x17\n\x13MEAN_ABSOLUTE_ERROR\x10\x01\x12\x1b\n\x17ROOT_MEAN_SQUARED_ERROR\x10\x02\x12 \n\x1cNEGATIVE_LOG_LIKELIHOOD_LOSS\x10\x03\x12\x16\n\x12\x43ROSS_ENTROPY_LOSS\x10\x04*&\n\x0fSpatialCoverage\x12\x07\n\x03\x41LL\x10\x00\x12\n\n\x06SUBSET\x10\x01*2\n\x14ReplicaSetMembership\x12\r\n\tSECONDARY\x10\x00\x12\x0b\n\x07PRIMARY\x10\x01**\n\x11SpatialResolution\x12\n\n\x06\x43OUNTY\x10\x00\x12\t\n\x05STATE\x10\x01\x32\x97\x02\n\x06Master\x12)\n\nUploadFile\x12\n.ModelFile\x1a\r.UploadStatus\"\x00\x12\x46\n\x13SubmitValidationJob\x12\x15.ValidationJobRequest\x1a\x16.ValidationJobResponse\"\x00\x12K\n\x0eRegisterWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x12M\n\x10\x44\x65registerWorker\x12\x1a.WorkerRegistrationRequest\x1a\x1b.WorkerRegistrationResponse\"\x00\x32U\n\x06Worker\x12K\n\x12\x42\x65ginValidationJob\x12\x15.ValidationJobRequest\x1a\x1c.WorkerValidationJobResponse\"\x00\x62\x06proto3'
 )
 
 _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
@@ -48,8 +48,8 @@ _UPLOADSTATUSCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1935,
-  serialized_end=2043,
+  serialized_start=2003,
+  serialized_end=2111,
 )
 _sym_db.RegisterEnumDescriptor(_UPLOADSTATUSCODE)
 
@@ -79,8 +79,8 @@ _BUDGETTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2045,
-  serialized_end=2129,
+  serialized_start=2113,
+  serialized_end=2197,
 )
 _sym_db.RegisterEnumDescriptor(_BUDGETTYPE)
 
@@ -120,8 +120,8 @@ _JOBMODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2131,
-  serialized_end=2237,
+  serialized_start=2199,
+  serialized_end=2305,
 )
 _sym_db.RegisterEnumDescriptor(_JOBMODE)
 
@@ -151,8 +151,8 @@ _MODELFRAMEWORK = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2239,
-  serialized_end=2302,
+  serialized_start=2307,
+  serialized_end=2370,
 )
 _sym_db.RegisterEnumDescriptor(_MODELFRAMEWORK)
 
@@ -172,8 +172,8 @@ _MODELCATEGORY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2304,
-  serialized_end=2335,
+  serialized_start=2372,
+  serialized_end=2403,
 )
 _sym_db.RegisterEnumDescriptor(_MODELCATEGORY)
 
@@ -206,15 +206,15 @@ _MODELFILETYPE = _descriptor.EnumDescriptor(
       type=None,
       create_key=_descriptor._internal_create_key),
     _descriptor.EnumValueDescriptor(
-      name='PYTORCH_ZIPFILE', index=4, number=4,
+      name='PYTORCH_TORCHSCRIPT', index=4, number=4,
       serialized_options=None,
       type=None,
       create_key=_descriptor._internal_create_key),
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2338,
-  serialized_end=2481,
+  serialized_start=2406,
+  serialized_end=2553,
 )
 _sym_db.RegisterEnumDescriptor(_MODELFILETYPE)
 
@@ -254,8 +254,8 @@ _LOSSFUNCTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2484,
-  serialized_end=2634,
+  serialized_start=2556,
+  serialized_end=2706,
 )
 _sym_db.RegisterEnumDescriptor(_LOSSFUNCTION)
 
@@ -280,8 +280,8 @@ _SPATIALCOVERAGE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2636,
-  serialized_end=2674,
+  serialized_start=2708,
+  serialized_end=2746,
 )
 _sym_db.RegisterEnumDescriptor(_SPATIALCOVERAGE)
 
@@ -306,12 +306,38 @@ _REPLICASETMEMBERSHIP = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2676,
-  serialized_end=2726,
+  serialized_start=2748,
+  serialized_end=2798,
 )
 _sym_db.RegisterEnumDescriptor(_REPLICASETMEMBERSHIP)
 
 ReplicaSetMembership = enum_type_wrapper.EnumTypeWrapper(_REPLICASETMEMBERSHIP)
+_SPATIALRESOLUTION = _descriptor.EnumDescriptor(
+  name='SpatialResolution',
+  full_name='SpatialResolution',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='COUNTY', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='STATE', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=2800,
+  serialized_end=2842,
+)
+_sym_db.RegisterEnumDescriptor(_SPATIALRESOLUTION)
+
+SpatialResolution = enum_type_wrapper.EnumTypeWrapper(_SPATIALRESOLUTION)
 UPLOAD_STATUS_CODE_UNKNOWN = 0
 UPLOAD_STATUS_CODE_OK = 1
 UPLOAD_STATUS_CODE_FAILED = 2
@@ -331,7 +357,7 @@ UNKNOWN_MODEL_FILE_TYPE = 0
 SCIKIT_LEARN_PICKLE = 1
 TENSORFLOW_HDF5 = 2
 TENSORFLOW_SAVED_MODEL_ZIP = 3
-PYTORCH_ZIPFILE = 4
+PYTORCH_TORCHSCRIPT = 4
 MEAN_SQUARED_ERROR = 0
 MEAN_ABSOLUTE_ERROR = 1
 ROOT_MEAN_SQUARED_ERROR = 2
@@ -341,6 +367,8 @@ ALL = 0
 SUBSET = 1
 SECONDARY = 0
 PRIMARY = 1
+COUNTY = 0
+STATE = 1
 
 
 
@@ -529,50 +557,57 @@ _VALIDATIONJOBREQUEST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='normalize_inputs', full_name='ValidationJobRequest.normalize_inputs', index=12,
-      number=13, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='validation_budget', full_name='ValidationJobRequest.validation_budget', index=13,
-      number=14, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='loss_function', full_name='ValidationJobRequest.loss_function', index=14,
-      number=15, type=14, cpp_type=8, label=1,
+      name='spatial_resolution', full_name='ValidationJobRequest.spatial_resolution', index=12,
+      number=13, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='spatial_coverage', full_name='ValidationJobRequest.spatial_coverage', index=15,
+      name='normalize_inputs', full_name='ValidationJobRequest.normalize_inputs', index=13,
+      number=14, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='validation_budget', full_name='ValidationJobRequest.validation_budget', index=14,
+      number=15, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='loss_function', full_name='ValidationJobRequest.loss_function', index=15,
       number=16, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='gis_joins', full_name='ValidationJobRequest.gis_joins', index=16,
-      number=17, type=9, cpp_type=9, label=3,
+      name='spatial_coverage', full_name='ValidationJobRequest.spatial_coverage', index=16,
+      number=17, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='gis_joins', full_name='ValidationJobRequest.gis_joins', index=17,
+      number=18, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='allocations', full_name='ValidationJobRequest.allocations', index=17,
-      number=18, type=11, cpp_type=10, label=3,
+      name='allocations', full_name='ValidationJobRequest.allocations', index=18,
+      number=19, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='model_file', full_name='ValidationJobRequest.model_file', index=18,
-      number=19, type=11, cpp_type=10, label=1,
+      name='model_file', full_name='ValidationJobRequest.model_file', index=19,
+      number=20, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -590,7 +625,7 @@ _VALIDATIONJOBREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=232,
-  serialized_end=826,
+  serialized_end=874,
 )
 
 
@@ -649,8 +684,8 @@ _VALIDATIONJOBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=829,
-  serialized_end=973,
+  serialized_start=877,
+  serialized_end=1021,
 )
 
 
@@ -670,22 +705,29 @@ _WORKERVALIDATIONJOBRESPONSE = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='hostname', full_name='WorkerValidationJobResponse.hostname', index=1,
+      name='error_msg', full_name='WorkerValidationJobResponse.error_msg', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='duration_sec', full_name='WorkerValidationJobResponse.duration_sec', index=2,
-      number=3, type=1, cpp_type=5, label=1,
+      name='hostname', full_name='WorkerValidationJobResponse.hostname', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='duration_sec', full_name='WorkerValidationJobResponse.duration_sec', index=3,
+      number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='metrics', full_name='WorkerValidationJobResponse.metrics', index=3,
-      number=4, type=11, cpp_type=10, label=3,
+      name='metrics', full_name='WorkerValidationJobResponse.metrics', index=4,
+      number=5, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -702,8 +744,8 @@ _WORKERVALIDATIONJOBRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=975,
-  serialized_end=1092,
+  serialized_start=1024,
+  serialized_end=1160,
 )
 
 
@@ -783,8 +825,8 @@ _VALIDATIONMETRIC = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1095,
-  serialized_end=1254,
+  serialized_start=1163,
+  serialized_end=1322,
 )
 
 
@@ -829,8 +871,8 @@ _MODELFILE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1256,
-  serialized_end=1329,
+  serialized_start=1324,
+  serialized_end=1397,
 )
 
 
@@ -875,8 +917,8 @@ _UPLOADSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1331,
-  serialized_end=1428,
+  serialized_start=1399,
+  serialized_end=1496,
 )
 
 
@@ -914,8 +956,8 @@ _MONGOREADCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1430,
-  serialized_end=1494,
+  serialized_start=1498,
+  serialized_end=1562,
 )
 
 
@@ -960,8 +1002,8 @@ _SPATIALALLOCATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1496,
-  serialized_end=1576,
+  serialized_start=1564,
+  serialized_end=1644,
 )
 
 
@@ -1006,8 +1048,8 @@ _VALIDATIONBUDGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1579,
-  serialized_end=1722,
+  serialized_start=1647,
+  serialized_end=1790,
 )
 
 
@@ -1045,8 +1087,8 @@ _INCREMENTALVARIANCEBUDGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1724,
-  serialized_end=1801,
+  serialized_start=1792,
+  serialized_end=1869,
 )
 
 
@@ -1091,8 +1133,8 @@ _STATICBUDGET = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1803,
-  serialized_end=1881,
+  serialized_start=1871,
+  serialized_end=1949,
 )
 
 
@@ -1130,8 +1172,8 @@ _GISJOINMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1883,
-  serialized_end=1933,
+  serialized_start=1951,
+  serialized_end=2001,
 )
 
 _WORKERREGISTRATIONREQUEST.fields_by_name['rs_member'].enum_type = _REPLICASETMEMBERSHIP
@@ -1141,6 +1183,7 @@ _VALIDATIONJOBREQUEST.fields_by_name['worker_job_mode'].enum_type = _JOBMODE
 _VALIDATIONJOBREQUEST.fields_by_name['model_framework'].enum_type = _MODELFRAMEWORK
 _VALIDATIONJOBREQUEST.fields_by_name['model_category'].enum_type = _MODELCATEGORY
 _VALIDATIONJOBREQUEST.fields_by_name['read_config'].message_type = _MONGOREADCONFIG
+_VALIDATIONJOBREQUEST.fields_by_name['spatial_resolution'].enum_type = _SPATIALRESOLUTION
 _VALIDATIONJOBREQUEST.fields_by_name['validation_budget'].message_type = _VALIDATIONBUDGET
 _VALIDATIONJOBREQUEST.fields_by_name['loss_function'].enum_type = _LOSSFUNCTION
 _VALIDATIONJOBREQUEST.fields_by_name['spatial_coverage'].enum_type = _SPATIALCOVERAGE
@@ -1176,6 +1219,7 @@ DESCRIPTOR.enum_types_by_name['ModelFileType'] = _MODELFILETYPE
 DESCRIPTOR.enum_types_by_name['LossFunction'] = _LOSSFUNCTION
 DESCRIPTOR.enum_types_by_name['SpatialCoverage'] = _SPATIALCOVERAGE
 DESCRIPTOR.enum_types_by_name['ReplicaSetMembership'] = _REPLICASETMEMBERSHIP
+DESCRIPTOR.enum_types_by_name['SpatialResolution'] = _SPATIALRESOLUTION
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 WorkerRegistrationRequest = _reflection.GeneratedProtocolMessageType('WorkerRegistrationRequest', (_message.Message,), {
@@ -1285,8 +1329,8 @@ _MASTER = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2729,
-  serialized_end=3008,
+  serialized_start=2845,
+  serialized_end=3124,
   methods=[
   _descriptor.MethodDescriptor(
     name='UploadFile',
@@ -1341,8 +1385,8 @@ _WORKER = _descriptor.ServiceDescriptor(
   index=1,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=3010,
-  serialized_end=3095,
+  serialized_start=3126,
+  serialized_end=3211,
   methods=[
   _descriptor.MethodDescriptor(
     name='BeginValidationJob',

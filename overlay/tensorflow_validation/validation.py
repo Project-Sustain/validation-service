@@ -175,6 +175,7 @@ def validate_model(
     import tensorflow as tf
     import pandas as pd
     import numpy as np
+    from welford import Welford
     from sklearn.preprocessing import MinMaxScaler
 
     from overlay.db.querier import Querier
@@ -245,6 +246,7 @@ def validate_model(
     if verbose:
         info(f"y_true: {y_true}")
 
+    welford_variance_calculator = Welford()
     if loss_function == "MEAN_SQUARED_ERROR":
         info("MEAN_SQUARED_ERROR...")
         loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
@@ -262,16 +264,21 @@ def validate_model(
         # variance: float = S_h
 
         # Numpy's built-in variance function for MSE
-        variance: float = np.square(y_true - y_pred).var()
+        squared_residuals = np.square(y_true - y_pred)
+        welford_variance_calculator.add_all(squared_residuals)
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
-        variance: float = np.square(y_pred - y_true).var()
+        squared_residuals = np.square(y_true - y_pred)
+        welford_variance_calculator.add_all(squared_residuals)
+
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         info("MEAN_ABSOLUTE_ERROR...")
         loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
-        variance: float = np.absolute(y_pred - y_true).var()
+        absolute_residuals = np.absolute(y_pred - y_true)
+        welford_variance_calculator.add_all(absolute_residuals)
+
     else:
         profiler.stop()
         error_msg = f"Unsupported loss function {loss_function}"
@@ -279,6 +286,7 @@ def validate_model(
         return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
     profiler.stop()
+    variance_of_residuals = welford_variance_calculator.var_p
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return gis_join, allocation, loss, variance, ok, "", profiler.elapsed
+    return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed

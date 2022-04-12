@@ -105,6 +105,7 @@ def train_linear_regression_model(dataloader: DataLoader):
 
             optimizer.zero_grad()
             outputs = model(data)
+
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -178,12 +179,26 @@ class DeepModel(nn.Module):
 
 
 def main():
-    cuda = torch.cuda.is_available()
+    # cuda = torch.cuda.is_available()
     features_df, label_df = load_from_disk()
     noaa_ds = NoaaNamDataset(features_df, label_df)
-    train_loader = DataLoader(noaa_ds, batch_size=BATCH_SIZE, shuffle=True)
+    sample_subset = torch.utils.data.Subset(noaa_ds, [0])
+    sample_loader = DataLoader(sample_subset, batch_size=1, shuffle=False)
+    #train_loader = DataLoader(noaa_ds, batch_size=BATCH_SIZE, shuffle=True)
     #train_linear_regression_model(train_loader)
-    train_deep_model(train_loader)
+    #train_deep_model(train_loader)
+
+    loaded_model: DeepModel = torch.load('../../testing/test_models/pytorch/neural_network/model.pth')
+    cpu_model = loaded_model.cpu()
+    for data, label in sample_loader:
+        sample_input_cpu = data.cpu()
+        traced_cpu = torch.jit.trace(cpu_model, sample_input_cpu)
+
+        model_scripted = torch.jit.script(traced_cpu)
+        model_scripted.save('../../testing/test_models/pytorch/neural_network/model.pt')  # Save
+
+
+
 
 if __name__ == "__main__":
     main()
