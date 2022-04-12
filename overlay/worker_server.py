@@ -154,9 +154,9 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
             # Saved PyTorch models have to be in the Pickle zipfile format:
             # https://pytorch.org/tutorials/beginner/saving_loading_models.html#saving-loading-model-for-inference
-            if request.model_file.type != ModelFileType.PYTORCH_ZIPFILE:
+            if request.model_file.type != ModelFileType.PYTORCH_TORCHSCRIPT:
                 return not ok
-            file_extension = "pth"
+            file_extension = "pt"
 
         # Save the model with appropriate extension
         model_file_path = f"{model_dir}/{request.id}.{file_extension}"

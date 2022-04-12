@@ -191,8 +191,8 @@ def validate_model(
     profiler: Timer = Timer()
     profiler.start()
 
-    # Load PyTorch model from disk (OS should cache in memory for future loads)
-    model = torch.load(model_path)
+    # Load TorchScript PyTorch model from disk (OS should cache in memory for future loads)
+    model = torch.jit.load(model_path)
 
     if verbose:
         model_description = f'{model}\nParameters:\n'

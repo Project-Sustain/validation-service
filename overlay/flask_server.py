@@ -12,7 +12,7 @@ from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType
 
 UPLOAD_DIR = "./uploads"
-ALLOWED_EXTENSIONS = {"zip", "pth", "pkl", "h5"}
+ALLOWED_EXTENSIONS = {"zip", "pt", "pkl", "h5"}
 
 app = Flask(__name__)
 app.config["UPLOAD_DIR"] = UPLOAD_DIR
@@ -33,8 +33,8 @@ def allowed_file(filename) -> bool:
 
 def file_type(filename) -> ModelFileType:
     extension = filename.rsplit(".", 1)[1].lower()
-    if extension == "pth":
-        return ModelFileType.PYTORCH_ZIPFILE
+    if extension == "pt":
+        return ModelFileType.PYTORCH_TORCHSCRIPT
     elif extension == "zip":
         return ModelFileType.TENSORFLOW_SAVED_MODEL_ZIP
     elif extension == "h5":

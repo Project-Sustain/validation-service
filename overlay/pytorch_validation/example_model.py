@@ -106,9 +106,6 @@ def train_linear_regression_model(dataloader: DataLoader):
             optimizer.zero_grad()
             outputs = model(data)
 
-            print(outputs.cpu().numpy())
-
-            break
             loss = criterion(outputs, labels)
             loss.backward()
             optimizer.step()
@@ -116,11 +113,9 @@ def train_linear_regression_model(dataloader: DataLoader):
             if i % 1000 == 0:
                 print(f'Epoch: {epoch + 1}, loss={loss.item():.4f}')
 
-        break
-
     # save model
-    #filename = '../../testing/test_models/pytorch/linear_regression/model.pth'
-    #torch.save(model, filename)  # using TorchScript
+    filename = '../../testing/test_models/pytorch/linear_regression/model.pth'
+    torch.save(model, filename)  # using TorchScript
 
 
 
@@ -184,12 +179,17 @@ class DeepModel(nn.Module):
 
 
 def main():
-    cuda = torch.cuda.is_available()
-    features_df, label_df = load_from_disk()
-    noaa_ds = NoaaNamDataset(features_df, label_df)
-    train_loader = DataLoader(noaa_ds, batch_size=BATCH_SIZE, shuffle=True)
-    train_linear_regression_model(train_loader)
+    # cuda = torch.cuda.is_available()
+    # features_df, label_df = load_from_disk()
+    # noaa_ds = NoaaNamDataset(features_df, label_df)
+    # train_loader = DataLoader(noaa_ds, batch_size=BATCH_SIZE, shuffle=True)
+    # train_linear_regression_model(train_loader)
     #train_deep_model(train_loader)
+
+    loaded_model: nn.Linear = torch.load('../../testing/test_models/pytorch/linear_regression/model.pth')
+    model_scripted = torch.jit.script(loaded_model)
+    model_scripted.save('../../testing/test_models/pytorch/linear_regression/model.pt')  # Save
+
 
 if __name__ == "__main__":
     main()
