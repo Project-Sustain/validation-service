@@ -176,6 +176,8 @@ def validate_model(
     import pandas as pd
     import json
     import numpy as np
+    import logging
+    from logging import info, error
     from welford import Welford
     from sklearn.preprocessing import MinMaxScaler
 
@@ -195,9 +197,11 @@ def validate_model(
     model_dir = "/".join(model_path_parts)
     model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
     if os.path.exists(model_metrics_path):
+        info(f"P{model_metrics_path} exists, loading")
         with open(model_metrics_path, "r") as f:
             current_model_metrics = json.load(f)
     else:
+        info(f"P{model_metrics_path} does not exist, initializing for first time")
         # First time calculating variance/errors for model
         current_model_metrics = {
             "gis_join": gis_join,
@@ -283,7 +287,7 @@ def validate_model(
 
         # Numpy's built-in variance function for MSE
         squared_residuals = np.square(y_true - y_pred)
-        m = np.mean(squared_residuals, axis=0)
+        m = np.mean(squared_residuals, axis=0)[0]
         s = np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]
 
         info(f"m = {m}, s = {s}")
@@ -292,14 +296,14 @@ def validate_model(
         info("ROOT_MEAN_SQUARED_ERROR...")
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
         squared_residuals = np.square(y_true - y_pred)
-        m = np.mean(squared_residuals, axis=0)
+        m = np.mean(squared_residuals, axis=0)[0]
         s = np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]
 
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         info("MEAN_ABSOLUTE_ERROR...")
         loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
         absolute_residuals = np.absolute(y_pred - y_true)
-        m = np.mean(absolute_residuals, axis=0)
+        m = np.mean(absolute_residuals, axis=0)[0]
         s = np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0]
 
     else:
