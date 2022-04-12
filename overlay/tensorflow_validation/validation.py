@@ -288,7 +288,7 @@ def validate_model(
         # Numpy's built-in variance function for MSE
         squared_residuals = np.square(y_true - y_pred)
         m = np.mean(squared_residuals, axis=0)[0]
-        s = np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0]
 
         info(f"m = {m}, s = {s}")
 
