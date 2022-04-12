@@ -297,14 +297,14 @@ def validate_model(
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
         squared_residuals = np.square(y_true - y_pred)
         m = np.mean(squared_residuals, axis=0)[0]
-        s = np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0]
 
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         info("MEAN_ABSOLUTE_ERROR...")
         loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
         absolute_residuals = np.absolute(y_pred - y_true)
         m = np.mean(absolute_residuals, axis=0)[0]
-        s = np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0]
+        s = (np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0])[0]
 
     else:
         profiler.stop()
