@@ -14,7 +14,7 @@ from overlay.db.shards import ShardMetadata
 from overlay.profiler import Timer
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
-    SpatialAllocation
+    SpatialAllocation, SpatialResolution
 
 
 class JobMetadata:
@@ -453,7 +453,12 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Create and launch a job from allocations
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
-        return job.job_id, launch_worker_jobs(request, job)
+        worker_responses: list = launch_worker_jobs(request, job)  # list(WorkerValidationJobResponse)
+
+        # Aggregate to state level if requested
+        #if request.spatial_resolution == SpatialResolution.STATE:
+
+        return job.job_id, worker_responses
 
     # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
     # for the ShardMetadata objects.
