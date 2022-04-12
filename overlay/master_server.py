@@ -393,7 +393,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         for metric in filtered_gis_join_metrics:
 
             # Neyman Allocation + initial allocation
-            new_optimal_allocation = int((budget_left * metric.variance) / sum_of_filtered_variances) + initial_allocation
+            new_optimal_allocation = int((budget_left * metric.variance) / sum_of_filtered_variances)
 
             # Cap new allocation at size of GISJOIN; don't allocate more than that GISJOIN has
             if new_optimal_allocation > self.gis_join_metadata[metric.gis_join]:
