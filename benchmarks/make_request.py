@@ -7,6 +7,11 @@ import os
 
 experiment_dir = sys.argv[1]
 experiment_request = f"{experiment_dir}/request.json"
+experiment_dir_parts = experiment_dir.split("/")
+exp_framework_path = experiment_dir_parts[0]  # i.e. pytorch, tensorflow, scikitlearn
+exp_model_category_path = f"{exp_framework_path}/{experiment_dir_parts[1]}"
+dir_walk = os.walk(exp_model_category_path)
+model_file = next(dir_walk)[2][0]
 
 if not os.path.exists(experiment_request):
     print(f"{experiment_request} does not exist! Please create first (hint, use the testing/test_requests/ JSON requests as a template example)")
@@ -14,7 +19,6 @@ if not os.path.exists(experiment_request):
 
 url = "lattice-150.cs.colostate.edu:5000/validation_service/submit_validation_job"
 request_file = f"/s/parsons/b/others/sustain/SustainProject/validation-service/benchmarks/{experiment_dir}/request.json"
-model_file = "/s/parsons/b/others/sustain/SustainProject/validation-service/testing/test_models/tensorflow/neural_network/hdf5/model.h5"
 
 with open(request_file, "r") as rfile:
     request = json.load(rfile)
