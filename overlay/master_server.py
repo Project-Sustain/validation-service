@@ -412,9 +412,9 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Create and launch 2nd job from allocations
         job: JobMetadata = self.create_job_from_allocations(new_allocations)
-        new_worker_responses = launch_worker_jobs(request, job)
+        new_worker_responses: list = launch_worker_jobs(request, job)
         for new_worker_response in new_worker_responses:
-            for new_metric in new_worker_response:
+            for new_metric in new_worker_response.metrics:
                 new_metric.iteration = 1
         worker_responses.extend(new_worker_responses)
 
