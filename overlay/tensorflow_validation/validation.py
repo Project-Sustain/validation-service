@@ -174,6 +174,7 @@ def validate_model(
 
     import tensorflow as tf
     import pandas as pd
+    import json
     import numpy as np
     from welford import Welford
     from sklearn.preprocessing import MinMaxScaler
@@ -188,6 +189,24 @@ def validate_model(
 
     # Load Tensorflow model from disk (OS should cache in memory for future loads)
     model: tf.keras.Model = tf.keras.models.load_model(model_path)
+
+    # Create or load persisted model metrics
+    model_path_parts = model_path.split("/")[:-1]
+    model_dir = "/".join(model_path_parts)
+    model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
+    if os.path.exists(model_metrics_path):
+        with open(model_metrics_path, "r") as f:
+            current_model_metrics = json.load(f)
+    else:
+        # First time calculating variance/errors for model
+        current_model_metrics = {
+            "gis_join": gis_join,
+            "allocation": 0,
+            "variance": 0.0,
+            "m": 0.0,
+            "s": 0.0,
+            "loss": 0.0
+        }
 
     if verbose:
         model.summary()
@@ -246,7 +265,6 @@ def validate_model(
     if verbose:
         info(f"y_true: {y_true}")
 
-    welford_variance_calculator = Welford()
     if loss_function == "MEAN_SQUARED_ERROR":
         info("MEAN_SQUARED_ERROR...")
         loss = tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred)))
@@ -265,19 +283,22 @@ def validate_model(
 
         # Numpy's built-in variance function for MSE
         squared_residuals = np.square(y_true - y_pred)
-        welford_variance_calculator.add_all(squared_residuals)
+        m = np.mean(squared_residuals, axis=0)
+        s = np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
         loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
         squared_residuals = np.square(y_true - y_pred)
-        welford_variance_calculator.add_all(squared_residuals)
+        m = np.mean(squared_residuals, axis=0)
+        s = np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]
 
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         info("MEAN_ABSOLUTE_ERROR...")
         loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
         absolute_residuals = np.absolute(y_pred - y_true)
-        welford_variance_calculator.add_all(absolute_residuals)
+        m = np.mean(absolute_residuals, axis=0)
+        s = np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0]
 
     else:
         profiler.stop()
@@ -285,8 +306,33 @@ def validate_model(
         error(error_msg)
         return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
+    # Merging old metrics in with new metrics using Welford's method (if applicable)
+    prev_allocation = current_model_metrics["allocation"]
+    if prev_allocation > 0:
+        prev_m = current_model_metrics["m"]
+        prev_s = current_model_metrics["s"]
+        new_allocation = prev_allocation + allocation
+        delta = m - prev_m
+        delta2 = delta * delta
+        new_m = ((allocation * m) + (prev_allocation * prev_m)) / new_allocation
+        new_s = s + prev_s + delta2 * (allocation * prev_allocation) / new_allocation
+        new_loss = ((current_model_metrics["loss"] * prev_allocation) + (loss * allocation)) / new_allocation
+
+        m = new_m
+        s = new_s
+        allocation = new_allocation
+        loss = new_loss
+
+    variance = s / allocation
+    current_model_metrics["allocation"] = allocation
+    current_model_metrics["loss"] = loss
+    current_model_metrics["variance"] = variance
+    current_model_metrics["m"] = m
+    current_model_metrics["s"] = s
+    with open(model_metrics_path, "w") as f:
+        json.dump(current_model_metrics, f)
+
     profiler.stop()
-    variance_of_residuals = welford_variance_calculator.var_p
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed
+    return gis_join, allocation, loss, variance, ok, "", profiler.elapsed
