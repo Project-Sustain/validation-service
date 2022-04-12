@@ -12,6 +12,7 @@ exp_framework_path = experiment_dir_parts[0]  # i.e. pytorch, tensorflow, scikit
 exp_model_category_path = f"{exp_framework_path}/{experiment_dir_parts[1]}"
 dir_walk = os.walk(exp_model_category_path)
 model_file = next(dir_walk)[2][0]
+model_file = f"{exp_model_category_path}/{model_file}"
 
 if not os.path.exists(experiment_request):
     print(f"{experiment_request} does not exist! Please create first (hint, use the testing/test_requests/ JSON requests as a template example)")
