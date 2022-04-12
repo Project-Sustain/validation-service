@@ -96,12 +96,12 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
-            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor)
+            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor, self.local_gis_joins)
             metrics = skl_validator.validate_gis_joins(request)
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
-            pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor)
+            pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor, self.local_gis_joins)
             metrics = pytorch_validator.validate_gis_joins(request)
 
         else:
