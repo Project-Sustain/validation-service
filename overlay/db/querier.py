@@ -62,8 +62,8 @@ class Querier:
             sample = {"size": limit}
             return collection.aggregate([
                 {"$match": query},
+                {"$project": projection},
                 {"$sample": sample},
-                {"$project": projection}
             ])
         else:
             return collection.find(query, projection)  # Just find all that match
