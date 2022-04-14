@@ -14,9 +14,9 @@ from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistration
     ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.profiler import Timer
-from overlay.tensorflow_validation.validation import TensorflowValidator
-from overlay.scikitlearn_validation.validation import ScikitLearnValidator
-from overlay.pytorch_validation.validation import PyTorchValidator
+from overlay.validation.tensorflow import TensorflowValidator
+from overlay.validation.scikitlearn import ScikitLearnValidator
+from overlay.validation.pytorch import PyTorchValidator
 from overlay.db.shards import get_rs_member_state
 from overlay.db.locality import discover_gis_joins
 from overlay.structures import GisTree
