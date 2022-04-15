@@ -383,9 +383,9 @@ class Master(validation_pb2_grpc.MasterServicer):
         sum_of_filtered_variances = 0.0
         for metric in all_gis_join_metrics:
             # If variance > 2 standard deviations above mean
-            if abs((metric.variance - mean_of_all_variances) / std_dev_all_variances) >= 1.0:
-                filtered_gis_join_metrics.append(metric)
-                sum_of_filtered_variances += metric.variance
+            #if abs((metric.variance - mean_of_all_variances) / std_dev_all_variances) >= 1.0:
+            filtered_gis_join_metrics.append(metric)
+            sum_of_filtered_variances += metric.variance
 
         # Create list of new allocations
         new_allocations: list = []  # list(SpatialAllocations)
