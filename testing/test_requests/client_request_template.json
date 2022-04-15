@@ -1,0 +1,12 @@
+{
+  "model_framework": "TENSORFLOW",
+  "model_category": "REGRESSION",
+  "database": "<database_name>",
+  "collection": "<collection_name>",
+  "feature_fields": [ "<feature_0>" ],
+  "label_field": "<label_field>",
+  "normalize_inputs": true,
+  "loss_function": "MEAN_SQUARED_ERROR",
+  "spatial_coverage": "ALL",
+  "spatial_resolution": "COUNTY"
+}

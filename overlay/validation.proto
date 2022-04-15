@@ -75,7 +75,8 @@ message WorkerValidationJobResponse {
   string error_msg = 2;
   string hostname = 3;
   double duration_sec = 4;
-  repeated ValidationMetric metrics = 5;
+  int32 iteration = 5;
+  repeated ValidationMetric metrics = 6;
 }
 
 message ValidationMetric {
@@ -85,8 +86,9 @@ message ValidationMetric {
   double accuracy = 4;
   double variance = 5;
   double duration_sec = 6;
-  bool ok = 7;
-  string error_msg = 8;
+  int32 iteration = 7;
+  bool ok = 8;
+  string error_msg = 9;
 }
 
 message ModelFile {

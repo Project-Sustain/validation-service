@@ -383,9 +383,9 @@ class Master(validation_pb2_grpc.MasterServicer):
         sum_of_filtered_variances = 0.0
         for metric in all_gis_join_metrics:
             # If variance > 2 standard deviations above mean
-            if (metric.variance - mean_of_all_variances) / std_dev_all_variances >= 2.0:
-                filtered_gis_join_metrics.append(metric)
-                sum_of_filtered_variances += metric.variance
+            #if abs((metric.variance - mean_of_all_variances) / std_dev_all_variances) >= 1.0:
+            filtered_gis_join_metrics.append(metric)
+            sum_of_filtered_variances += metric.variance
 
         # Create list of new allocations
         new_allocations: list = []  # list(SpatialAllocations)
@@ -393,7 +393,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         for metric in filtered_gis_join_metrics:
 
             # Neyman Allocation + initial allocation
-            new_optimal_allocation = int((budget_left * metric.variance) / sum_of_filtered_variances) + initial_allocation
+            new_optimal_allocation = int((budget_left * metric.variance) / sum_of_filtered_variances)
 
             # Cap new allocation at size of GISJOIN; don't allocate more than that GISJOIN has
             if new_optimal_allocation > self.gis_join_metadata[metric.gis_join]:
@@ -412,7 +412,13 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Create and launch 2nd job from allocations
         job: JobMetadata = self.create_job_from_allocations(new_allocations)
-        worker_responses = launch_worker_jobs(request, job)
+        new_worker_responses: list = launch_worker_jobs(request, job)
+        for new_worker_response in new_worker_responses:
+            new_worker_response.iteration = 1
+            for new_metric in new_worker_response.metrics:
+                new_metric.iteration = 1
+        worker_responses.extend(new_worker_responses)
+
         return job.job_id, worker_responses
 
     # Processes a job with either a default budget or static budget.
