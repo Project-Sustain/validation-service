@@ -262,7 +262,7 @@ def aggregate_metrics_by_state(flattened_metrics: list) -> list:  # returns list
             county_metric: ValidationMetric = county_node.contents["metric"]
             if county_metric.ok:
                 state_allocation += county_metric.allocation
-                state_variance += county_metric.allocation
+                state_variance += county_metric.variance
                 state_loss += county_metric.loss
                 state_duration_sec += county_metric.duration_sec
                 count += 1
