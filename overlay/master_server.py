@@ -14,7 +14,7 @@ from overlay.db.shards import ShardMetadata
 from overlay.profiler import Timer
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
-    SpatialAllocation, SpatialResolution
+    SpatialAllocation, SpatialResolution, ExperimentResponse
 
 
 class JobMetadata:
@@ -512,7 +512,52 @@ class Master(validation_pb2_grpc.MasterServicer):
             return WorkerRegistrationResponse(success=False)
 
     def SubmitValidationJob(self, request: ValidationJobRequest, context):
+        # Time the entire job from start to finish
+        profiler: Timer = Timer()
+        profiler.start()
 
+        if request.spatial_coverage == SpatialCoverage.ALL:
+            info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
+        else:
+            info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
+
+        # Process the job with either a variance budget or static/default budget
+        if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+            job_id, worker_responses = self.process_job_with_variance_budget(request)
+
+        else:  # Default or static budget
+            job_id, worker_responses = self.process_job_with_normal_budget(request)
+
+        aggregated_metrics: list = []
+        errors = []
+        ok = True
+
+        if len(worker_responses) == 0:
+            error_msg = "Did not receive any responses from workers"
+            ok = False
+            error(error_msg)
+            errors.append(error_msg)
+        else:
+            for worker_response in worker_responses:
+                if not worker_response.ok:
+                    ok = False
+                    error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
+                    errors.append(error_msg)
+                for metric in worker_response.metrics:
+                    aggregated_metrics.append(metric)
+
+        error_msg = f"errors: {errors}"
+        profiler.stop()
+
+        return ValidationJobResponse(
+            id=job_id,
+            ok=ok,
+            error_msg=error_msg,
+            duration_sec=profiler.elapsed,
+            metrics=aggregated_metrics
+        )
+
+    def SubmitExperiment(self, request: ValidationJobRequest, context):
         # Time the entire job from start to finish
         profiler: Timer = Timer()
         profiler.start()
@@ -547,7 +592,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         error_msg = f"errors: {errors}"
         profiler.stop()
 
-        return ValidationJobResponse(
+        return ExperimentResponse(
             id=job_id,
             ok=ok,
             error_msg=error_msg,
