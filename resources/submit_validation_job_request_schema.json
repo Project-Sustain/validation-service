@@ -1,6 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/Project-Sustain/validation-service/main/resources/submit_validation_job_request_schema.json",
+  "$version": "v1.0.0",
   "title": "SubmitValidationJobRequest",
   "description": "A schema for the JSON request portion of a SubmitValidationJob HTTP multipart/form request.",
   "type": "object",
