@@ -1,6 +1,8 @@
 import json
 import grpc
 import hashlib
+import jsonschema
+from jsonschema import validate
 from flask import Flask, request, jsonify
 from http import HTTPStatus
 from pprint import pprint
@@ -53,7 +55,7 @@ def default_route():
 
 @app.route("/validation_service/schema", methods=["GET"])
 def get_schema():
-    info(f"Recieved GET request for ")
+    info(f"Received GET request for ")
     with open("./resources/submit_validation_job_request_schema.json", "r") as f:
         schema_json = json.load(f)
     return jsonify(schema_json)
@@ -134,7 +136,10 @@ def validation():
         return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), HTTPStatus.BAD_REQUEST
 
     validation_request: dict = json.loads(validation_request_str)
-    pprint(validation_request)
+    info(validation_request)
+    ok, err_msg = validate_request_json(validation_request)
+    if not ok:
+        return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), HTTPStatus.BAD_REQUEST
 
     # Check if the POST request has the file part
     if "file" not in request.files:
@@ -193,3 +198,25 @@ def validation():
 
 def build_json_response(validation_grpc_response: ValidationJobResponse) -> str:
     return MessageToJson(validation_grpc_response, preserving_proto_field_name=True)
+
+
+def validate_request_json(request_json: dict) -> (bool, str):
+    """Validates a JSON request in the form of a Python object.
+        Returns a bool ok and a str msg"""
+    schema: dict = get_schema()
+    try:
+        validate(instance=request_json, schema=schema)
+    except jsonschema.exceptions.ValidationError as err:
+        err_msg = f"Given JSON data is Invalid: {err.message}"
+        error(err_msg)
+        return False, err_msg
+
+    info("JSON request is valid")
+    return True, ""
+
+
+def get_schema() -> dict:
+    """Loads the given schema from resources/"""
+    with open("resources/submit_validation_job_request_schema.json", "r") as file:
+        schema: dict = json.load(file)
+    return schema
