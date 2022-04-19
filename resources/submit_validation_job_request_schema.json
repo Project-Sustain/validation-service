@@ -72,16 +72,42 @@
       }
     }
   },
-  "required": [
-    "model_framework",
-    "model_category",
-    "database",
-    "collection",
-    "feature_fields",
-    "label_field",
-    "spatial_resolution",
-    "normalize_inputs",
-    "loss_function",
-    "spatial_coverage"
+  "anyOf": [
+    {
+      "not": {
+        "properties": {
+          "spatial_coverage": {
+            "const": "SUBSET"
+          }
+        },
+        "required": [
+          "model_framework",
+          "model_category",
+          "database",
+          "collection",
+          "feature_fields",
+          "label_field",
+          "spatial_resolution",
+          "normalize_inputs",
+          "loss_function",
+          "spatial_coverage"
+        ]
+      }
+    },
+    {
+      "required": [
+        "model_framework",
+        "model_category",
+        "database",
+        "collection",
+        "feature_fields",
+        "label_field",
+        "spatial_resolution",
+        "normalize_inputs",
+        "loss_function",
+        "spatial_coverage",
+        "gis_joins"
+      ]
+    }
   ]
 }
