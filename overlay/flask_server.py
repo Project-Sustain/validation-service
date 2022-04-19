@@ -1,7 +1,7 @@
 import json
 import grpc
 import hashlib
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from http import HTTPStatus
 from pprint import pprint
 from logging import info, error
@@ -47,7 +47,16 @@ def file_type(filename) -> ModelFileType:
 
 @app.route("/validation_service", methods=["GET"])
 def default_route():
-    return "Welcome to the Sustain Validation Service"
+    return "Welcome to the Sustain Validation Service! Query /validation_service/schema with HTTP GET for a request " \
+           "schema. "
+
+
+@app.route("/validation_service/schema", methods=["GET"])
+def get_schema():
+    info(f"Recieved GET request for ")
+    with open("../resources/submit_validation_job_request_schema.json", "r") as f:
+        schema_json = json.load(f)
+    return jsonify(schema_json)
 
 
 @app.route("/validation_service/submit_validation_experiment", methods=["POST"])
