@@ -54,7 +54,7 @@ def default_route():
 @app.route("/validation_service/schema", methods=["GET"])
 def get_schema():
     info(f"Recieved GET request for ")
-    with open("../resources/submit_validation_job_request_schema.json", "r") as f:
+    with open("./resources/submit_validation_job_request_schema.json", "r") as f:
         schema_json = json.load(f)
     return jsonify(schema_json)
 
