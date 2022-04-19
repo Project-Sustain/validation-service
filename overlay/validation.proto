@@ -10,6 +10,9 @@ service Master {
   // Submits a validation job to the cluster
   rpc SubmitValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
 
+  // Submits a validation job experiment to the cluster
+  rpc SubmitExperiment(ValidationJobRequest) returns (ExperimentResponse) {}
+
   // Registers a Worker to track
   rpc RegisterWorker (WorkerRegistrationRequest) returns (WorkerRegistrationResponse) {}
 
@@ -62,12 +65,20 @@ message ValidationJobRequest {
   ModelFile model_file = 20;
 }
 
-message ValidationJobResponse {
+message ExperimentResponse {
   string id = 1;
   bool ok = 2;
   string error_msg = 3;
   double duration_sec = 4;
   repeated WorkerValidationJobResponse worker_responses = 5;
+}
+
+message ValidationJobResponse {
+  string id = 1;
+  bool ok = 2;
+  string error_msg = 3;
+  double duration_sec = 4;
+  repeated ValidationMetric metrics = 5;
 }
 
 message WorkerValidationJobResponse {

@@ -25,6 +25,11 @@ class MasterStub(object):
                 request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
                 response_deserializer=validation__pb2.ValidationJobResponse.FromString,
                 )
+        self.SubmitExperiment = channel.unary_unary(
+                '/Master/SubmitExperiment',
+                request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
+                response_deserializer=validation__pb2.ExperimentResponse.FromString,
+                )
         self.RegisterWorker = channel.unary_unary(
                 '/Master/RegisterWorker',
                 request_serializer=validation__pb2.WorkerRegistrationRequest.SerializeToString,
@@ -50,6 +55,13 @@ class MasterServicer(object):
 
     def SubmitValidationJob(self, request, context):
         """Submits a validation job to the cluster
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def SubmitExperiment(self, request, context):
+        """Submits a validation job experiment to the cluster
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -81,6 +93,11 @@ def add_MasterServicer_to_server(servicer, server):
                     servicer.SubmitValidationJob,
                     request_deserializer=validation__pb2.ValidationJobRequest.FromString,
                     response_serializer=validation__pb2.ValidationJobResponse.SerializeToString,
+            ),
+            'SubmitExperiment': grpc.unary_unary_rpc_method_handler(
+                    servicer.SubmitExperiment,
+                    request_deserializer=validation__pb2.ValidationJobRequest.FromString,
+                    response_serializer=validation__pb2.ExperimentResponse.SerializeToString,
             ),
             'RegisterWorker': grpc.unary_unary_rpc_method_handler(
                     servicer.RegisterWorker,
@@ -134,6 +151,23 @@ class Master(object):
         return grpc.experimental.unary_unary(request, target, '/Master/SubmitValidationJob',
             validation__pb2.ValidationJobRequest.SerializeToString,
             validation__pb2.ValidationJobResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def SubmitExperiment(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/Master/SubmitExperiment',
+            validation__pb2.ValidationJobRequest.SerializeToString,
+            validation__pb2.ExperimentResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

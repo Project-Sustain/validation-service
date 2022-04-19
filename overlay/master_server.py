@@ -12,9 +12,10 @@ from overlay import validation_pb2_grpc
 from overlay.db import shards, locality
 from overlay.db.shards import ShardMetadata
 from overlay.profiler import Timer
+from overlay.structures import GisTree, GisNode
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
-    SpatialAllocation, SpatialResolution
+    SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric
 
 
 class JobMetadata:
@@ -239,6 +240,44 @@ def save_gis_join_counts(counts) -> None:
         json.dump(counts, f)
 
     info(f"Saved {filename}")
+
+def aggregate_metrics_by_state(flattened_metrics: list) -> list:  # returns list(ValidationMetric) at State level
+
+    # Build a prefix tree with the contents of gis_join -> {"metric": ValidationMetric}
+    gis_tree: GisTree = GisTree()
+    for metric in flattened_metrics:
+        gis_join: str = metric.gis_join
+        gis_tree.insert_county(gis_join, {"metric": metric})
+
+    # state is of type GisNode
+    state_metrics: list = []
+    for state_node in gis_tree.get_states():
+        count = 0
+        state_allocation = 0
+        state_loss = 0.0
+        state_variance = 0.0
+        state_duration_sec = 0.0
+
+        for county_gis_join, county_node in state_node.children.items():
+            county_metric: ValidationMetric = county_node.contents["metric"]
+            if county_metric.ok:
+                state_allocation += county_metric.allocation
+                state_variance += county_metric.variance
+                state_loss += county_metric.loss
+                state_duration_sec += county_metric.duration_sec
+                count += 1
+
+        state_loss /= count
+        state_variance /= count
+        state_metrics.append(ValidationMetric(
+            gis_join=state_node.gis_join,
+            allocation=state_allocation,
+            loss=state_loss,
+            variance=state_variance,
+            duration_sec=state_duration_sec
+        ))
+
+    return state_metrics
 
 
 class Master(validation_pb2_grpc.MasterServicer):
@@ -468,7 +507,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
     # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
     # for the ShardMetadata objects.
-    def RegisterWorker(self, request: WorkerRegistrationRequest, context):
+    def RegisterWorker(self, request: WorkerRegistrationRequest, context) -> WorkerRegistrationResponse:
         info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
         # Create a ShardMetadata for the registered worker if its shard is not already known
@@ -499,7 +538,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         self.tracked_workers[request.hostname] = worker
         return WorkerRegistrationResponse(success=True)
 
-    def DeregisterWorker(self, request, context):
+    def DeregisterWorker(self, request, context) -> WorkerRegistrationResponse:
         info(f"Received Worker(De)RegistrationRequest: hostname={request.hostname}, port={request.port}")
 
         if self.is_worker_registered(request.hostname):
@@ -511,8 +550,57 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(f"Worker {request.hostname} is not registered, can't remove")
             return WorkerRegistrationResponse(success=False)
 
-    def SubmitValidationJob(self, request: ValidationJobRequest, context):
+    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> ValidationJobResponse:
+        # Time the entire job from start to finish
+        profiler: Timer = Timer()
+        profiler.start()
 
+        if request.spatial_coverage == SpatialCoverage.ALL:
+            info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
+        else:
+            info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
+
+        # Process the job with either a variance budget or static/default budget
+        if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
+            job_id, worker_responses = self.process_job_with_variance_budget(request)
+
+        else:  # Default or static budget
+            job_id, worker_responses = self.process_job_with_normal_budget(request)
+
+        # Flattened list of metrics, instead of being nested in respective Worker responses
+        flattened_metrics: list = []
+        errors = []
+        ok = True
+
+        if len(worker_responses) == 0:
+            error_msg = "Did not receive any responses from workers"
+            ok = False
+            error(error_msg)
+            errors.append(error_msg)
+        else:
+            for worker_response in worker_responses:
+                if not worker_response.ok:
+                    ok = False
+                    error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
+                    errors.append(error_msg)
+                for metric in worker_response.metrics:
+                    flattened_metrics.append(metric)
+
+        if request.spatial_resolution == SpatialResolution.STATE:
+            flattened_metrics = aggregate_metrics_by_state(flattened_metrics)
+
+        error_msg = f"errors: {errors}"
+        profiler.stop()
+
+        return ValidationJobResponse(
+            id=job_id,
+            ok=ok,
+            error_msg=error_msg,
+            duration_sec=profiler.elapsed,
+            metrics=flattened_metrics
+        )
+
+    def SubmitExperiment(self, request: ValidationJobRequest, context) -> ExperimentResponse:
         # Time the entire job from start to finish
         profiler: Timer = Timer()
         profiler.start()
@@ -547,7 +635,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         error_msg = f"errors: {errors}"
         profiler.stop()
 
-        return ValidationJobResponse(
+        return ExperimentResponse(
             id=job_id,
             ok=ok,
             error_msg=error_msg,
@@ -556,7 +644,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         )
 
 
-def run(master_port=50051):
+def run(master_port=50051) -> None:
 
     # Initialize server and master
     master_hostname: str = socket.gethostname()
