@@ -123,5 +123,12 @@
       {"human_readable": "County", "protobuf_type": "COUNTY"},
       {"human_readable": "State", "protobuf_type": "STATE"}
     ]
+  },
+  "spatial_coverages": {
+    "description": "Supported spatial coverage types for model validation",
+    "values": [
+      {"human_readable": "Viewport", "protobuf_type": "SUBSET"},
+      {"human_readable": "All", "protobuf_type": "ALL"}
+    ]
   }
 }
