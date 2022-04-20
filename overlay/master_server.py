@@ -645,6 +645,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
 
 def run(master_port=50051) -> None:
+    locality.discover_gis_join_counts()
 
     # Initialize server and master
     master_hostname: str = socket.gethostname()
