@@ -130,8 +130,8 @@ def main():
 
     features_df, label_df = load_from_disk()
     regression_model: tf.keras.Model = create_and_train_regression_model(features_df, label_df)
-    regression_model.save("my_regression_model.h5")
-    loaded_model: tf.keras.Model = tf.keras.models.load_model("my_regression_model.h5")
+    regression_model.save("/home/inf0rmatiker/my_regression_model.h5")
+    loaded_model: tf.keras.Model = tf.keras.models.load_model("/home/inf0rmatiker/my_regression_model.h5")
     loaded_model.summary()
 
     # validation_results = loaded_model.evaluate(features_df, label_df, batch_size=128, return_dict=True, verbose=1)
