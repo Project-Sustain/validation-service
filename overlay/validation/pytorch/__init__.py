@@ -76,6 +76,7 @@ def validate_model(
                 "loss": 0.0
             }
 
+        model.eval()
         if verbose:
             model_description = f'{model}\nParameters:\n'
             for param in model.parameters():
