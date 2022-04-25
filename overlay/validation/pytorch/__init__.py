@@ -141,11 +141,12 @@ def validate_model(
         absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
 
     elif loss_function == "MEAN_SQUARED_ERROR":
-        criterion = torch.nn.MSELoss()
-        y_predicted = model(inputs)
-        y_predicted_numpy = y_predicted.detach().numpy()
-        loss = criterion(y_predicted, y_true)
-        squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
+        with torch.no_grad():
+            criterion = torch.nn.MSELoss()
+            y_predicted = model(inputs)
+            y_predicted_numpy = y_predicted.detach().numpy()
+            loss = criterion(y_predicted, y_true)
+            squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         criterion = torch.nn.MSELoss()
