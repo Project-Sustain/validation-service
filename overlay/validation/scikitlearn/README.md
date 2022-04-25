@@ -108,3 +108,53 @@
 
 * `support_vectors_` : ndarray of shape (n_SV, n_features)
     Support vectors.
+
+
+### Random Forest Regression
+
+* `base_estimator_` : DecisionTreeRegressor
+    The child estimator template used to create the collection of fitted
+    sub-estimators.
+
+* `estimators_` : list of DecisionTreeRegressor
+    The collection of fitted sub-estimators.
+
+* `feature_importances_` : ndarray of shape (n_features,)
+    The impurity-based feature importances.
+    The higher, the more important the feature.
+    The importance of a feature is computed as the (normalized)
+    total reduction of the criterion brought by that feature.  It is also
+    known as the Gini importance.
+
+    Warning: impurity-based feature importances can be misleading for
+    high cardinality features (many unique values). See
+    :func:`sklearn.inspection.permutation_importance` as an alternative.
+
+* `n_features_` : int
+    The number of features when ``fit`` is performed.
+
+    .. deprecated:: 1.0
+        Attribute `n_features_` was deprecated in version 1.0 and will be
+        removed in 1.2. Use `n_features_in_` instead.
+
+* `n_features_in_` : int
+    Number of features seen during :term:`fit`.
+
+    .. versionadded:: 0.24
+
+* `feature_names_in_` : ndarray of shape (`n_features_in_`,)
+    Names of features seen during :term:`fit`. Defined only when `X`
+    has feature names that are all strings.
+
+    .. versionadded:: 1.0
+
+* `n_outputs_` : int
+    The number of outputs when ``fit`` is performed.
+
+* `oob_score_` : float
+    Score of the training dataset obtained using an out-of-bag estimate.
+    This attribute exists only when ``oob_score`` is True.
+
+* `oob_prediction_` : ndarray of shape (n_samples,) or (n_samples, n_outputs)
+    Prediction computed with out-of-bag estimate on the training set.
+    This attribute exists only when ``oob_score`` is True.
