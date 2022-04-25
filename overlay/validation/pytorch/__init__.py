@@ -162,11 +162,11 @@ def validate_model(
             # y_predicted = model(x)
 
         # evaluate model
-        inputs_numpy = features_df.values.astype(np.float32)
-        y_true_numpy = label_df.values.astype(np.float32)
-        inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
-        y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
-        y_true = y_true.view(y_true.shape[0], 1)  # convert y to a column vector
+        # inputs_numpy = features_df.values.astype(np.float32)
+        # y_true_numpy = label_df.values.astype(np.float32)
+        # inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
+        # y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
+        # y_true = y_true.view(y_true.shape[0], 1)  # convert y to a column vector
 
         n_samples, n_features = inputs.shape
         info(f'n_samples: {n_samples}, n_features: {n_features}')
@@ -176,7 +176,7 @@ def validate_model(
             y_predicted = model(inputs)
             y_predicted_numpy = y_predicted.numpy()
             loss = criterion(y_predicted, y_true)
-            absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
+            # absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
 
         elif loss_function == "MEAN_SQUARED_ERROR":
             # with torch.set_grad_enabled(False):
@@ -194,7 +194,7 @@ def validate_model(
             y_predicted = model(inputs)
             y_predicted_numpy = y_predicted.cpu().numpy()
             loss = sqrt(criterion(y_predicted, y_true))
-            squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
+            # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
 
         elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
             criterion = torch.nn.NLLLoss()
