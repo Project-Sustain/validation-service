@@ -18,7 +18,7 @@ if not os.path.exists(experiment_request):
     print(f"{experiment_request} does not exist! Please create first (hint, use the testing/test_requests/ JSON requests as a template example)")
     exit(1)
 
-url = "lattice-150.cs.colostate.edu:5000/validation_service/submit_validation_job"
+url = "lattice-150.cs.colostate.edu:5000/validation_service/submit_validation_experiment"
 request_file = f"/s/parsons/b/others/sustain/SustainProject/validation-service/benchmarks/{experiment_dir}/request.json"
 
 with open(request_file, "r") as rfile:

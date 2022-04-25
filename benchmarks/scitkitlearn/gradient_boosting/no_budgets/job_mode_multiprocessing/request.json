@@ -1,7 +1,7 @@
 {
   "master_job_mode": "ASYNCHRONOUS",
   "worker_job_mode": "MULTIPROCESSING",
-  "model_framework": "PYTORCH",
+  "model_framework": "SCIKIT_LEARN",
   "model_category": "REGRESSION",
   "mongo_host": "localhost",
   "mongo_port": 27017,
@@ -33,7 +33,7 @@
       "sample_rate": 0.0
     }
   },
-  "spatial_resolution": "STATE",
   "loss_function": "MEAN_SQUARED_ERROR",
+  "spatial_resolution": "COUNTY",
   "spatial_coverage": "ALL"
 }

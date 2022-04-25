@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Project-Sustain/validation-service/main/resources/submit_validation_job_request_schema.json",
+  "$version": "v1.0.0",
+  "title": "SubmitValidationJobRequest",
+  "description": "A schema for the JSON request portion of a SubmitValidationJob HTTP multipart/form request.",
+  "type": "object",
+  "properties": {
+    "model_framework": {
+      "description": "The modeling framework used to both build the original model as given and to validate it on ground truth.",
+      "enum": [
+        "TENSORFLOW",
+        "SCIKIT_LEARN",
+        "PYTORCH"
+      ]
+    },
+    "model_category": {
+      "description": "The category of model used for validation.",
+      "enum": [
+        "REGRESSION"
+      ]
+    },
+    "database": {
+      "description": "The name of the MongoDB database to use for model validation.",
+      "type": "string"
+    },
+    "collection": {
+      "description": "The name of the MongoDB collection to use for model validation.",
+      "type": "string"
+    },
+    "feature_fields": {
+      "description": "The fields to use as features for model validation.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "label_field": {
+      "description": "The field to use as a label for model validation.",
+      "type": "string"
+    },
+    "spatial_resolution": {
+      "description": "The geospatial resolution to evaluate the model with.",
+      "enum": [
+        "STATE",
+        "COUNTY"
+      ]
+    },
+    "normalize_inputs": {
+      "description": "A boolean flag indicating whether or not to normalize the input data before feeding it to the model for validation.",
+      "type": "boolean"
+    },
+    "loss_function": {
+      "description": "The loss function used to evaluate the model's performance.",
+      "enum": [
+        "MEAN_SQUARED_ERROR",
+        "MEAN_ABSOLUTE_ERROR",
+        "ROOT_MEAN_SQUARED_ERROR"
+      ]
+    },
+    "spatial_coverage": {
+      "description": "The area of geospatial coverage requested for model validation. Use ALL for evaluating the model on all available spatial extents at the chosen spatial resolution, or use SUBSET with the gis_joins field to specify a specific set of GISJOINs to be evaluated.",
+      "enum": [
+        "SUBSET",
+        "ALL"
+      ]
+    },
+    "gis_joins": {
+      "description": "A list of GISJOIN values for either states or counties to evaluate the model on. Must be supplied only when spatial_coverage ALL is selected.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "not": {
+        "properties": {
+          "spatial_coverage": {
+            "const": "SUBSET"
+          }
+        },
+        "required": [
+          "model_framework",
+          "model_category",
+          "database",
+          "collection",
+          "feature_fields",
+          "label_field",
+          "spatial_resolution",
+          "normalize_inputs",
+          "loss_function",
+          "spatial_coverage"
+        ]
+      }
+    },
+    {
+      "required": [
+        "model_framework",
+        "model_category",
+        "database",
+        "collection",
+        "feature_fields",
+        "label_field",
+        "spatial_resolution",
+        "normalize_inputs",
+        "loss_function",
+        "spatial_coverage",
+        "gis_joins"
+      ]
+    }
+  ]
+}
