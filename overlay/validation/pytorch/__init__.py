@@ -175,6 +175,10 @@ def validate_model(
         return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
     del model  # hopefully this frees up memory
+    del inputs
+    del y_true
+    del y_predicted
+    gc.collect()
     profiler.stop()
     variance_of_residuals = 0.0
 
