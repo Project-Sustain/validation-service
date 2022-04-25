@@ -67,7 +67,6 @@ def validate_model(
                  f"estimators: {model.estimators_},"
                  f"n_classes: {model.n_classes_},"
                  f"n_estimators: {model.n_estimators_},"
-                 f"n_features: {model.n_features_},"
                  f"max_features: {model.max_features_})")
         elif model_type == "SVR":
             info(f"Model Description(class_weight: {model.class_weight_},"
