@@ -33,6 +33,7 @@
       "sample_rate": 0.0
     }
   },
+  "spatial_resolution": "STATE",
   "loss_function": "MEAN_SQUARED_ERROR",
   "spatial_coverage": "ALL"
 }
