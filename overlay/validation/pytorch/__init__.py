@@ -53,6 +53,7 @@ def validate_model(
 
     # Load TorchScript PyTorch model from disk (OS should cache in memory for future loads)
     model = torch.jit.load(model_path)
+    model.eval()
 
     # Create or load persisted model metrics
     model_path_parts = model_path.split("/")[:-1]
@@ -144,8 +145,7 @@ def validate_model(
     elif loss_function == "MEAN_SQUARED_ERROR":
         criterion = torch.nn.MSELoss()
         y_predicted = model(inputs)
-        info("INBETWEEN")
-        y_predicted_numpy = y_predicted.detach().squeeze(-1).numpy()
+        y_predicted_numpy = y_predicted.detach().unsqueeze(-1).numpy()
         loss = criterion(y_predicted, y_true)
         squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
         welford_variance_calculator.add_all(squared_residuals)
