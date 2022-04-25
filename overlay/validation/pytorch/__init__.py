@@ -141,6 +141,9 @@ def validate_model(
         absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
 
     elif loss_function == "MEAN_SQUARED_ERROR":
+        # with torch.set_grad_enabled(False):
+        #     linear.eval()
+        #     print(linear.weight.requires_grad)
         with torch.no_grad():
             criterion = torch.nn.MSELoss()
             y_predicted = model(inputs)
