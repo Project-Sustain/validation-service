@@ -144,7 +144,8 @@ def validate_model(
     elif loss_function == "MEAN_SQUARED_ERROR":
         criterion = torch.nn.MSELoss()
         y_predicted = model(inputs)
-        y_predicted_numpy = y_predicted.detach().unsqueeze(-1).numpy()
+        info("INBETWEEN")
+        y_predicted_numpy = y_predicted.detach().squeeze(-1).numpy()
         loss = criterion(y_predicted, y_true)
         squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
         welford_variance_calculator.add_all(squared_residuals)
