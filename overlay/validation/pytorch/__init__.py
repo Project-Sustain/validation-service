@@ -178,6 +178,7 @@ def validate_model(
         warning(error_msg)
         return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
+    del model  # hopefully this frees up memory
     profiler.stop()
     variance_of_residuals = welford_variance_calculator.var_p
 
