@@ -26,7 +26,7 @@ def run(gis_join):
         "TOTAL_CLOUD_COVER_PERCENT"
     ]
     label = "SOIL_TEMPERATURE_0_TO_01_M_BELOW_SURFACE_KELVIN"
-    model_path = "../../testing/test_models/pytorch/neural_network/model.pt"
+    model_path = "../../../testing/test_models/pytorch/neural_network/model.pt"
     model = torch.jit.load(model_path)
     model.eval()
 
@@ -43,6 +43,8 @@ def run(gis_join):
     documents = coll.find(query, projection)
 
     features_df = pd.DataFrame(list(documents))
+    client.close()
+
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     print(f"Normalized Pandas DataFrame")
