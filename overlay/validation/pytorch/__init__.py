@@ -42,6 +42,7 @@ def validate_model(
     import gc
     from sklearn.preprocessing import MinMaxScaler
     from math import sqrt
+    from torch.utils.data import Dataset, DataLoader
 
     from overlay.db.querier import Querier
 
@@ -83,6 +84,8 @@ def validate_model(
                 model_description = f'{param}\n'
 
             info(f"Model :{model_description}")
+            info('Logging model.code...')
+            info(model.code)
 
         querier = Querier(
             mongo_host=mongo_host,
@@ -122,8 +125,40 @@ def validate_model(
         # Pop the label column off into its own DataFrame
         label_df = features_df.pop(label_field)
 
+        # Creating a Dataset and DataLoader for inference -----------------------------------
+        class CustomDataset(Dataset):
+            def __init__(self, data, targets):
+                # data loading
+                self.data = data
+                self.targets = targets
+
+            def __len__(self):
+                return self.data.shape[0]
+
+            def __getitem__(self, idx):
+                current_sample = self.data[idx, :]
+                current_target = self.targets[idx]
+                return {
+                    "x": torch.tensor(current_sample, dtype=torch.float),
+                    "y": torch.tensor(current_target, dtype=torch.float)
+                }
+
         if verbose:
             info(f"label_df: {label_df}")
+
+        dataset = CustomDataset(features_df, label_df)
+        test_loader = DataLoader(
+            dataset,
+            batch_size=32,
+            num_workers=1,
+        )
+
+        # TODO: use DataLoader for inference
+        # for data in test_loader:
+        #     x = data["x"]
+        #     y = data["y"]
+        #
+        #     y_predicted = model(x)
 
         # evaluate model
         inputs_numpy = features_df.values.astype(np.float32)
