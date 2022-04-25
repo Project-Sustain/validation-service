@@ -125,7 +125,7 @@ def validate_model(
     # evaluate model
     inputs_numpy = features_df.values.astype(np.float32)
     y_true_numpy = label_df.values.astype(np.float32)
-    inputs: torch.Tensor = torch.from_numpy(inputs_numpy).unsqueeze(-1)
+    inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
     y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
     y_true = y_true.view(y_true.shape[0], 1)  # convert y to a column vector
 
@@ -144,7 +144,7 @@ def validate_model(
     elif loss_function == "MEAN_SQUARED_ERROR":
         criterion = torch.nn.MSELoss()
         y_predicted = model(inputs)
-        y_predicted_numpy = y_predicted.detach().numpy()
+        y_predicted_numpy = y_predicted.detach().unsqueeze(-1).numpy()
         loss = criterion(y_predicted, y_true)
         squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
         welford_variance_calculator.add_all(squared_residuals)
