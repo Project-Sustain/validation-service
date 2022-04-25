@@ -39,7 +39,7 @@ def validate_model(
     import json
     import pandas as pd
     import numpy as np
-    from welford import Welford
+    import gc
     from sklearn.preprocessing import MinMaxScaler
     from math import sqrt
 
@@ -133,14 +133,12 @@ def validate_model(
     n_samples, n_features = inputs.shape
     info(f'n_samples: {n_samples}, n_features: {n_features}')
 
-    welford_variance_calculator = Welford()
     if loss_function == "MEAN_ABSOLUTE_ERROR":
         criterion = torch.nn.L1Loss()
         y_predicted = model(inputs)
         y_predicted_numpy = y_predicted.numpy()
         loss = criterion(y_predicted, y_true)
         absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
-        welford_variance_calculator.add_all(absolute_residuals)
 
     elif loss_function == "MEAN_SQUARED_ERROR":
         criterion = torch.nn.MSELoss()
@@ -148,7 +146,6 @@ def validate_model(
         y_predicted_numpy = y_predicted.detach().numpy()
         loss = criterion(y_predicted, y_true)
         squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
-        welford_variance_calculator.add_all(squared_residuals)
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         criterion = torch.nn.MSELoss()
@@ -156,7 +153,6 @@ def validate_model(
         y_predicted_numpy = y_predicted.cpu().numpy()
         loss = sqrt(criterion(y_predicted, y_true))
         squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
-        welford_variance_calculator.add_all(squared_residuals)
 
     elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
         criterion = torch.nn.NLLLoss()
@@ -180,7 +176,7 @@ def validate_model(
 
     del model  # hopefully this frees up memory
     profiler.stop()
-    variance_of_residuals = welford_variance_calculator.var_p
+    variance_of_residuals = 0.0
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
     return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed
