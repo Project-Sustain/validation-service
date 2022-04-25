@@ -149,16 +149,17 @@ def validate_model(
         dataset = CustomDataset(features_df, label_df)
         test_loader = DataLoader(
             dataset,
-            batch_size=32,
+            batch_size=features_df.shape[0],
             num_workers=1,
         )
 
         # TODO: use DataLoader for inference
-        # for data in test_loader:
-        #     x = data["x"]
-        #     y = data["y"]
-        #
-        #     y_predicted = model(x)
+        for data in test_loader:
+            model.eval()
+            inputs = data["x"]
+            y_true = data["y"]
+
+            # y_predicted = model(x)
 
         # evaluate model
         inputs_numpy = features_df.values.astype(np.float32)
@@ -184,9 +185,9 @@ def validate_model(
             with torch.no_grad():
                 criterion = torch.nn.MSELoss()
                 y_predicted = model(inputs)
-                y_predicted_numpy = y_predicted.detach().numpy()
+                # y_predicted_numpy = y_predicted.detach().numpy()
                 loss = criterion(y_predicted, y_true)
-                squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
+                # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
 
         elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
             criterion = torch.nn.MSELoss()
