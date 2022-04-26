@@ -53,174 +53,139 @@ def validate_model(
     profiler.start()
 
     # Load TorchScript PyTorch model from disk (OS should cache in memory for future loads)
-    with torch.inference_mode():
-        model = torch.jit.load(model_path)
-        model.eval()
+    model = torch.jit.load(model_path)
+    model.eval()
 
-        # Create or load persisted model metrics
-        model_path_parts = model_path.split("/")[:-1]
-        model_dir = "/".join(model_path_parts)
-        model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
-        if os.path.exists(model_metrics_path):
-            info(f"P{model_metrics_path} exists, loading")
-            with open(model_metrics_path, "r") as f:
-                current_model_metrics = json.load(f)
-        else:
-            info(f"P{model_metrics_path} does not exist, initializing for first time")
-            # First time calculating variance/errors for model
-            current_model_metrics = {
-                "gis_join": gis_join,
-                "allocation": 0,
-                "variance": 0.0,
-                "m": 0.0,
-                "s": 0.0,
-                "loss": 0.0
-            }
+    # Create or load persisted model metrics
+    model_path_parts = model_path.split("/")[:-1]
+    model_dir = "/".join(model_path_parts)
+    model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
+    if os.path.exists(model_metrics_path):
+        info(f"P{model_metrics_path} exists, loading")
+        with open(model_metrics_path, "r") as f:
+            current_model_metrics = json.load(f)
+    else:
+        info(f"P{model_metrics_path} does not exist, initializing for first time")
+        # First time calculating variance/errors for model
+        current_model_metrics = {
+            "gis_join": gis_join,
+            "allocation": 0,
+            "variance": 0.0,
+            "m": 0.0,
+            "s": 0.0,
+            "loss": 0.0
+        }
 
-        model.eval()
-        if verbose:
-            model_description = f'{model}\nParameters:\n'
-            for param in model.parameters():
-                model_description = f'{param}\n'
+    if verbose:
+        model_description = f'{model}\nParameters:\n'
+        for param in model.parameters():
+            model_description = f'{param}\n'
 
-            info(f"Model :{model_description}")
-            info('Logging model.code...')
-            info(model.code)
+        info(f"Model :{model_description}")
+        info('Logging model.code...')
+        info(model.code)
 
-        querier = Querier(
-            mongo_host=mongo_host,
-            mongo_port=mongo_port,
-            db_name=database,
-            read_preference=read_preference,
-            read_concern=read_concern
-        )
+    querier = Querier(
+        mongo_host=mongo_host,
+        mongo_port=mongo_port,
+        db_name=database,
+        read_preference=read_preference,
+        read_concern=read_concern
+    )
 
-        documents = querier.spatial_query(
-            collection_name=collection,
-            gis_join=gis_join,
-            features=feature_fields,
-            label=label_field,
-            limit=limit,
-            sample_rate=sample_rate
-        )
+    documents = querier.spatial_query(
+        collection_name=collection,
+        gis_join=gis_join,
+        features=feature_fields,
+        label=label_field,
+        limit=limit,
+        sample_rate=sample_rate
+    )
 
-        # Load MongoDB Documents into Pandas DataFrame
-        features_df = pd.DataFrame(list(documents))
-        querier.close()
+    # Load MongoDB Documents into Pandas DataFrame
+    features_df = pd.DataFrame(list(documents))
+    querier.close()
 
-        allocation: int = len(features_df.index)
-        info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+    allocation: int = len(features_df.index)
+    info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
-        if allocation == 0:
-            error_msg = f"No records found for GISJOIN {gis_join}"
-            error(error_msg)
-            return gis_join, 0, -1.0, -1.0, not ok, error_msg, 0.0
+    if allocation == 0:
+        error_msg = f"No records found for GISJOIN {gis_join}"
+        error(error_msg)
+        return gis_join, 0, -1.0, -1.0, not ok, error_msg, 0.0
 
-        # Normalize features, if requested
-        if normalize_inputs:
-            scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
-            features_df = pd.DataFrame(scaled, columns=features_df.columns)
-            info(f"Normalized Pandas DataFrame")
+    # Normalize features, if requested
+    if normalize_inputs:
+        scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        features_df = pd.DataFrame(scaled, columns=features_df.columns)
+        info(f"Normalized Pandas DataFrame")
 
-        # Pop the label column off into its own DataFrame
-        label_df = features_df.pop(label_field)
+    # Pop the label column off into its own DataFrame
+    label_df = features_df.pop(label_field)
 
-        # Creating a Dataset and DataLoader for inference -----------------------------------
-        class CustomDataset(Dataset):
-            def __init__(self, data, targets):
-                # data loading
-                self.data = data
-                self.targets = targets
+    if verbose:
+        info(f"label_df: {label_df}")
 
-            def __len__(self):
-                return self.data.shape[0]
+    inputs_tensor = torch.tensor(features_df.values, dtype=torch.float32, requires_grad=False)
+    y_true_tensor = torch.tensor(label_df.values, dtype=torch.float32, requires_grad=False)
+    y_true_tensor = y_true_tensor.view(y_true_tensor.shape[0], 1).squeeze(-1)
 
-            def __getitem__(self, idx):
-                current_sample = self.data[idx, :]
-                current_target = self.targets[idx]
-                return {
-                    "x": torch.tensor(current_sample, dtype=torch.float),
-                    "y": torch.tensor(current_target, dtype=torch.float)
-                }
+    n_samples, n_features = inputs_tensor.shape
+    info(f'n_samples: {n_samples}, n_features: {n_features}')
 
-        if verbose:
-            info(f"label_df: {label_df}")
+    if loss_function == "MEAN_ABSOLUTE_ERROR":
+        pass
+        # criterion = torch.nn.L1Loss()
+        # y_predicted = model(inputs)
+        # y_predicted_numpy = y_predicted.numpy()
+        # loss = criterion(y_predicted, y_true)
+        # absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
 
-        dataset = CustomDataset(features_df, label_df)
-        test_loader = DataLoader(
-            dataset,
-            batch_size=features_df.shape[0],
-            num_workers=1,
-        )
-
-        # TODO: use DataLoader for inference
-        for data in test_loader:
-            model.eval()
-            inputs = data["x"]
-            y_true = data["y"]
-
-            # y_predicted = model(x)
-
-        # evaluate model
-        # inputs_numpy = features_df.values.astype(np.float32)
-        # y_true_numpy = label_df.values.astype(np.float32)
-        # inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
-        # y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
-        # y_true = y_true.view(y_true.shape[0], 1)  # convert y to a column vector
-
-        n_samples, n_features = inputs.shape
-        info(f'n_samples: {n_samples}, n_features: {n_features}')
-
-        if loss_function == "MEAN_ABSOLUTE_ERROR":
-            criterion = torch.nn.L1Loss()
-            y_predicted = model(inputs)
-            y_predicted_numpy = y_predicted.numpy()
-            loss = criterion(y_predicted, y_true)
-            # absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
-
-        elif loss_function == "MEAN_SQUARED_ERROR":
-            # with torch.set_grad_enabled(False):
-            #     linear.eval()
-            #     print(linear.weight.requires_grad)
-            with torch.no_grad():
-                criterion = torch.nn.MSELoss()
-                y_predicted = model(inputs)
-                # y_predicted_numpy = y_predicted.detach().numpy()
-                loss = criterion(y_predicted, y_true)
-                # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
-
-        elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
+    elif loss_function == "MEAN_SQUARED_ERROR":
+        # with torch.set_grad_enabled(False):
+        #     linear.eval()
+        #     print(linear.weight.requires_grad)
+        with torch.no_grad():
             criterion = torch.nn.MSELoss()
-            y_predicted = model(inputs)
-            y_predicted_numpy = y_predicted.cpu().numpy()
-            loss = sqrt(criterion(y_predicted, y_true))
+            y_predicted = model(inputs_tensor)
+            # y_predicted_numpy = y_predicted.detach().numpy()
+            loss = criterion(y_predicted, y_true_tensor)
             # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
 
-        elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
-            criterion = torch.nn.NLLLoss()
-            y_predicted = model(inputs)
-            y_predicted_numpy = y_predicted.cpu().numpy()
-            loss = criterion(y_predicted, y_true)
+    elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
+        pass
+        # criterion = torch.nn.MSELoss()
+        # y_predicted = model(inputs)
+        # y_predicted_numpy = y_predicted.cpu().numpy()
+        # loss = sqrt(criterion(y_predicted, y_true))
+        # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
 
-        elif loss_function == "CROSS_ENTROPY_LOSS":
-            criterion = torch.nn.CrossEntropyLoss()
-            y_predicted = model(inputs)
-            y_predicted_numpy = y_predicted.cpu().numpy()
-            loss = criterion(y_predicted, y_true)
+    elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
+        pass
+        # criterion = torch.nn.NLLLoss()
+        # y_predicted = model(inputs)
+        # y_predicted_numpy = y_predicted.cpu().numpy()
+        # loss = criterion(y_predicted, y_true)
 
-        else:
-            profiler.stop()
-            error_msg = f"PyTorch validation: Unknown loss function: {loss_function}"
-            warning(error_msg)
-            return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
+    elif loss_function == "CROSS_ENTROPY_LOSS":
+        pass
+        # criterion = torch.nn.CrossEntropyLoss()
+        # y_predicted = model(inputs)
+        # y_predicted_numpy = y_predicted.cpu().numpy()
+        # loss = criterion(y_predicted, y_true)
 
-        del model  # hopefully this frees up memory
-        del inputs
-        del y_true
-        del y_predicted
-        gc.collect()
+    else:
         profiler.stop()
-        variance_of_residuals = 0.0
+        error_msg = f"PyTorch validation: Unknown loss function: {loss_function}"
+        warning(error_msg)
+        return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
-        info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-        return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed
+    del model  # hopefully this frees up memory
+    del inputs_tensor
+    del y_true_tensor
+    del y_predicted
+    profiler.stop()
+    variance_of_residuals = 0.0
+
+    info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
+    return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed
