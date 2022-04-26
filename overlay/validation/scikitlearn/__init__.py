@@ -79,13 +79,14 @@ def validate_model(
                  f"support: {model.support_},"
                  f"support_vectors_: {model.support_vectors_})")
         elif model_type == "RandomForestRegressor":
-            info(f"Model Description(base_estimator: {model.base_estimator_},"
-                 f"estimators: {model.estimators_}),"
-                 f"feature_importances_: {model.feature_importances_},"
-                 f"n_features_in: {model.n_features_in},"
-                 f"n_outputs: {model.n_outputs_},"
-                 f"oob_score: {model.oob_score_},"
-                 f"oob_prediction: {model.oob_score_}")
+            info(f"Selecting RandomForestRegressor")
+            # info(f"Model Description(base_estimator: {model.base_estimator_},"
+            #      f"estimators: {model.estimators_}),"
+            #      f"feature_importances_: {model.feature_importances_},"
+            #      f"n_features_in: {model.n_features_in},"
+            #      f"n_outputs: {model.n_outputs_},"
+            #      f"oob_score: {model.oob_score_},"
+            #      f"oob_prediction: {model.oob_score_}")
         else:
             error(f"Unsupported model type: {model_type}")
 
