@@ -1,5 +1,308 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<title>500 Internal Server Error</title>
-<h1>Internal Server Error</h1>
-<p>The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.</p>
-
+{
+  "id": "24307d50d80f4941b27bb883183ab7b0",
+  "ok": true,
+  "error_msg": "errors: []",
+  "duration_sec": 63.64793631597422,
+  "metrics": [
+    {
+      "gis_join": "G010",
+      "allocation": "16071",
+      "loss": 0.05566155165433884,
+      "duration_sec": 0.4281634381040931
+    },
+    {
+      "gis_join": "G050",
+      "allocation": "18993",
+      "loss": 0.051406629383563995,
+      "duration_sec": 0.5831531547009945
+    },
+    {
+      "gis_join": "G080",
+      "allocation": "93504",
+      "loss": 0.041527122259140015,
+      "duration_sec": 1.8734832312911749
+    },
+    {
+      "gis_join": "G120",
+      "allocation": "16071",
+      "loss": 0.07639992982149124,
+      "duration_sec": 0.28850566502660513
+    },
+    {
+      "gis_join": "G100",
+      "allocation": "13149",
+      "loss": 0.048065684735774994,
+      "duration_sec": 0.3234195215627551
+    },
+    {
+      "gis_join": "G130",
+      "allocation": "23376",
+      "loss": 0.044188763946294785,
+      "duration_sec": 0.4983743606135249
+    },
+    {
+      "gis_join": "G060",
+      "allocation": "130029",
+      "loss": 0.05476965010166168,
+      "duration_sec": 2.732416681945324
+    },
+    {
+      "gis_join": "G160",
+      "allocation": "54057",
+      "loss": 0.06197362020611763,
+      "duration_sec": 1.2186596160754561
+    },
+    {
+      "gis_join": "G170",
+      "allocation": "7305",
+      "loss": 0.06439268589019775,
+      "duration_sec": 0.1975694466382265
+    },
+    {
+      "gis_join": "G180",
+      "allocation": "11688",
+      "loss": 0.06386362761259079,
+      "duration_sec": 0.42253033723682165
+    },
+    {
+      "gis_join": "G190",
+      "allocation": "17532",
+      "loss": 0.065321184694767,
+      "duration_sec": 0.5610816720873117
+    },
+    {
+      "gis_join": "G200",
+      "allocation": "23376",
+      "loss": 0.048831596970558167,
+      "duration_sec": 0.4488068735226989
+    },
+    {
+      "gis_join": "G210",
+      "allocation": "10227",
+      "loss": 0.04819060489535332,
+      "duration_sec": 0.2484641531482339
+    },
+    {
+      "gis_join": "G220",
+      "allocation": "23376",
+      "loss": 0.0558185912668705,
+      "duration_sec": 0.49044270254671574
+    },
+    {
+      "gis_join": "G250",
+      "allocation": "13149",
+      "loss": 0.06097609922289848,
+      "duration_sec": 0.3381000133231282
+    },
+    {
+      "gis_join": "G260",
+      "allocation": "35064",
+      "loss": 0.04936571046710014,
+      "duration_sec": 0.7092517027631402
+    },
+    {
+      "gis_join": "G230",
+      "allocation": "23376",
+      "loss": 0.038663461804389954,
+      "duration_sec": 0.6126372506842017
+    },
+    {
+      "gis_join": "G270",
+      "allocation": "33603",
+      "loss": 0.05055946484208107,
+      "duration_sec": 0.6731465784832835
+    },
+    {
+      "gis_join": "G280",
+      "allocation": "18993",
+      "loss": 0.05230913311243057,
+      "duration_sec": 0.4634406864643097
+    },
+    {
+      "gis_join": "G290",
+      "allocation": "24837",
+      "loss": 0.05081988126039505,
+      "duration_sec": 0.4751789178699255
+    },
+    {
+      "gis_join": "G310",
+      "allocation": "13149",
+      "loss": 0.05554305016994476,
+      "duration_sec": 0.37401194404810667
+    },
+    {
+      "gis_join": "G300",
+      "allocation": "162171",
+      "loss": 0.03415524959564209,
+      "duration_sec": 3.12746683973819
+    },
+    {
+      "gis_join": "G330",
+      "allocation": "14610",
+      "loss": 0.05675486475229263,
+      "duration_sec": 0.381057433784008
+    },
+    {
+      "gis_join": "G370",
+      "allocation": "20454",
+      "loss": 0.06545593589544296,
+      "duration_sec": 0.5629775607958436
+    },
+    {
+      "gis_join": "G360",
+      "allocation": "17532",
+      "loss": 0.05517330765724182,
+      "duration_sec": 0.39845724683254957
+    },
+    {
+      "gis_join": "G390",
+      "allocation": "11688",
+      "loss": 0.06584357470273972,
+      "duration_sec": 0.39803562220185995
+    },
+    {
+      "gis_join": "G350",
+      "allocation": "51135",
+      "loss": 0.04052666574716568,
+      "duration_sec": 1.166355430148542
+    },
+    {
+      "gis_join": "G380",
+      "allocation": "36525",
+      "loss": 0.04311017692089081,
+      "duration_sec": 0.78730184212327
+    },
+    {
+      "gis_join": "G400",
+      "allocation": "65745",
+      "loss": 0.046867530792951584,
+      "duration_sec": 1.2803190490230918
+    },
+    {
+      "gis_join": "G420",
+      "allocation": "23376",
+      "loss": 0.05801863595843315,
+      "duration_sec": 0.4336298471316695
+    },
+    {
+      "gis_join": "G450",
+      "allocation": "14610",
+      "loss": 0.06227022036910057,
+      "duration_sec": 0.33612058963626623
+    },
+    {
+      "gis_join": "G470",
+      "allocation": "16071",
+      "loss": 0.07091829180717468,
+      "duration_sec": 0.2896835273131728
+    },
+    {
+      "gis_join": "G460",
+      "allocation": "61362",
+      "loss": 0.035914234817028046,
+      "duration_sec": 1.271147777326405
+    },
+    {
+      "gis_join": "G480",
+      "allocation": "67206",
+      "loss": 0.04359711334109306,
+      "duration_sec": 1.1552547980099916
+    },
+    {
+      "gis_join": "G410",
+      "allocation": "45291",
+      "loss": 0.06554148346185684,
+      "duration_sec": 0.92461031768471
+    },
+    {
+      "gis_join": "G490",
+      "allocation": "54057",
+      "loss": 0.047184739261865616,
+      "duration_sec": 0.9452465372160077
+    },
+    {
+      "gis_join": "G110",
+      "allocation": "1461",
+      "loss": 0.060919806361198425,
+      "duration_sec": 0.06718281656503677
+    },
+    {
+      "gis_join": "G320",
+      "allocation": "7305",
+      "loss": 0.06932801753282547,
+      "duration_sec": 0.23883389122784138
+    },
+    {
+      "gis_join": "G240",
+      "allocation": "11688",
+      "loss": 0.06357700377702713,
+      "duration_sec": 0.2999499663710594
+    },
+    {
+      "gis_join": "G340",
+      "allocation": "11688",
+      "loss": 0.0919913649559021,
+      "duration_sec": 0.3310241913422942
+    },
+    {
+      "gis_join": "G040",
+      "allocation": "162171",
+      "loss": 0.036478497087955475,
+      "duration_sec": 3.1996672498062253
+    },
+    {
+      "gis_join": "G090",
+      "allocation": "10227",
+      "loss": 0.03886549174785614,
+      "duration_sec": 0.18651151843369007
+    },
+    {
+      "gis_join": "G020",
+      "allocation": "175320",
+      "loss": 0.028437038883566856,
+      "duration_sec": 31.16529014799744
+    },
+    {
+      "gis_join": "G440",
+      "allocation": "2922",
+      "loss": 0.0692920982837677,
+      "duration_sec": 0.0720987357199192
+    },
+    {
+      "gis_join": "G500",
+      "allocation": "29220",
+      "loss": 0.05606495216488838,
+      "duration_sec": 0.6755981687456369
+    },
+    {
+      "gis_join": "G510",
+      "allocation": "11688",
+      "loss": 0.07763251662254333,
+      "duration_sec": 0.8388086790218949
+    },
+    {
+      "gis_join": "G530",
+      "allocation": "64284",
+      "loss": 0.02945674955844879,
+      "duration_sec": 1.4627872314304113
+    },
+    {
+      "gis_join": "G540",
+      "allocation": "10227",
+      "loss": 0.06789650022983551,
+      "duration_sec": 0.7551699047908187
+    },
+    {
+      "gis_join": "G550",
+      "allocation": "23376",
+      "loss": 0.05205010995268822,
+      "duration_sec": 3.0613500559702516
+    },
+    {
+      "gis_join": "G560",
+      "allocation": "197235",
+      "loss": 0.03866686299443245,
+      "duration_sec": 5.861255092546344
+    }
+  ]
+}
