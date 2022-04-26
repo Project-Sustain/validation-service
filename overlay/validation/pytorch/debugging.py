@@ -55,7 +55,7 @@ def run(gis_join):
     y_true_numpy = label_df.values.astype(np.float32)
     inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
     y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
-    y_true = y_true.view(y_true.shape[0]).squeeze(1)  # convert y to a column vector
+    y_true = y_true.view(y_true.shape[0], 1).squeeze(-1)  # convert y to a column vector
 
     n_samples, n_features = inputs.shape
     print(f'n_samples: {n_samples}, n_features: {n_features}')
