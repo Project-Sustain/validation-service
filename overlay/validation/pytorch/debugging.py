@@ -547,14 +547,28 @@ def run(gis_join):
     print(f">>> Getting tensors from pandas df: {profiler.elapsed} sec")
     profiler.reset()
 
+    profiler.start()
+
     n_samples, n_features = inputs_tensor.shape
     print(f'n_samples: {n_samples}, n_features: {n_features}')
 
     with torch.no_grad():
         criterion = torch.nn.MSELoss()
         y_predicted = model(inputs_tensor)
+
+        profiler.stop()
+        print(f">>> Getting predicted values from model: {profiler.elapsed} sec")
+        profiler.reset()
+
+        profiler.start()
+
         # y_predicted_numpy = y_predicted.detach().numpy()
         loss = criterion(y_predicted, y_true_tensor)
+
+        profiler.stop()
+        print(f">>> Getting loss criterion from residuals: {profiler.elapsed} sec")
+        profiler.reset()
+
         # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
         print(loss)
 
