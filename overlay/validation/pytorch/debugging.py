@@ -437,6 +437,8 @@ lattice_157_gis_joins = [
 
 
 def run(gis_join):
+    print(f"GISJOIN: {gis_join}")
+
     features = [
         "PRESSURE_REDUCED_TO_MSL_PASCAL",
         "VISIBILITY_AT_SURFACE_METERS",
