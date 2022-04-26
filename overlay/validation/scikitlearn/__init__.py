@@ -170,4 +170,10 @@ def validate_model(
     variance_of_residuals = welford_variance_calculator.var_p
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
+    info(f"gis_join: {gis_join}")
+    info(f"allocation: {allocation}")
+    info(f"loss: {loss}")
+    info(f"variance_of_residuals: {variance_of_residuals}")
+    info(f"ok: {ok}")
+    info(f"profiler.elapsed: {profiler.elapsed}")
     return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed
