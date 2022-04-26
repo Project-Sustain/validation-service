@@ -167,7 +167,8 @@ def validate_model(
     # evaluate model
     #score = model.score(features_df, label_df)
     profiler.stop()
-    variance_of_residuals = welford_variance_calculator.var_p
+    # variance_of_residuals = welford_variance_calculator.var_p
+    variance_of_residuals = 0
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
     info(f"gis_join: {gis_join}")
