@@ -4,6 +4,7 @@ import json
 import pandas as pd
 import numpy as np
 import gc
+import time
 import pymongo
 from pymongo import MongoClient
 from sklearn.preprocessing import MinMaxScaler
@@ -436,9 +437,47 @@ lattice_157_gis_joins = [
 ]
 
 
+class Timer:
+
+    def __init__(self, func=time.perf_counter):
+        self.elapsed = 0.0
+        self._func = func
+        self._start = None
+
+    # starting the module
+    def start(self):
+        if self._start is not None:
+            raise RuntimeError('Already started')
+        self._start = self._func()
+
+    # stopping the timer
+    def stop(self):
+        if self._start is None:
+            raise RuntimeError('Not started')
+        end = self._func()
+        self.elapsed += end - self._start
+        self._start = None
+
+    # resetting the timer
+    def reset(self):
+        self.elapsed = 0.0
+
+    def running(self):
+        return self._start is not None
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, *args):
+        self.stop()
+
+
 def run(gis_join):
     print(f"GISJOIN: {gis_join}")
 
+    profiler: Timer = Timer()
+    profiler.start()
     features = [
         "PRESSURE_REDUCED_TO_MSL_PASCAL",
         "VISIBILITY_AT_SURFACE_METERS",
@@ -456,6 +495,11 @@ def run(gis_join):
     model = torch.jit.load(model_path)
     model.eval()
 
+    profiler.stop()
+    print(f">>> Loading model: {profiler.elapsed} sec")
+    profiler.reset()
+
+    profiler.start()
     client = MongoClient("mongodb://localhost:27017")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
@@ -471,26 +515,46 @@ def run(gis_join):
     features_df = pd.DataFrame(list(documents))
     client.close()
 
+    profiler.stop()
+    print(f">>> Loading data into pandas df: {profiler.elapsed} sec")
+    profiler.reset()
+
+    profiler.start()
+
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
     print(f"Normalized Pandas DataFrame")
 
     label_df = features_df.pop(label)
 
-    inputs_numpy = features_df.values.astype(np.float32)
-    y_true_numpy = label_df.values.astype(np.float32)
-    inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
-    y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
-    y_true = y_true.view(y_true.shape[0], 1).squeeze(-1)  # convert y to a column vector
+    profiler.stop()
+    print(f">>> Normalizing pandas df: {profiler.elapsed} sec")
+    profiler.reset()
 
-    n_samples, n_features = inputs.shape
+    profiler.start()
+
+    #inputs_numpy = features_df.values.astype(np.float32)
+    #y_true_numpy = label_df.values.astype(np.float32)
+
+    inputs_tensor = torch.tensor(features_df.values, dtype=torch.float32, requires_grad=False)
+    y_true_tensor = torch.tensor(label_df.values, dtype=torch.float32, requires_grad=False)
+
+    #inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
+    #y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
+    y_true_tensor = y_true_tensor.view(y_true_tensor.shape[0], 1).squeeze(-1)  # convert y to a column vector
+
+    profiler.stop()
+    print(f">>> Getting tensors from pandas df: {profiler.elapsed} sec")
+    profiler.reset()
+
+    n_samples, n_features = inputs_tensor.shape
     print(f'n_samples: {n_samples}, n_features: {n_features}')
 
     with torch.no_grad():
         criterion = torch.nn.MSELoss()
-        y_predicted = model(inputs)
+        y_predicted = model(inputs_tensor)
         # y_predicted_numpy = y_predicted.detach().numpy()
-        loss = criterion(y_predicted, y_true)
+        loss = criterion(y_predicted, y_true_tensor)
         # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
         print(loss)
 
