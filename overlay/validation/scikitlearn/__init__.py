@@ -79,13 +79,14 @@ def validate_model(
                  f"support: {model.support_},"
                  f"support_vectors_: {model.support_vectors_})")
         elif model_type == "RandomForestRegressor":
-            info(f"Model Description(base_estimator: {model.base_estimator_},"
-                 f"estimators: {model.estimators_}),"
-                 f"feature_importances_: {model.feature_importances_},"
-                 f"n_features_in: {model.n_features_in},"
-                 f"n_outputs: {model.n_outputs_},"
-                 f"oob_score: {model.oob_score_},"
-                 f"oob_prediction: {model.oob_score_}")
+            info(f"Selecting RandomForestRegressor")
+            # info(f"Model Description(base_estimator: {model.base_estimator_},"
+            #      f"estimators: {model.estimators_}),"
+            #      f"feature_importances_: {model.feature_importances_},"
+            #      f"n_features_in: {model.n_features_in},"
+            #      f"n_outputs: {model.n_outputs_},"
+            #      f"oob_score: {model.oob_score_},"
+            #      f"oob_prediction: {model.oob_score_}")
         else:
             error(f"Unsupported model type: {model_type}")
 
@@ -166,7 +167,14 @@ def validate_model(
     # evaluate model
     #score = model.score(features_df, label_df)
     profiler.stop()
-    variance_of_residuals = welford_variance_calculator.var_p
+    # variance_of_residuals = welford_variance_calculator.var_p
+    variance_of_residuals = 0
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
+    info(f"gis_join: {gis_join}")
+    info(f"allocation: {allocation}")
+    info(f"loss: {loss}")
+    info(f"variance_of_residuals: {variance_of_residuals}")
+    info(f"ok: {ok}")
+    info(f"profiler.elapsed: {profiler.elapsed}")
     return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed
