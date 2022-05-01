@@ -1,4 +1,5 @@
 import os
+import psutil
 from logging import info, error
 from concurrent.futures import as_completed, ThreadPoolExecutor
 
@@ -141,6 +142,13 @@ class Validator:
                     ok=ok,
                     error_msg=error_msg
                 ))
+
+            # all tasks completed. kill all child processes
+            parent_pid = os.getpid()
+            parent = psutil.Process(parent_pid)
+            for child in parent.children(recursive=True):
+                info(f"Terminating Child Process: {child}")
+                child.kill()
 
         info(f"metrics: {len(metrics)} responses")
         return metrics
