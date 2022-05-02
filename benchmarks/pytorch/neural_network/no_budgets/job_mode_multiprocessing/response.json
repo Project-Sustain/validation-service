@@ -1,358 +1,358 @@
 {
-  "id": "2f87fbb441374e8a90e3211c75a5aeb1",
+  "id": "cd48c57d82e44ce984a08463785dba07",
   "ok": true,
   "error_msg": "errors: []",
-  "duration_sec": 23.80988613795489,
+  "duration_sec": 23.981010876130313,
   "metrics": [
     {
       "gis_join": "G010",
       "allocation": "16071",
       "loss": 0.055661555379629135,
       "variance": 0.002636535558849573,
-      "duration_sec": 0.3459856593981385
+      "duration_sec": 0.3935250844806433
     },
     {
       "gis_join": "G080",
       "allocation": "93504",
       "loss": 0.041527122259140015,
       "variance": 0.001534183043986559,
-      "duration_sec": 1.94675422180444
+      "duration_sec": 1.9935549264773726
     },
     {
       "gis_join": "G050",
       "allocation": "17532",
       "loss": 0.05468648299574852,
       "variance": 0.0026741609908640385,
-      "duration_sec": 0.45794962998479605
+      "duration_sec": 0.4327521352097392
+    },
+    {
+      "gis_join": "G100",
+      "allocation": "13149",
+      "loss": 0.048065681010484695,
+      "variance": 0.0019883897621184587,
+      "duration_sec": 0.2887412789859809
     },
     {
       "gis_join": "G120",
       "allocation": "16071",
       "loss": 0.07639992982149124,
       "variance": 0.005571634974330664,
-      "duration_sec": 0.367606527172029
-    },
-    {
-      "gis_join": "G100",
-      "allocation": "13149",
-      "loss": 0.048065681010484695,
-      "variance": 0.0019883892964571714,
-      "duration_sec": 0.2635882794857025
-    },
-    {
-      "gis_join": "G130",
-      "allocation": "23376",
-      "loss": 0.04418876767158508,
-      "variance": 0.002266411203891039,
-      "duration_sec": 0.5855922605842352
+      "duration_sec": 0.39132601488381624
     },
     {
       "gis_join": "G060",
       "allocation": "130029",
       "loss": 0.05476965755224228,
       "variance": 0.0020950811449438334,
-      "duration_sec": 2.379068076610565
+      "duration_sec": 2.5641858568415046
+    },
+    {
+      "gis_join": "G130",
+      "allocation": "23376",
+      "loss": 0.04418876767158508,
+      "variance": 0.002266411203891039,
+      "duration_sec": 0.49675870034843683
     },
     {
       "gis_join": "G170",
-      "allocation": "7305",
-      "loss": 0.06439268589019775,
-      "variance": 0.003570028580725193,
-      "duration_sec": 0.17667044512927532
+      "allocation": "13149",
+      "loss": 0.06026279181241989,
+      "variance": 0.002795635489746928,
+      "duration_sec": 0.3340126657858491
     },
     {
       "gis_join": "G160",
       "allocation": "54057",
       "loss": 0.06197362020611763,
       "variance": 0.002381341764703393,
-      "duration_sec": 1.1305886199697852
+      "duration_sec": 1.1064006248489022
     },
     {
       "gis_join": "G180",
-      "allocation": "11688",
-      "loss": 0.06562697142362595,
-      "variance": 0.0029939087107777596,
-      "duration_sec": 0.38407234475016594
+      "allocation": "8766",
+      "loss": 0.05446404591202736,
+      "variance": 0.0021270958241075277,
+      "duration_sec": 0.2961593382060528
     },
     {
       "gis_join": "G190",
       "allocation": "17532",
       "loss": 0.065321184694767,
       "variance": 0.0035297891590744257,
-      "duration_sec": 0.4162236200645566
+      "duration_sec": 0.444763345643878
     },
     {
       "gis_join": "G200",
       "allocation": "23376",
       "loss": 0.048831596970558167,
       "variance": 0.0028690691106021404,
-      "duration_sec": 0.5945573067292571
+      "duration_sec": 0.5472485702484846
     },
     {
       "gis_join": "G210",
-      "allocation": "7305",
-      "loss": 0.05996420606970787,
-      "variance": 0.002653858158737421,
-      "duration_sec": 0.23621802311390638
+      "allocation": "10227",
+      "loss": 0.04819060117006302,
+      "variance": 0.002331014256924391,
+      "duration_sec": 0.3580184802412987
     },
     {
       "gis_join": "G220",
       "allocation": "23376",
       "loss": 0.0558185875415802,
       "variance": 0.00288045359775424,
-      "duration_sec": 0.5539466636255383
+      "duration_sec": 0.3958406765013933
     },
     {
       "gis_join": "G250",
       "allocation": "13149",
       "loss": 0.06097610294818878,
       "variance": 0.001819081138819456,
-      "duration_sec": 0.31449110992252827
+      "duration_sec": 0.3005093242973089
     },
     {
       "gis_join": "G260",
       "allocation": "35064",
       "loss": 0.04936571046710014,
       "variance": 0.002221447415649891,
-      "duration_sec": 0.6839679386466742
-    },
-    {
-      "gis_join": "G270",
-      "allocation": "33603",
-      "loss": 0.05055946484208107,
-      "variance": 0.0026379087939858437,
-      "duration_sec": 0.6795862643048167
-    },
-    {
-      "gis_join": "G280",
-      "allocation": "20454",
-      "loss": 0.05284314230084419,
-      "variance": 0.002351851901039481,
-      "duration_sec": 0.5574768260121346
+      "duration_sec": 0.7788137393072248
     },
     {
       "gis_join": "G230",
       "allocation": "23376",
       "loss": 0.038663461804389954,
       "variance": 0.0013252097414806485,
-      "duration_sec": 0.5742295011878014
+      "duration_sec": 0.49814654514193535
+    },
+    {
+      "gis_join": "G270",
+      "allocation": "33603",
+      "loss": 0.05055946484208107,
+      "variance": 0.0026379087939858437,
+      "duration_sec": 0.7531097298488021
+    },
+    {
+      "gis_join": "G280",
+      "allocation": "18993",
+      "loss": 0.05230913311243057,
+      "variance": 0.002357034245505929,
+      "duration_sec": 0.46864851377904415
     },
     {
       "gis_join": "G290",
-      "allocation": "11688",
-      "loss": 0.05689648538827896,
-      "variance": 0.002897718921303749,
-      "duration_sec": 0.312796869315207
+      "allocation": "24837",
+      "loss": 0.05081987753510475,
+      "variance": 0.0021855568047612906,
+      "duration_sec": 0.5903476206585765
     },
     {
       "gis_join": "G310",
-      "allocation": "13149",
-      "loss": 0.055543046444654465,
-      "variance": 0.0026819093618541956,
-      "duration_sec": 0.35015137027949095
+      "allocation": "17532",
+      "loss": 0.05286192148923874,
+      "variance": 0.002440896350890398,
+      "duration_sec": 0.4779588580131531
     },
     {
       "gis_join": "G300",
       "allocation": "162171",
       "loss": 0.03415524959564209,
       "variance": 0.001027348218485713,
-      "duration_sec": 3.125896906480193
+      "duration_sec": 3.2638071635738015
     },
     {
       "gis_join": "G330",
       "allocation": "14610",
       "loss": 0.05675487592816353,
       "variance": 0.0026843517553061247,
-      "duration_sec": 0.4120931997895241
+      "duration_sec": 0.3736395612359047
     },
     {
       "gis_join": "G370",
       "allocation": "20454",
       "loss": 0.06545593589544296,
       "variance": 0.003416352905333042,
-      "duration_sec": 0.44362936448305845
+      "duration_sec": 0.5807695360854268
     },
     {
       "gis_join": "G360",
       "allocation": "17532",
       "loss": 0.05517330393195152,
       "variance": 0.0019458854803815484,
-      "duration_sec": 0.4331600023433566
-    },
-    {
-      "gis_join": "G350",
-      "allocation": "51135",
-      "loss": 0.04052666574716568,
-      "variance": 0.0015765648568049073,
-      "duration_sec": 1.1595040336251259
+      "duration_sec": 0.4375605136156082
     },
     {
       "gis_join": "G380",
       "allocation": "36525",
       "loss": 0.04311017692089081,
       "variance": 0.002199975773692131,
-      "duration_sec": 0.8190140966325998
+      "duration_sec": 0.7742485040798783
     },
     {
       "gis_join": "G390",
       "allocation": "14610",
       "loss": 0.06435579806566238,
       "variance": 0.002631653565913439,
-      "duration_sec": 0.35456226486712694
+      "duration_sec": 0.3646106394007802
+    },
+    {
+      "gis_join": "G350",
+      "allocation": "51135",
+      "loss": 0.04052666574716568,
+      "variance": 0.0015765648568049073,
+      "duration_sec": 1.0845549572259188
     },
     {
       "gis_join": "G400",
       "allocation": "65745",
       "loss": 0.04686753451824188,
       "variance": 0.002273504389449954,
-      "duration_sec": 1.228381983935833
+      "duration_sec": 1.3004418723285198
     },
     {
       "gis_join": "G420",
       "allocation": "23376",
       "loss": 0.05801864340901375,
       "variance": 0.0021977678406983614,
-      "duration_sec": 0.4846165021881461
+      "duration_sec": 0.540145717561245
     },
     {
       "gis_join": "G450",
-      "allocation": "13149",
-      "loss": 0.05695793032646179,
-      "variance": 0.0033012775238603354,
-      "duration_sec": 0.3410026114434004
+      "allocation": "14610",
+      "loss": 0.06227022036910057,
+      "variance": 0.003591247834265232,
+      "duration_sec": 0.36431314516812563
     },
     {
       "gis_join": "G470",
       "allocation": "16071",
       "loss": 0.07091829180717468,
       "variance": 0.0033628810197114944,
-      "duration_sec": 0.4133639093488455
+      "duration_sec": 0.39556416124105453
     },
     {
       "gis_join": "G460",
       "allocation": "43830",
       "loss": 0.03990523889660835,
       "variance": 0.0019226561998948455,
-      "duration_sec": 0.9501903289929032
+      "duration_sec": 0.8999707102775574
     },
     {
       "gis_join": "G480",
       "allocation": "67206",
       "loss": 0.04359711334109306,
       "variance": 0.0023543911520391703,
-      "duration_sec": 1.1530795460566878
+      "duration_sec": 1.142305321060121
     },
     {
       "gis_join": "G410",
       "allocation": "45291",
       "loss": 0.06554148346185684,
       "variance": 0.004039879888296127,
-      "duration_sec": 0.9881172748282552
+      "duration_sec": 0.8785388758406043
     },
     {
       "gis_join": "G490",
       "allocation": "54057",
       "loss": 0.047184739261865616,
       "variance": 0.0017306635854765773,
-      "duration_sec": 1.0935321096330881
+      "duration_sec": 1.0134579353034496
     },
     {
       "gis_join": "G110",
       "allocation": "1461",
       "loss": 0.06091980263590813,
       "variance": 0.003290041582658887,
-      "duration_sec": 0.08894459903240204
+      "duration_sec": 0.08065204322338104
     },
     {
       "gis_join": "G320",
       "allocation": "7305",
       "loss": 0.06932801753282547,
       "variance": 0.0034731056075543165,
-      "duration_sec": 0.2282281406223774
+      "duration_sec": 0.21035196725279093
     },
     {
       "gis_join": "G240",
       "allocation": "11688",
       "loss": 0.06357701122760773,
       "variance": 0.0035394150763750076,
-      "duration_sec": 0.2706883745267987
+      "duration_sec": 0.2549876980483532
     },
     {
       "gis_join": "G340",
       "allocation": "11688",
       "loss": 0.0919913649559021,
       "variance": 0.0045656803995370865,
-      "duration_sec": 0.28827562741935253
+      "duration_sec": 0.3840537080541253
     },
     {
       "gis_join": "G040",
       "allocation": "162171",
       "loss": 0.03647848963737488,
       "variance": 0.0015605799853801727,
-      "duration_sec": 2.987651616334915
+      "duration_sec": 2.8444446977227926
     },
     {
       "gis_join": "G020",
       "allocation": "118341",
       "loss": 0.025713829323649406,
-      "variance": 0.000614563818089664,
-      "duration_sec": 2.4426962984725833
+      "variance": 0.0006145638762973249,
+      "duration_sec": 2.4183114789775573
     },
     {
       "gis_join": "G500",
       "allocation": "29220",
       "loss": 0.05606495589017868,
       "variance": 0.0024953954853117466,
-      "duration_sec": 0.5108796451240778
+      "duration_sec": 0.6197727732360363
     },
     {
       "gis_join": "G510",
-      "allocation": "8766",
-      "loss": 0.07801931351423264,
-      "variance": 0.003988299518823624,
-      "duration_sec": 0.3956382153555751
+      "allocation": "13149",
+      "loss": 0.07000769674777985,
+      "variance": 0.0034113815054297447,
+      "duration_sec": 0.4496539384126663
     },
     {
       "gis_join": "G530",
-      "allocation": "70128",
-      "loss": 0.04180383309721947,
-      "variance": 0.0013137896312400699,
-      "duration_sec": 1.4922748217359185
+      "allocation": "64284",
+      "loss": 0.02945674955844879,
+      "variance": 0.0007823744672350585,
+      "duration_sec": 1.3283018823713064
     },
     {
       "gis_join": "G540",
       "allocation": "10227",
       "loss": 0.07268400490283966,
       "variance": 0.003358752466738224,
-      "duration_sec": 0.3463036483153701
+      "duration_sec": 0.2382036717608571
     },
     {
       "gis_join": "G550",
-      "allocation": "23376",
-      "loss": 0.05205010995268822,
-      "variance": 0.0023404310923069715,
-      "duration_sec": 0.6678017992526293
+      "allocation": "20454",
+      "loss": 0.04326054826378822,
+      "variance": 0.0016409846721217036,
+      "duration_sec": 0.6399185052141547
     },
     {
       "gis_join": "G560",
       "allocation": "197235",
       "loss": 0.03866686671972275,
       "variance": 0.00126658717636019,
-      "duration_sec": 3.2776420768350363
+      "duration_sec": 3.2600631145760417
     },
     {
       "gis_join": "G090",
       "allocation": "10227",
       "loss": 0.03886549174785614,
       "variance": 0.0012839995324611664,
-      "duration_sec": 0.15723018255084753
+      "duration_sec": 0.2130744969472289
     },
     {
       "gis_join": "G440",
       "allocation": "2922",
-      "loss": 0.0692921057343483,
-      "variance": 0.0014311759732663631,
-      "duration_sec": 0.08700508438050747
+      "loss": 0.0692920982837677,
+      "variance": 0.001431176089681685,
+      "duration_sec": 0.08851645898539573
     }
   ]
 }
