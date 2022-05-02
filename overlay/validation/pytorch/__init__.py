@@ -148,7 +148,7 @@ def validate_model(
         absolute_residuals = np.abs(y_true_numpy - y_predicted_numpy)
         loss = np.mean(absolute_residuals, axis=0)
         m = np.mean(absolute_residuals, axis=0)[0]
-        s = (np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0])[0]
+        s = (np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0])
 
     elif loss_function == "MEAN_SQUARED_ERROR":
         info("MEAN_SQUARED_ERROR...")
@@ -156,14 +156,14 @@ def validate_model(
         info(f"squared_residuals: {squared_residuals}")
         m = np.mean(squared_residuals, axis=0)
         loss = m
-        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0]
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true_numpy - y_predicted_numpy)
         m = np.mean(squared_residuals, axis=0)
         loss = sqrt(m)
-        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0]
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])
 
     elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
         profiler.stop()
