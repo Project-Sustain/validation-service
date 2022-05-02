@@ -50,7 +50,7 @@ payload = body
 headers = {
    'Content-type': 'multipart/form-data; boundary={}'.format(boundary)
 }
-conn.request("POST", "/validation_service/submit_validation_job", payload, headers)
+conn.request("POST", "/validation_service/submit_validation_experiment", payload, headers)
 res = conn.getresponse()
 data = res.read()
 print(data.decode("utf-8"))
