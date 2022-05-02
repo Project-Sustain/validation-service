@@ -126,6 +126,7 @@ def validate_model(
     if verbose:
         info(f"label_df: {label_df}")
 
+    # Create Tensors from Pandas input/output dataframes
     inputs_tensor = torch.tensor(features_df.values, dtype=torch.float32, requires_grad=False)
     y_true_tensor = torch.tensor(label_df.values, dtype=torch.float32, requires_grad=False)
     y_true_tensor = y_true_tensor.view(y_true_tensor.shape[0], 1).squeeze(-1)
@@ -148,6 +149,8 @@ def validate_model(
         with torch.no_grad():
             criterion = torch.nn.MSELoss()
             y_predicted = model(inputs_tensor)
+            info(f"y_predicted: {y_predicted}")
+            info(f"y_true_tensor: {y_true_tensor}")
             # y_predicted_numpy = y_predicted.detach().numpy()
             loss = criterion(y_predicted, y_true_tensor)
             # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
