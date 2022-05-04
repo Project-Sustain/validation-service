@@ -107,8 +107,8 @@ def validation_experiment():
 
                 info(validation_grpc_request)
 
-                # Submit validation job
-                experiment_grpc_response: ExperimentResponse = stub.SubmitValidationJob(validation_grpc_request)
+                # Submit validation experiment job
+                experiment_grpc_response: ExperimentResponse = stub.SubmitExperiment(validation_grpc_request)
                 info(f"Experiment Response received: {experiment_grpc_response}")
 
             response_code: int = HTTPStatus.OK if experiment_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
@@ -123,7 +123,7 @@ def validation_experiment():
     else:
         err_msg = f"Uploaded file object is None! Please upload a valid file"
         error(err_msg)
-        return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), \
+        return build_json_response(ExperimentResponse(id="None", ok=False, err_msg=err_msg)), \
             HTTPStatus.BAD_REQUEST
 
 

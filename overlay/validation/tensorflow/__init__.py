@@ -156,7 +156,6 @@ def validate_model(
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
-        #loss = tf.sqrt(tf.reduce_mean(tf.square(tf.subtract(y_true, y_pred))))
         squared_residuals = np.square(y_true - y_pred)
         m = np.mean(squared_residuals, axis=0)[0]
         loss = sqrt(m)

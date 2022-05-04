@@ -81,7 +81,7 @@ def validate_model(
         for param in model.parameters():
             model_description = f'{param}\n'
 
-        info(f"Model :{model_description}")
+        info(f"Model: {model_description}")
         info('Logging model.code...')
         info(model.code)
 
@@ -126,6 +126,7 @@ def validate_model(
     if verbose:
         info(f"label_df: {label_df}")
 
+    # Create Tensors from Pandas input/output dataframes
     inputs_tensor = torch.tensor(features_df.values, dtype=torch.float32, requires_grad=False)
     y_true_tensor = torch.tensor(label_df.values, dtype=torch.float32, requires_grad=False)
     y_true_tensor = y_true_tensor.view(y_true_tensor.shape[0], 1).squeeze(-1)
@@ -133,46 +134,48 @@ def validate_model(
     n_samples, n_features = inputs_tensor.shape
     info(f'n_samples: {n_samples}, n_features: {n_features}')
 
+    # Get model predictions
+    with torch.no_grad():
+        # criterion = torch.nn.MSELoss()
+        y_predicted_tensor = model(inputs_tensor)
+        info(f"y_predicted: {y_predicted_tensor}")
+        info(f"y_true_tensor: {y_true_tensor}")
+        y_predicted_numpy = y_predicted_tensor.numpy()
+        y_true_numpy = y_true_tensor.numpy()
+
     if loss_function == "MEAN_ABSOLUTE_ERROR":
-        pass
-        # criterion = torch.nn.L1Loss()
-        # y_predicted = model(inputs)
-        # y_predicted_numpy = y_predicted.numpy()
-        # loss = criterion(y_predicted, y_true)
-        # absolute_residuals = np.absolute(y_predicted_numpy - y_true_numpy)
+        info("MEAN_ABSOLUTE_ERROR...")
+        absolute_residuals = np.abs(y_true_numpy - y_predicted_numpy)
+        m = np.mean(absolute_residuals, axis=0).item()
+        loss = m
+        s = (np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0]).item()
 
     elif loss_function == "MEAN_SQUARED_ERROR":
-        # with torch.set_grad_enabled(False):
-        #     linear.eval()
-        #     print(linear.weight.requires_grad)
-        with torch.no_grad():
-            criterion = torch.nn.MSELoss()
-            y_predicted = model(inputs_tensor)
-            # y_predicted_numpy = y_predicted.detach().numpy()
-            loss = criterion(y_predicted, y_true_tensor)
-            # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
+        info("MEAN_SQUARED_ERROR...")
+        squared_residuals = np.square(y_true_numpy - y_predicted_numpy)
+        info(f"squared_residuals: {squared_residuals}")
+        m = np.mean(squared_residuals, axis=0).item()
+        loss = m
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]).item()
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
-        pass
-        # criterion = torch.nn.MSELoss()
-        # y_predicted = model(inputs)
-        # y_predicted_numpy = y_predicted.cpu().numpy()
-        # loss = sqrt(criterion(y_predicted, y_true))
-        # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
+        info("ROOT_MEAN_SQUARED_ERROR...")
+        squared_residuals = np.square(y_true_numpy - y_predicted_numpy)
+        m = np.mean(squared_residuals, axis=0).item()
+        loss = sqrt(m)
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]).item()
 
     elif loss_function == "NEGATIVE_LOG_LIKELIHOOD_LOSS":
-        pass
-        # criterion = torch.nn.NLLLoss()
-        # y_predicted = model(inputs)
-        # y_predicted_numpy = y_predicted.cpu().numpy()
-        # loss = criterion(y_predicted, y_true)
+        profiler.stop()
+        error_msg = "PyTorch validation: negative log-likelihood loss unimplemented"
+        warning(error_msg)
+        return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
     elif loss_function == "CROSS_ENTROPY_LOSS":
-        pass
-        # criterion = torch.nn.CrossEntropyLoss()
-        # y_predicted = model(inputs)
-        # y_predicted_numpy = y_predicted.cpu().numpy()
-        # loss = criterion(y_predicted, y_true)
+        profiler.stop()
+        error_msg = "PyTorch validation: cross-entropy loss unimplemented"
+        warning(error_msg)
+        return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
     else:
         profiler.stop()
@@ -180,12 +183,41 @@ def validate_model(
         warning(error_msg)
         return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
 
-    del model  # hopefully this frees up memory
+    info(f"m = {m}, s = {s}, loss = {loss}")
+
+    # hopefully this frees up memory
+    del model
     del inputs_tensor
     del y_true_tensor
-    del y_predicted
+    del y_predicted_tensor
+
+    # Merging old metrics in with new metrics using Welford's method (if applicable)
+    prev_allocation = current_model_metrics["allocation"]
+    if prev_allocation > 0:
+        prev_m = current_model_metrics["m"]
+        prev_s = current_model_metrics["s"]
+        new_allocation = prev_allocation + allocation
+        delta = m - prev_m
+        delta2 = delta * delta
+        new_m = ((allocation * m) + (prev_allocation * prev_m)) / new_allocation
+        new_s = s + prev_s + delta2 * (allocation * prev_allocation) / new_allocation
+        new_loss = ((current_model_metrics["loss"] * prev_allocation) + (loss * allocation)) / new_allocation
+
+        m = new_m
+        s = new_s
+        allocation = new_allocation
+        loss = new_loss
+
+    variance = s / allocation
+    current_model_metrics["allocation"] = allocation
+    current_model_metrics["loss"] = loss
+    current_model_metrics["variance"] = variance
+    current_model_metrics["m"] = m
+    current_model_metrics["s"] = s
+    with open(model_metrics_path, "w") as f:
+        json.dump(current_model_metrics, f)
+
     profiler.stop()
-    variance_of_residuals = 0.0
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return gis_join, allocation, loss, variance_of_residuals, ok, "", profiler.elapsed
+    return gis_join, allocation, loss, variance, ok, "", profiler.elapsed
