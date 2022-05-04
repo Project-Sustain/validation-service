@@ -474,6 +474,7 @@ class Timer:
 
 
 def run(gis_join):
+
     print(f"GISJOIN: {gis_join}")
 
     profiler: Timer = Timer()
@@ -533,14 +534,8 @@ def run(gis_join):
 
     profiler.start()
 
-    #inputs_numpy = features_df.values.astype(np.float32)
-    #y_true_numpy = label_df.values.astype(np.float32)
-
     inputs_tensor = torch.tensor(features_df.values, dtype=torch.float32, requires_grad=False)
     y_true_tensor = torch.tensor(label_df.values, dtype=torch.float32, requires_grad=False)
-
-    #inputs: torch.Tensor = torch.from_numpy(inputs_numpy)
-    #y_true: torch.Tensor = torch.from_numpy(y_true_numpy)
     y_true_tensor = y_true_tensor.view(y_true_tensor.shape[0], 1).squeeze(-1)  # convert y to a column vector
 
     profiler.stop()
@@ -553,8 +548,9 @@ def run(gis_join):
     print(f'n_samples: {n_samples}, n_features: {n_features}')
 
     with torch.no_grad():
-        criterion = torch.nn.MSELoss()
-        y_predicted = model(inputs_tensor)
+        y_predicted_tensor = model(inputs_tensor)
+        y_predicted_numpy = y_predicted_tensor.numpy()
+        y_true_numpy = y_true_tensor.numpy()
 
         profiler.stop()
         print(f">>> Getting predicted values from model: {profiler.elapsed} sec")
@@ -562,20 +558,22 @@ def run(gis_join):
 
         profiler.start()
 
-        # y_predicted_numpy = y_predicted.detach().numpy()
-        loss = criterion(y_predicted, y_true_tensor)
+        squared_residuals = np.square(y_true_numpy - y_predicted_numpy)
+        print(f"squared_residuals: {squared_residuals}")
+        m = np.mean(squared_residuals, axis=0).item()
+        loss = m
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]).item()
 
         profiler.stop()
         print(f">>> Getting loss criterion from residuals: {profiler.elapsed} sec")
         profiler.reset()
 
-        # squared_residuals = np.square(y_predicted_numpy - y_true_numpy)
         print(loss)
 
 
 def main():
-    for gis_join in lattice_157_gis_joins:
-        run(gis_join)
+    #for gis_join in lattice_157_gis_joins:
+    run("G4100450")
 
 
 if __name__ == "__main__":
