@@ -108,7 +108,7 @@ def run(gis_join):
     profiler.start()
 
     # Get predictions
-    y_pred = model(features_df.values.astype(np.float32), verbose=0)
+    y_pred = model(features_df.values.astype(np.float32))
 
     profiler.stop()
     print(f">>> Getting predicted values from model: {profiler.elapsed} sec")
