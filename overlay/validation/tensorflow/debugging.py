@@ -89,6 +89,7 @@ def run(gis_join):
     client.close()
 
     profiler.stop()
+    print(f"Size of DF: {len(features_df.index)}")
     print(f">>> Loading data into pandas df: {profiler.elapsed} sec")
     profiler.reset()
 
