@@ -89,7 +89,7 @@ def run(gis_join):
     client.close()
 
     profiler.stop()
-    print(f"Size of DF: {len(features_df.index)}")
+    #print(f"Size of DF: {len(features_df.index)}")
     print(f">>> Loading data into pandas df: {profiler.elapsed} sec")
     profiler.reset()
 
@@ -97,7 +97,7 @@ def run(gis_join):
 
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
-    print(f"Normalized Pandas DataFrame")
+    #print(f"Normalized Pandas DataFrame")
 
     label_df = features_df.pop(label)
 
@@ -128,7 +128,7 @@ def run(gis_join):
     print(f">>> Getting loss criterion from residuals: {profiler.elapsed} sec")
     profiler.reset()
 
-    print(loss)
+    #print(loss)
 
 
 if __name__ == "__main__":

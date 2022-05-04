@@ -517,7 +517,7 @@ def run(gis_join):
     client.close()
 
     profiler.stop()
-    print(f"Size of DF: {len(features_df.index)}")
+    #print(f"Size of DF: {len(features_df.index)}")
     print(f">>> Loading data into pandas df: {profiler.elapsed} sec")
     profiler.reset()
 
@@ -525,7 +525,7 @@ def run(gis_join):
 
     scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
     features_df = pd.DataFrame(scaled, columns=features_df.columns)
-    print(f"Normalized Pandas DataFrame")
+    #print(f"Normalized Pandas DataFrame")
 
     label_df = features_df.pop(label)
 
@@ -546,7 +546,7 @@ def run(gis_join):
     profiler.start()
 
     n_samples, n_features = inputs_tensor.shape
-    print(f'n_samples: {n_samples}, n_features: {n_features}')
+    #print(f'n_samples: {n_samples}, n_features: {n_features}')
 
     with torch.no_grad():
         y_predicted_tensor = model(inputs_tensor)
@@ -560,7 +560,7 @@ def run(gis_join):
         profiler.start()
 
         squared_residuals = np.square(y_true_numpy - y_predicted_numpy)
-        print(f"squared_residuals: {squared_residuals}")
+        #print(f"squared_residuals: {squared_residuals}")
         m = np.mean(squared_residuals, axis=0).item()
         loss = m
         s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0]).item()
@@ -569,7 +569,7 @@ def run(gis_join):
         print(f">>> Getting loss criterion from residuals: {profiler.elapsed} sec")
         profiler.reset()
 
-        print(loss)
+        #print(loss)
 
 
 def main():
