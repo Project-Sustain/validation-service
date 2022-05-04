@@ -172,7 +172,7 @@ def run(gis_join):
 
     print(f">>> Metric: MEAN_SQUARED_ERROR")
     squared_residuals = np.square(y_true - y_pred)
-    loss = np.mean(squared_residuals, axis=0)[0]
+    loss = np.mean(squared_residuals, axis=0)
 
     print(f"loss: {loss}")
 
