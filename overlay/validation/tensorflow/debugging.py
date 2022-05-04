@@ -110,11 +110,17 @@ def run(gis_join):
     # Get predictions
     y_pred = model.predict(features_df, verbose=0)
 
+    profiler.stop()
+    print(f">>> Getting predicted values from model: {profiler.elapsed} sec")
+    profiler.reset()
+
+    profiler.start()
+
     # Use labels and predictions to evaluate the model
     y_true = np.array(label_df).reshape(-1, 1)
 
     profiler.stop()
-    print(f">>> Getting predicted values from model: {profiler.elapsed} sec")
+    print(f">>> Reshaping label_df as numpy column: {profiler.elapsed} sec")
     profiler.reset()
 
     profiler.start()
