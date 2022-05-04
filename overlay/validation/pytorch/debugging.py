@@ -573,7 +573,7 @@ def run(gis_join):
 
 def main():
     #for gis_join in lattice_157_gis_joins:
-    run("G4100450")
+    run("G4801090")
 
 
 if __name__ == "__main__":
