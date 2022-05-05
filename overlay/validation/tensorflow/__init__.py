@@ -134,24 +134,24 @@ def validate_model(
     if loss_function == "MEAN_SQUARED_ERROR":
         info("MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
-        m = np.mean(squared_residuals, axis=0)[0]
+        m = np.mean(squared_residuals, axis=0)[0].item()
         loss = m
-        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0]
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0].item()
         info(f"m = {m}, s = {s}, loss = {loss}")
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("ROOT_MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
-        m = np.mean(squared_residuals, axis=0)[0]
+        m = np.mean(squared_residuals, axis=0)[0].item()
         loss = sqrt(m)
-        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0]
+        s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0].item()
 
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         info("MEAN_ABSOLUTE_ERROR...")
         absolute_residuals = np.abs(y_true - y_pred)
-        loss = np.mean(absolute_residuals, axis=0)[0]
-        m = np.mean(absolute_residuals, axis=0)[0]
-        s = (np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0])[0]
+        m = np.mean(absolute_residuals, axis=0)[0].item()
+        loss = m
+        s = (np.var(absolute_residuals, axis=0, ddof=0) * absolute_residuals.shape[0])[0].item()
 
     else:
         profiler.stop()
