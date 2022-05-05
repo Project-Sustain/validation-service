@@ -23,7 +23,7 @@ from overlay.structures import GisTree
 
 
 # Loky shared, reusable ProcessPoolExecutor
-shared_executor = get_reusable_executor(max_workers=8, timeout=10)
+shared_executor = get_reusable_executor(max_workers=8, timeout=180)
 
 
 class Worker(validation_pb2_grpc.WorkerServicer):
