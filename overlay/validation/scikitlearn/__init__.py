@@ -132,8 +132,8 @@ def validate_model(
         info(f"label_df: {label_df}")
 
     # Get predictions
-    inputs_numpy = features_df.values.astype(np.float32)
-    y_true = label_df.values.astype(np.float32).reshape(-1, 1)
+    inputs_numpy = features_df.to_numpy()
+    y_true = label_df.to_numpy()
     y_pred = model.predict(inputs_numpy)
 
     if verbose:
@@ -143,18 +143,18 @@ def validate_model(
     if loss_function == "MEAN_SQUARED_ERROR":
         info("MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
-        loss = np.mean(squared_residuals, axis=0)[0]
+        loss = np.mean(squared_residuals, axis=0)
         welford_variance_calculator.add_all(squared_residuals)
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
         info("MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
-        loss = sqrt(np.mean(squared_residuals, axis=0)[0])
+        loss = sqrt(np.mean(squared_residuals, axis=0))
         welford_variance_calculator.add_all(squared_residuals)
 
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
         info("MEAN_ABSOLUTE_ERROR...")
-        loss = np.mean(np.abs(y_true - y_pred), axis=0)[0]
+        loss = np.mean(np.abs(y_true - y_pred), axis=0)
         absolute_residuals = np.absolute(y_pred - y_true)
         welford_variance_calculator.add_all(absolute_residuals)
 
