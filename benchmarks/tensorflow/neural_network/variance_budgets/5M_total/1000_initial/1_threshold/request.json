@@ -1,0 +1,39 @@
+{
+  "master_job_mode": "ASYNCHRONOUS",
+  "worker_job_mode": "MULTIPROCESSING",
+  "model_framework": "TENSORFLOW",
+  "model_category": "REGRESSION",
+  "mongo_host": "localhost",
+  "mongo_port": 27017,
+  "read_config": {
+    "read_preference": "primary",
+    "read_concern": "local"
+  },
+  "database": "sustaindb",
+  "collection": "noaa_nam",
+  "feature_fields": [
+    "PRESSURE_REDUCED_TO_MSL_PASCAL",
+    "VISIBILITY_AT_SURFACE_METERS",
+    "VISIBILITY_AT_CLOUD_TOP_METERS",
+    "WIND_GUST_SPEED_AT_SURFACE_METERS_PER_SEC",
+    "PRESSURE_AT_SURFACE_PASCAL",
+    "TEMPERATURE_AT_SURFACE_KELVIN",
+    "DEWPOINT_TEMPERATURE_2_METERS_ABOVE_SURFACE_KELVIN",
+    "RELATIVE_HUMIDITY_2_METERS_ABOVE_SURFACE_PERCENT",
+    "ALBEDO_PERCENT",
+    "TOTAL_CLOUD_COVER_PERCENT"
+  ],
+  "label_field": "SOIL_TEMPERATURE_0_TO_01_M_BELOW_SURFACE_KELVIN",
+  "normalize_inputs": true,
+  "validation_budget": {
+    "budget_type": "INCREMENTAL_VARIANCE_BUDGET",
+    "variance_budget": {
+      "total_budget": 5000000,
+      "initial_allocation": 1000,
+      "use_threshold": true,
+      "std_devs_threshold": 1.0
+    }
+  },
+  "loss_function": "MEAN_SQUARED_ERROR",
+  "spatial_coverage": "ALL"
+}
