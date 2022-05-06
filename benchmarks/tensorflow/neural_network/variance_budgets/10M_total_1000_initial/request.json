@@ -29,7 +29,9 @@
     "budget_type": "INCREMENTAL_VARIANCE_BUDGET",
     "variance_budget": {
       "total_budget": 10000000,
-      "initial_allocation": 1000
+      "initial_allocation": 1000,
+      "use_threshold": true,
+      "std_devs_threshold": 1.0
     }
   },
   "loss_function": "MEAN_SQUARED_ERROR",
