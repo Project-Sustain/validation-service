@@ -393,6 +393,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         all_gis_join_variances: list = []
         sum_of_all_variances: int = 0
         budget_used: int = 0
+
         for worker_response in worker_responses:
             for metric in worker_response.metrics:
                 all_gis_join_metrics.append(metric)
@@ -420,6 +421,8 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         filtered_gis_join_metrics: list = []
         sum_of_filtered_variances = 0.0
+
+
         for metric in all_gis_join_metrics:
             # If variance > 2 standard deviations above mean
             if abs((metric.variance - mean_of_all_variances) / std_dev_all_variances) >= 2.0:

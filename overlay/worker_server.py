@@ -75,49 +75,51 @@ class Worker(validation_pb2_grpc.WorkerServicer):
     def __repr__(self) -> str:
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
-    def BeginValidationJob(self, request: ValidationJobRequest, context) -> WorkerValidationJobResponse:
-        profiler: Timer = Timer()
-        profiler.start()
+#     def BeginValidationJob(self, request: ValidationJobRequest, context) -> WorkerValidationJobResponse:
+#         profiler: Timer = Timer()
+#         profiler.start()
+#
+#         info(f"Received BeginValidationJob Request: {request}")
+#
+#         # Save model
+#         if not self.save_model(request):
+#             err_msg = f"Unable to save {str(request.model_framework)} model file with type " \
+#                       f"{str(request.model_file.type)}!"
+#             error(err_msg)
+#             return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
+#
+#         # Select model framework, then launch jobs
+#         if request.model_framework == ModelFramework.TENSORFLOW:
+#
+#             tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
+#             metrics = tf_validator.validate_gis_joins()
+#
+#         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
+#
+#             skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor, self.local_gis_joins)
+#             metrics = skl_validator.validate_gis_joins(request)
+#
+#         elif request.model_framework == ModelFramework.PYTORCH:
+#
+#             pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor, self.local_gis_joins)
+#             metrics = pytorch_validator.validate_gis_joins(request)
+#
+#         else:
+#             err_msg = f"Unsupported model framework type {ModelFramework.Name(request.model_framework)}"
+#             error(err_msg)
+#             return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
+#
+#         # Create and return response from aggregated metrics
+#         profiler.stop()
+#
+#         return WorkerValidationJobResponse(
+#             ok=True,
+#             hostname=self.hostname,
+#             duration_sec=profiler.elapsed,
+#             metrics=metrics
+#         )
 
-        info(f"Received BeginValidationJob Request: {request}")
-
-        # Save model
-        if not self.save_model(request):
-            err_msg = f"Unable to save {str(request.model_framework)} model file with type " \
-                      f"{str(request.model_file.type)}!"
-            error(err_msg)
-            return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
-
-        # Select model framework, then launch jobs
-        if request.model_framework == ModelFramework.TENSORFLOW:
-
-            tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
-            metrics = tf_validator.validate_gis_joins()
-
-        elif request.model_framework == ModelFramework.SCIKIT_LEARN:
-
-            skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor, self.local_gis_joins)
-            metrics = skl_validator.validate_gis_joins(request)
-
-        elif request.model_framework == ModelFramework.PYTORCH:
-
-            pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor, self.local_gis_joins)
-            metrics = pytorch_validator.validate_gis_joins(request)
-
-        else:
-            err_msg = f"Unsupported model framework type {ModelFramework.Name(request.model_framework)}"
-            error(err_msg)
-            return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
-
-        # Create and return response from aggregated metrics
-        profiler.stop()
-
-        return WorkerValidationJobResponse(
-            ok=True,
-            hostname=self.hostname,
-            duration_sec=profiler.elapsed,
-            metrics=metrics
-        )
+    def BeginValidationJob()
 
     def save_model(self, request: ValidationJobRequest) -> bool:
         ok = True

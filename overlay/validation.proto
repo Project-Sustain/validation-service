@@ -38,7 +38,8 @@ message WorkerRegistrationResponse {
 service Worker {
 
   // Registers a Worker to track via heartbeats
-  rpc BeginValidationJob(ValidationJobRequest) returns (WorkerValidationJobResponse) {}
+  rpc BeginValidationJob(ValidationJobRequest) returns (stream WorkerValidationJobResponse) {}
+
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
