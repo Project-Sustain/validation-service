@@ -107,14 +107,14 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
     # Iterate over all the worker jobs created for this job and launch them serially
     for worker_hostname, worker_job in job.worker_jobs.items():
         if len(worker_job.gis_joins) > 0:
-            info("Launching async run_worker_job()...")
+            info("Launching run_worker_job()...")
             worker = worker_job.worker
             with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
                 stub = validation_pb2_grpc.WorkerStub(channel)
                 request_copy = ValidationJobRequest()
                 request_copy.CopyFrom(request)
                 del request_copy.allocations[:]
-                request_copy.allocations.extend(job.gis_joins)
+                request_copy.allocations.extend(worker_job.gis_joins)
                 request_copy.id = worker_job.job_id
 
                 responses.append(stub.BeginValidationJob(request_copy))
