@@ -7,6 +7,7 @@ import numpy as np
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import info, error
+from typing import Iterator
 
 from overlay import validation_pb2_grpc
 from overlay.db import shards, locality
@@ -15,7 +16,7 @@ from overlay.profiler import Timer
 from overlay.structures import GisTree, GisNode
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
-    SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric
+    SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric, Metric
 
 
 class JobMetadata:
@@ -84,24 +85,25 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
 
 # Launches a round of worker jobs based on the master job mode selected.
 # Returns a list of WorkerValidationJobResponse objects.
-def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> list:
+def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> Iterator[Metric]:
     # Select strategy for submitting the job from the master
+    # all of these will need to yield the responses back
+
     if request.master_job_mode == JobMode.MULTITHREADED:
         info("Launching jobs in multi-threaded mode")
-        worker_validation_job_responses = launch_worker_jobs_multithreaded(job, request)
+        return launch_worker_jobs_multithreaded(job, request)
     elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
         info("Launching jobs in asynchronous mode")
-        worker_validation_job_responses = launch_worker_jobs_asynchronously(job, request)
+        # worker_validation_job_responses = launch_worker_jobs_asynchronously(job, request)
     else:
         info("Launching jobs in synchronous mode")
-        worker_validation_job_responses = launch_worker_jobs_synchronously(job, request)
+        return launch_worker_jobs_synchronously(job, request)
 
-    info("Received all validation responses, returning...")
-    return worker_validation_job_responses
+
 
 
 # Returns list of WorkerValidationJobResponses
-def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
+def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
     responses = []
 
     # Iterate over all the worker jobs created for this job and launch them serially
@@ -117,13 +119,16 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 request_copy.allocations.extend(worker_job.gis_joins)
                 request_copy.id = worker_job.job_id
 
-                responses.append(stub.BeginValidationJob(request_copy))
+                #TODO
+                # responses.append(stub.BeginValidationJob(request_copy))
+                return stub.BeginValidationJob(request_copy)
 
-    return responses
+
+    # return responses # also needs to yield the response from stub.BeginValidationJob(request_copy)
 
 
 # Returns list of WorkerValidationJobResponses
-def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> list:
+def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
     responses = []
 
     # Define worker job function to be run in the thread pool
@@ -150,13 +155,12 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
         info(future)
-        responses.append(future.result())
+        yield future.result()
 
-    return responses
 
 
 # Returns list of WorkerValidationJobResponses
-def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
+async def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
 
     # Define async function to launch worker job
     async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
@@ -181,11 +185,16 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
         if len(worker_job.gis_joins) > 0:
             tasks.append(loop.create_task(run_worker_job(worker_job, request)))
 
-    task_group = asyncio.gather(*tasks)
-    responses = loop.run_until_complete(task_group)
-    loop.close()
 
-    return list(responses)
+    # task_group = asyncio.gather(*tasks)
+    # responses = loop.run_until_complete(task_group)
+    # loop.close()
+
+    for result in as_completed(tasks):
+        for metric in result:
+            yield metric
+
+    # return list(responses)
 
 
 def save_intermediate_response_data(total_budget: int, initial_allocation: int, initial_response_metrics: list) -> None:
@@ -501,7 +510,10 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Create and launch a job from allocations
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
-        worker_responses: list = launch_worker_jobs(request, job)  # list(WorkerValidationJobResponse)
+
+        worker_responses = []
+        for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
+            worker_responses.append(metric)
 
         # Aggregate to state level if requested
         #if request.spatial_resolution == SpatialResolution.STATE:
@@ -570,37 +582,38 @@ class Master(validation_pb2_grpc.MasterServicer):
         else:  # Default or static budget
             job_id, worker_responses = self.process_job_with_normal_budget(request)
 
-        # Flattened list of metrics, instead of being nested in respective Worker responses
-        flattened_metrics: list = []
-        errors = []
-        ok = True
+        # # Flattened list of metrics, instead of being nested in respective Worker responses
+        # flattened_metrics: list = []
+        # errors = []
+        # ok = True
+        #
+        # if len(worker_responses) == 0:
+        #     error_msg = "Did not receive any responses from workers"
+        #     ok = False
+        #     error(error_msg)
+        #     errors.append(error_msg)
+        # else:
+        #     for worker_response in worker_responses:
+        #         if not worker_response.ok:
+        #             ok = False
+        #             error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
+        #             errors.append(error_msg)
+        #         for metric in worker_response.metrics:
+        #             flattened_metrics.append(metric)
+        #
+        # if request.spatial_resolution == SpatialResolution.STATE:
+        #     flattened_metrics = aggregate_metrics_by_state(flattened_metrics)
 
-        if len(worker_responses) == 0:
-            error_msg = "Did not receive any responses from workers"
-            ok = False
-            error(error_msg)
-            errors.append(error_msg)
-        else:
-            for worker_response in worker_responses:
-                if not worker_response.ok:
-                    ok = False
-                    error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
-                    errors.append(error_msg)
-                for metric in worker_response.metrics:
-                    flattened_metrics.append(metric)
-
-        if request.spatial_resolution == SpatialResolution.STATE:
-            flattened_metrics = aggregate_metrics_by_state(flattened_metrics)
-
-        error_msg = f"errors: {errors}"
+        # error_msg = f"errors: {errors}"
         profiler.stop()
 
+        # TODO needs to yield the responses back to the flask server here
         return ValidationJobResponse(
             id=job_id,
-            ok=ok,
-            error_msg=error_msg,
+            ok=True,
+            error_msg="error_msg",
             duration_sec=profiler.elapsed,
-            metrics=flattened_metrics
+            metrics=worker_responses
         )
 
     def SubmitExperiment(self, request: ValidationJobRequest, context) -> ExperimentResponse:

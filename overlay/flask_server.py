@@ -177,6 +177,7 @@ def validation():
                 info(validation_grpc_request)
 
                 # Submit validation job
+                # Needs to stream back to the client
                 validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
                 info(f"Validation Response received: {validation_grpc_response}")
 
