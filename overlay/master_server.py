@@ -131,7 +131,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
 
 # Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
-    responses: Queue = Queue(maxsize=10)
+    responses: Queue = Queue(maxsize=1024)
 
     # Define worker job function to be run in the thread pool
     def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
