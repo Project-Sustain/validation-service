@@ -40,6 +40,9 @@ service Worker {
   // Registers a Worker to track via heartbeats
   rpc BeginValidationJob(ValidationJobRequest) returns (stream Metric) {}
 
+  // For debugging
+  rpc DebugBeginValidationJob(ValidationJobRequest) returns (stream Metric) {}
+
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
