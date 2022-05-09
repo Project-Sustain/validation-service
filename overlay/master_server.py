@@ -146,20 +146,27 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             request_copy.id = _worker_job.job_id
 
             info(f"Iterating over stub.BeginValidationJob()'s unary channel stream...")
-            # for _response in stub.BeginValidationJob(request_copy):
-            #     while not _responses.full():
-            #         info(f"Adding response to queue: {_response}")
-            #         _responses.put(_response)
-            yield stub.BeginValidationJob(request_copy)
+            for _response in stub.BeginValidationJob(request_copy):
+                while not _responses.full():
+                    info(f"Adding response to queue: {_response}")
+                    _responses.put(_response)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        for worker_hostname, worker_job in job.worker_jobs.items():
-            if len(worker_job.gis_joins) > 0:
-                executors_list.append(
-                    executor.submit(run_worker_job, responses, worker_job, request)
-                )
+    # with ThreadPoolExecutor(max_workers=10) as executor:
+    #     for worker_hostname, worker_job in job.worker_jobs.items():
+    #         if len(worker_job.gis_joins) > 0:
+    #             executors_list.append(
+    #                 executor.submit(run_worker_job, responses, worker_job, request)
+    #             )
+
+    executor = ThreadPoolExecutor(max_workers=10)
+    for worker_hostname, worker_job in job.worker_jobs.items():
+        if len(worker_job.gis_joins) > 0:
+            executors_list.append(
+                executor.submit(run_worker_job, responses, worker_job, request)
+            )
+    executor.shutdown(wait=False)
 
     info("Got here")
     for future in as_completed(executors_list):
@@ -170,6 +177,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 info(f"Responses size: {responses.qsize()}")
                 response = responses.get()
                 info(f"Consumed response from queue: {response}")
+
+
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     # for future in as_completed(executors_list):
     #     info(f"Future from as_completed: {future}")
