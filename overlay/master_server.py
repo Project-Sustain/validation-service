@@ -5,6 +5,7 @@ import json
 import grpc
 import numpy as np
 import uuid
+from queue import Queue
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import info, error
 from typing import Iterator
@@ -130,10 +131,10 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
 
 # Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
-    responses = []
+    responses: Queue = Queue(maxsize=1024)
 
     # Define worker job function to be run in the thread pool
-    def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
+    def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
         _worker = _worker_job.worker
         info(f"Launching run_worker_job() for {_worker.hostname}:{_worker.port}")
         with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
@@ -146,7 +147,9 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
 
             info(f"Returning stub.BeginValidationJob()'s unary channel stream...")
             for response in stub.BeginValidationJob(request_copy):
-                info(f"RESPONSE: {response}")
+                if not _responses.full():
+                    info(f"Adding response to queue: {response}")
+                    _responses.put(response)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
@@ -157,9 +160,14 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                     executor.submit(run_worker_job, worker_job, request)
                 )
 
+    for future in executors_list:
+        while future.running():
+            while not responses.empty():
+                response = responses.get()
+                info(f"Consumed response from queue: {response}")
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
-    for future in as_completed(executors_list):
-        info(f"Future from as_completed: {future}")
+    # for future in as_completed(executors_list):
+    #     info(f"Future from as_completed: {future}")
         # for metric in future.result():
         #     info(metric)
         # # yield future.result()
