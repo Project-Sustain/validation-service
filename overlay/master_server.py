@@ -161,7 +161,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 )
 
     for future in executors_list:
-        while future.running():
+        while not future.done():
             while not responses.empty():
                 response = responses.get()
                 info(f"Consumed response from queue: {response}")
