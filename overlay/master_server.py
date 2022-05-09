@@ -151,6 +151,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                     info(f"Adding response to queue: {_response}")
                     _responses.put(_response)
 
+            return
+
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -683,7 +685,7 @@ def run(master_port=50051) -> None:
 
     # Initialize server and master
     master_hostname: str = socket.gethostname()
-    server = grpc.server(ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(ThreadPoolExecutor(max_workers=32))
     master: Master = Master(master_hostname, master_port)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
 
