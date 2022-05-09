@@ -161,7 +161,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 )
 
     info("Got here")
-    for future in executors_list:
+    for future in as_completed(executors_list):
         info(f"Future: {future}")
         while not future.done():
             info(f"Future {future} is not done yet")
