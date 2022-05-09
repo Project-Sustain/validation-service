@@ -145,7 +145,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             request_copy.allocations.extend(_worker_job.gis_joins)
             request_copy.id = _worker_job.job_id
 
-            info(f"Returning stub.BeginValidationJob()'s unary channel stream...")
+            info(f"Iterating over stub.BeginValidationJob()'s unary channel stream...")
             for _response in stub.BeginValidationJob(request_copy):
                 if not _responses.full():
                     info(f"Adding response to queue: {_response}")
@@ -161,8 +161,11 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 )
 
     for future in executors_list:
+        info(f"Future: {future}")
         while not future.done():
+            info(f"Future {future} is not done yet")
             while not responses.empty():
+                info(f"Responses size: {responses.qsize()}")
                 response = responses.get()
                 info(f"Consumed response from queue: {response}")
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
