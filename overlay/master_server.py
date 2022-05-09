@@ -157,7 +157,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
         for worker_hostname, worker_job in job.worker_jobs.items():
             if len(worker_job.gis_joins) > 0:
                 executors_list.append(
-                    executor.submit(run_worker_job, worker_job, request)
+                    executor.submit(run_worker_job, responses, worker_job, request)
                 )
 
     for future in executors_list:
