@@ -4,6 +4,7 @@ import os
 import io
 import zipfile
 import signal
+from typing import Iterator
 from concurrent import futures
 from loky import get_reusable_executor
 
@@ -11,7 +12,7 @@ import socket
 
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
-    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata
+    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata, Metric
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.profiler import Timer
 from overlay.validation.tensorflow import TensorflowValidator
@@ -75,7 +76,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
     def __repr__(self) -> str:
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
-    def BeginValidationJob(self, request: ValidationJobRequest, context) -> WorkerValidationJobResponse:
+    def BeginValidationJob(self, request: ValidationJobRequest, context) -> Iterator[Metric]:
 
         info(f"Received BeginValidationJob Request: {request}")
 

@@ -133,9 +133,9 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     responses = []
 
     # Define worker job function to be run in the thread pool
-    def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
-        info("Launching run_worker_job()...")
+    def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
         _worker = _worker_job.worker
+        info(f"Launching run_worker_job() for {_worker.hostname}:{_worker.port}")
         with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
             request_copy = ValidationJobRequest()
@@ -144,6 +144,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             request_copy.allocations.extend(_worker_job.gis_joins)
             request_copy.id = _worker_job.job_id
 
+            info(f"Returning stub.BeginValidationJob()'s unary channel stream...")
             return stub.BeginValidationJob(request_copy)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
@@ -151,10 +152,13 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     with ThreadPoolExecutor(max_workers=10) as executor:
         for worker_hostname, worker_job in job.worker_jobs.items():
             if len(worker_job.gis_joins) > 0:
-                executors_list.append(executor.submit(run_worker_job, worker_job, request))
+                executors_list.append(
+                    executor.submit(run_worker_job, worker_job, request)
+                )
 
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
+        info(f"Future from as_completed: {future}")
         for metric in future.result():
             info(metric)
         # yield future.result()
