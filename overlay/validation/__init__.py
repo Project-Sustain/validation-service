@@ -145,8 +145,29 @@ class Validator:
                     )
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
-            return as_completed(executors_list)
-
+            for future in as_completed(executors_list):
+                gis_join, allocation, loss, variance, iteration, ok, error_msg, duration_sec = future.result()
+                # metrics.append(ValidationMetric(
+                #     gis_join=gis_join,
+                #     allocation=allocation,
+                #     loss=loss,
+                #     variance=variance,
+                #     duration_sec=duration_sec,
+                #     ok=ok,
+                #     error_msg=error_msg
+                # ))
+                info(f"Yielding metric for gis_join={gis_join}")
+                yield Metric(
+                    gis_join=gis_join,
+                    allocation=allocation,
+                    loss=loss,
+                    variance=variance,
+                    duration_sec=duration_sec,
+                    iteration=iteration,
+                    ok=ok,
+                    error_msg=error_msg,
+                    hostname=self.hostname
+                )
 
             # all tasks completed. kill all child processes
             # parent_pid = os.getpid()

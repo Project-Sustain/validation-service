@@ -91,32 +91,9 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         if request.model_framework == ModelFramework.TENSORFLOW:
 
             tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
-            as_completed_iterable = tf_validator.validate_gis_joins()
-            info(f"as_completed_iterable: {as_completed_iterable}")
-            for future in as_completed_iterable:
-                info(f"Future: {future}")
-                gis_join, allocation, loss, variance, iteration, ok, error_msg, duration_sec = future.result()
-                # metrics.append(ValidationMetric(
-                #     gis_join=gis_join,
-                #     allocation=allocation,
-                #     loss=loss,
-                #     variance=variance,
-                #     duration_sec=duration_sec,
-                #     ok=ok,
-                #     error_msg=error_msg
-                # ))
-                info(f"Yielding metric for gis_join={gis_join}")
-                yield Metric(
-                    gis_join=gis_join,
-                    allocation=allocation,
-                    loss=loss,
-                    variance=variance,
-                    duration_sec=duration_sec,
-                    iteration=iteration,
-                    ok=ok,
-                    error_msg=error_msg,
-                    hostname=self.hostname
-                )
+            for metric in tf_validator.validate_gis_joins():
+                info(f"Yielding metric from worker_server: {metric}")
+                yield metric
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
