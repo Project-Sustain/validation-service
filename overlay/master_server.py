@@ -131,7 +131,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
 
 # Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
-    responses: Queue = Queue(maxsize=1024)
+    responses: Queue = Queue(maxsize=10)
 
     # Define worker job function to be run in the thread pool
     def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
@@ -147,7 +147,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
 
             info(f"Iterating over stub.BeginValidationJob()'s unary channel stream...")
             for _response in stub.BeginValidationJob(request_copy):
-                if not _responses.full():
+                while not _responses.full():
                     info(f"Adding response to queue: {_response}")
                     _responses.put(_response)
 
@@ -160,6 +160,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                     executor.submit(run_worker_job, responses, worker_job, request)
                 )
 
+    info("Got here")
     for future in executors_list:
         info(f"Future: {future}")
         while not future.done():
