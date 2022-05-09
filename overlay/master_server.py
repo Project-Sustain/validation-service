@@ -120,7 +120,9 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 request_copy.id = worker_job.job_id
 
                 for response in stub.BeginValidationJob(request_copy):
-                    info(response)
+                    info("twerkin")
+
+                    info
 
     return []
 
@@ -512,6 +514,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Create and launch a job from allocations
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
 
+
         worker_responses = []
         for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
             worker_responses.append(metric)
@@ -608,7 +611,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         # error_msg = f"errors: {errors}"
         profiler.stop()
 
-        # TODO needs to yield the responses back to the flask server here
         return ValidationJobResponse(
             id=job_id,
             ok=True,
