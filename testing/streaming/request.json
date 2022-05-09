@@ -1,6 +1,6 @@
 {
-  "master_job_mode": "SYNCHRONOUS",
-  "worker_job_mode": "MULTITHREADED",
+  "master_job_mode": "MULTITHREADED",
+  "worker_job_mode": "SYNCHRONOUS",
   "model_framework": "TENSORFLOW",
   "model_category": "REGRESSION",
   "mongo_host": "localhost",
