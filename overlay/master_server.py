@@ -156,8 +156,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
         info(future)
-        yield future.result()
-
+        # yield future.result()
+    return []
 
 
 # Returns list of WorkerValidationJobResponses
