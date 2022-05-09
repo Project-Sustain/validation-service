@@ -91,7 +91,9 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         if request.model_framework == ModelFramework.TENSORFLOW:
 
             tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
-            return tf_validator.validate_gis_joins()
+            metric_generator = tf_validator.validate_gis_joins()
+            info(f"Returning validate_gis_joins(): {metric_generator}")
+            return metric_generator
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
