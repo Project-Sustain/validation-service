@@ -145,7 +145,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             request_copy.id = _worker_job.job_id
 
             info(f"Returning stub.BeginValidationJob()'s unary channel stream...")
-            return stub.BeginValidationJob(request_copy)
+            for response in stub.BeginValidationJob(request_copy):
+                info(f"RESPONSE: {response}")
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
@@ -159,9 +160,9 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
     for future in as_completed(executors_list):
         info(f"Future from as_completed: {future}")
-        for metric in future.result():
-            info(metric)
-        # yield future.result()
+        # for metric in future.result():
+        #     info(metric)
+        # # yield future.result()
     return []
 
 
