@@ -146,10 +146,10 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             request_copy.id = _worker_job.job_id
 
             info(f"Returning stub.BeginValidationJob()'s unary channel stream...")
-            for response in stub.BeginValidationJob(request_copy):
+            for _response in stub.BeginValidationJob(request_copy):
                 if not _responses.full():
-                    info(f"Adding response to queue: {response}")
-                    _responses.put(response)
+                    info(f"Adding response to queue: {_response}")
+                    _responses.put(_response)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
