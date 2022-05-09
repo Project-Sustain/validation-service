@@ -120,9 +120,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 request_copy.id = worker_job.job_id
 
                 for response in stub.BeginValidationJob(request_copy):
-                    info("twerkin")
-
-                    info
+                    info(response)
 
     return []
 
