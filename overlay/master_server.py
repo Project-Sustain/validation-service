@@ -586,7 +586,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(f"Worker {request.hostname} is not registered, can't remove")
             return WorkerRegistrationResponse(success=False)
 
-    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> Iterator[ValidationJobResponse]:
+    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> Iterator[ResponseMetric]:
 
         if request.spatial_coverage == SpatialCoverage.ALL:
             info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
