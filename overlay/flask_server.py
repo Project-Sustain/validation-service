@@ -178,14 +178,14 @@ def validation():
 
                 # Submit validation job
                 # Needs to stream back to the client
-                # validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
-                # info(f"Validation Response received: {validation_grpc_response}")
+                validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
+                info(f"Validation Response received: {validation_grpc_response}")
 
-                for jobResponse in stub.SubmitValidationJob(validation_grpc_request):
-                    info(f"inside flask server!! {jobResponse}")
+                # for jobResponse in stub.SubmitValidationJob(validation_grpc_request):
+                #     info(f"inside flask server!! {jobResponse}")
 
-            # response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
-            # return build_json_response(validation_grpc_response), response_code
+            response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
+            return build_json_response(validation_grpc_response), response_code
 
         else:
             err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
