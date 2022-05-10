@@ -3,7 +3,7 @@ import grpc
 import hashlib
 import jsonschema
 from jsonschema import validate
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, stream_with_context
 from http import HTTPStatus
 from pprint import pprint
 from logging import info, error
@@ -178,8 +178,11 @@ def validation():
 
                 # Submit validation job
                 # Needs to stream back to the client
-                validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
-                info(f"Validation Response received: {validation_grpc_response}")
+                # validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
+                # info(f"Validation Response received: {validation_grpc_response}")
+
+                for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
+                    info(f"inside flask server!! {validation_grpc_response}")
 
             response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
             return build_json_response(validation_grpc_response), response_code

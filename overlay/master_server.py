@@ -121,9 +121,10 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 request_copy.id = worker_job.job_id
 
                 for response in stub.BeginValidationJob(request_copy):
-                    info(response)
+                    # info(response)
+                    yield response
 
-    return []
+                # return stub.BeginValidationJob(request_copy)
 
 
     # return responses # also needs to yield the response from stub.BeginValidationJob(request_copy)
@@ -131,7 +132,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
 
 # Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
-    responses: Queue = Queue(maxsize=10)
+    responses: Queue = Queue(maxsize=1024)
 
     # Define worker job function to be run in the thread pool
     def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
@@ -151,8 +152,6 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                     info(f"Adding response to queue: {_response}")
                     _responses.put(_response)
 
-            return
-
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
     with ThreadPoolExecutor(max_workers=10) as executor:
@@ -161,23 +160,19 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 executors_list.append(
                     executor.submit(run_worker_job, responses, worker_job, request)
                 )
+        info("Got here")
+        for future in executors_list:
+            info(f"Future: {future}")
+            while not future.done():
+                info(f"Future {future} is not done yet")
+                while not responses.empty():
+                    info(f"Responses size: {responses.qsize()}")
+                    response = responses.get()
+                    info(f"Consumed response from queue: {response}")
+                    yield response
 
-    info("Got here")
-    for future in as_completed(executors_list):
-        info(f"Future: {future}")
-        while not future.done():
-            info(f"Future {future} is not done yet")
-            while not responses.empty():
-                info(f"Responses size: {responses.qsize()}")
-                response = responses.get()
-                info(f"Consumed response from queue: {response}")
-    # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
-    # for future in as_completed(executors_list):
-    #     info(f"Future from as_completed: {future}")
-        # for metric in future.result():
-        #     info(metric)
-        # # yield future.result()
-    return []
+
+
 
 
 # Returns list of WorkerValidationJobResponses
@@ -495,7 +490,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
     # Processes a job with either a default budget or static budget.
     # Returns a list of WorkerValidationJobResponse objects.
-    def process_job_with_normal_budget(self, request: ValidationJobRequest) -> (str, list):
+    def process_job_with_normal_budget(self, request: ValidationJobRequest) -> (str, Iterator[Metric]):
 
         # Defaults
         strata_limit = 0
@@ -533,14 +528,18 @@ class Master(validation_pb2_grpc.MasterServicer):
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
 
 
-        worker_responses = []
-        for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
-            worker_responses.append(metric)
+        # worker_responses = []
+        # for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
+        #     info(f"Response from launch in process with normal budget - {metric}")
+        #     worker_responses.append(metric)
+        #
+        # # Aggregate to state level if requested
+        # #if request.spatial_resolution == SpatialResolution.STATE:
+        #
+        # return job.job_id, worker_responses
 
-        # Aggregate to state level if requested
-        #if request.spatial_resolution == SpatialResolution.STATE:
+        return job.job_id, launch_worker_jobs(request, job)
 
-        return job.job_id, worker_responses
 
     # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
     # for the ShardMetadata objects.
@@ -587,7 +586,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(f"Worker {request.hostname} is not registered, can't remove")
             return WorkerRegistrationResponse(success=False)
 
-    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> ValidationJobResponse:
+    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> Iterator[ValidationJobResponse]:
         # Time the entire job from start to finish
         profiler: Timer = Timer()
         profiler.start()
@@ -604,29 +603,9 @@ class Master(validation_pb2_grpc.MasterServicer):
         else:  # Default or static budget
             job_id, worker_responses = self.process_job_with_normal_budget(request)
 
-        # # Flattened list of metrics, instead of being nested in respective Worker responses
-        # flattened_metrics: list = []
-        # errors = []
-        # ok = True
-        #
-        # if len(worker_responses) == 0:
-        #     error_msg = "Did not receive any responses from workers"
-        #     ok = False
-        #     error(error_msg)
-        #     errors.append(error_msg)
-        # else:
-        #     for worker_response in worker_responses:
-        #         if not worker_response.ok:
-        #             ok = False
-        #             error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
-        #             errors.append(error_msg)
-        #         for metric in worker_response.metrics:
-        #             flattened_metrics.append(metric)
-        #
-        # if request.spatial_resolution == SpatialResolution.STATE:
-        #     flattened_metrics = aggregate_metrics_by_state(flattened_metrics)
+        for response in worker_responses:
+            info(f"in submit validation -- {response}")
 
-        # error_msg = f"errors: {errors}"
         profiler.stop()
 
         return ValidationJobResponse(
@@ -636,6 +615,19 @@ class Master(validation_pb2_grpc.MasterServicer):
             duration_sec=profiler.elapsed,
             metrics=worker_responses
         )
+
+
+
+
+        # profiler.stop()
+        #
+        # return ValidationJobResponse(
+        #     id=job_id,
+        #     ok=True,
+        #     error_msg="error_msg",
+        #     duration_sec=profiler.elapsed,
+        #     metrics=worker_responses
+        # )
 
     def SubmitExperiment(self, request: ValidationJobRequest, context) -> ExperimentResponse:
         # Time the entire job from start to finish
