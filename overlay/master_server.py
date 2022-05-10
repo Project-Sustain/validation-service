@@ -120,10 +120,10 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 request_copy.allocations.extend(worker_job.gis_joins)
                 request_copy.id = worker_job.job_id
 
-                for response in stub.BeginValidationJob(request_copy):
-                    info(response)
+                # for response in stub.BeginValidationJob(request_copy):
+                #     info(response)
 
-    return []
+                return stub.BeginValidationJob(request_copy)
 
 
     # return responses # also needs to yield the response from stub.BeginValidationJob(request_copy)
@@ -527,6 +527,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         worker_responses = []
         for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
+            info(f"Response from launch - {metric}")
             worker_responses.append(metric)
 
         # Aggregate to state level if requested
@@ -596,29 +597,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         else:  # Default or static budget
             job_id, worker_responses = self.process_job_with_normal_budget(request)
 
-        # # Flattened list of metrics, instead of being nested in respective Worker responses
-        # flattened_metrics: list = []
-        # errors = []
-        # ok = True
-        #
-        # if len(worker_responses) == 0:
-        #     error_msg = "Did not receive any responses from workers"
-        #     ok = False
-        #     error(error_msg)
-        #     errors.append(error_msg)
-        # else:
-        #     for worker_response in worker_responses:
-        #         if not worker_response.ok:
-        #             ok = False
-        #             error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
-        #             errors.append(error_msg)
-        #         for metric in worker_response.metrics:
-        #             flattened_metrics.append(metric)
-        #
-        # if request.spatial_resolution == SpatialResolution.STATE:
-        #     flattened_metrics = aggregate_metrics_by_state(flattened_metrics)
-
-        # error_msg = f"errors: {errors}"
         profiler.stop()
 
         return ValidationJobResponse(
