@@ -605,15 +605,16 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         for response in worker_responses:
             info(f"in submit validation -- {response}")
-            profiler.stop()
 
-            yield ValidationJobResponse(
-                id=job_id,
-                ok=True,
-                error_msg="error_msg",
-                duration_sec=profiler.elapsed,
-                metrics=worker_responses
-            )
+        profiler.stop()
+
+        return ValidationJobResponse(
+            id=job_id,
+            ok=True,
+            error_msg="error_msg",
+            duration_sec=profiler.elapsed,
+            metrics=worker_responses
+        )
 
 
 
