@@ -120,10 +120,11 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 request_copy.allocations.extend(worker_job.gis_joins)
                 request_copy.id = worker_job.job_id
 
-                # for response in stub.BeginValidationJob(request_copy):
-                #     info(response)
+                for response in stub.BeginValidationJob(request_copy):
+                    info(response)
+                    yield response
 
-                return stub.BeginValidationJob(request_copy)
+                # return stub.BeginValidationJob(request_copy)
 
 
     # return responses # also needs to yield the response from stub.BeginValidationJob(request_copy)
