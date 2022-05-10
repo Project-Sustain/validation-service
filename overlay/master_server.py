@@ -490,7 +490,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
     # Processes a job with either a default budget or static budget.
     # Returns a list of WorkerValidationJobResponse objects.
-    def process_job_with_normal_budget(self, request: ValidationJobRequest) -> (str, list):
+    def process_job_with_normal_budget(self, request: ValidationJobRequest) -> (str, Iterator[Metric]):
 
         # Defaults
         strata_limit = 0
@@ -528,15 +528,18 @@ class Master(validation_pb2_grpc.MasterServicer):
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
 
 
-        worker_responses = []
-        for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
-            info(f"Response from launch in process with normal budget - {metric}")
-            worker_responses.append(metric)
+        # worker_responses = []
+        # for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
+        #     info(f"Response from launch in process with normal budget - {metric}")
+        #     worker_responses.append(metric)
+        #
+        # # Aggregate to state level if requested
+        # #if request.spatial_resolution == SpatialResolution.STATE:
+        #
+        # return job.job_id, worker_responses
 
-        # Aggregate to state level if requested
-        #if request.spatial_resolution == SpatialResolution.STATE:
+        return job.job_id, launch_worker_jobs(request, job)
 
-        return job.job_id, worker_responses
 
     # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
     # for the ShardMetadata objects.
@@ -599,6 +602,9 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         else:  # Default or static budget
             job_id, worker_responses = self.process_job_with_normal_budget(request)
+
+        for response in worker_responses:
+            info(f"in submit validation -- {response}")
 
         profiler.stop()
 
