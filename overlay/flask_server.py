@@ -205,20 +205,22 @@ def validation():
                 validation_grpc_request.model_file.data = file_bytes
 
                 info(validation_grpc_request)
+                for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
+                    info(f"inside flask server!! {validation_grpc_response}")
 
                 # Submit validation job
                 # Needs to stream back to the client
                 # validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
                 # info(f"Validation Response received: {validation_grpc_response}")
 
-                def generate_response():
-                    for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
-                        info(f"inside flask server!! {validation_grpc_response}")
-                        response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
-                        yield build_json_response(validation_grpc_response), response_code
-
-                return app.response_class(stream_with_context(generate_response()))
-
+                # def generate_response():
+                #     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
+                #         info(f"inside flask server!! {validation_grpc_response}")
+                #         response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
+                #         yield build_json_response(validation_grpc_response), response_code
+                #
+                # return app.response_class(stream_with_context(generate_response()))
+                return json.dumps({"ok": True}), HTTPStatus.OK
 
         else:
             err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
