@@ -586,7 +586,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(f"Worker {request.hostname} is not registered, can't remove")
             return WorkerRegistrationResponse(success=False)
 
-    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> ValidationJobResponse:
+    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> Iterator[ValidationJobResponse]:
         # Time the entire job from start to finish
         profiler: Timer = Timer()
         profiler.start()
@@ -605,16 +605,28 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         for response in worker_responses:
             info(f"in submit validation -- {response}")
+            profiler.stop()
 
-        profiler.stop()
+            yield ValidationJobResponse(
+                id=job_id,
+                ok=True,
+                error_msg="error_msg",
+                duration_sec=profiler.elapsed,
+                metrics=worker_responses
+            )
 
-        return ValidationJobResponse(
-            id=job_id,
-            ok=True,
-            error_msg="error_msg",
-            duration_sec=profiler.elapsed,
-            metrics=worker_responses
-        )
+
+
+
+        # profiler.stop()
+        #
+        # return ValidationJobResponse(
+        #     id=job_id,
+        #     ok=True,
+        #     error_msg="error_msg",
+        #     duration_sec=profiler.elapsed,
+        #     metrics=worker_responses
+        # )
 
     def SubmitExperiment(self, request: ValidationJobRequest, context) -> ExperimentResponse:
         # Time the entire job from start to finish

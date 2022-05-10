@@ -20,7 +20,7 @@ class MasterStub(object):
                 request_serializer=validation__pb2.ModelFile.SerializeToString,
                 response_deserializer=validation__pb2.UploadStatus.FromString,
                 )
-        self.SubmitValidationJob = channel.unary_unary(
+        self.SubmitValidationJob = channel.unary_stream(
                 '/Master/SubmitValidationJob',
                 request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
                 response_deserializer=validation__pb2.ValidationJobResponse.FromString,
@@ -89,7 +89,7 @@ def add_MasterServicer_to_server(servicer, server):
                     request_deserializer=validation__pb2.ModelFile.FromString,
                     response_serializer=validation__pb2.UploadStatus.SerializeToString,
             ),
-            'SubmitValidationJob': grpc.unary_unary_rpc_method_handler(
+            'SubmitValidationJob': grpc.unary_stream_rpc_method_handler(
                     servicer.SubmitValidationJob,
                     request_deserializer=validation__pb2.ValidationJobRequest.FromString,
                     response_serializer=validation__pb2.ValidationJobResponse.SerializeToString,
@@ -148,7 +148,7 @@ class Master(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/Master/SubmitValidationJob',
+        return grpc.experimental.unary_stream(request, target, '/Master/SubmitValidationJob',
             validation__pb2.ValidationJobRequest.SerializeToString,
             validation__pb2.ValidationJobResponse.FromString,
             options, channel_credentials,
