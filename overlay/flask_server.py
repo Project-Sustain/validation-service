@@ -143,87 +143,11 @@ def validation_experiment():
 
 @app.route("/validation_service/submit_validation_job", methods=["POST"])
 def validation():
-    validation_request_str: str = request.form["request"]
-    if validation_request_str == "":
-        err_msg = "Empty request submitted"
-        error(err_msg)
-        return json.dumps({
-            "id": "None",
-            "ok": False,
-            "err_msg": err_msg
-        }), HTTPStatus.BAD_REQUEST
 
-    validation_request: dict = json.loads(validation_request_str)
-    info(validation_request)
-    ok, err_msg = validate_request_json(validation_request)
-    if not ok:
-        return json.dumps({
-            "id": "None",
-            "ok": False,
-            "err_msg": err_msg
-        }), HTTPStatus.BAD_REQUEST
-
-    # Check if the POST request has the file part
-    if "file" not in request.files:
-        err_msg = "No file included in request"
-        error(err_msg)
-        return json.dumps({
-            "id": "None",
-            "ok": False,
-            "err_msg": err_msg
-        }), HTTPStatus.BAD_REQUEST
-
-    file: FileStorage = request.files["file"]
-
-    # If the user does not select a file, the browser submits an
-    # empty file without a filename.
-    if file.filename == "":
-        err_msg = "Empty filename submitted"
-        error(err_msg)
-        return json.dumps({
-            "id": "None",
-            "ok": False,
-            "err_msg": err_msg
-        }), HTTPStatus.BAD_REQUEST
-
-    if file is not None:
-        if allowed_file(file.filename):
-            file_bytes: bytes = file.read()
-
-            hasher = hashlib.md5()
-            hasher.update(file_bytes)
-            md5_hash: str = hasher.hexdigest()
-            info(f"Uploaded file of size {len(file_bytes)} bytes, and hash: {md5_hash}")
-
-            with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
-                stub: validation_pb2_grpc.MasterStub = validation_pb2_grpc.MasterStub(channel)
-
-                # Build and log gRPC request
-                validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
-                validation_grpc_request.model_file.type = file_type(file.filename)
-                validation_grpc_request.model_file.md5_hash = md5_hash
-                validation_grpc_request.model_file.data = file_bytes
-
-                info(validation_grpc_request)
-                for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
-                    info(f"inside flask server!! {validation_grpc_response}")
-
-                # Submit validation job
-                # Needs to stream back to the client
-                # validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
-                # info(f"Validation Response received: {validation_grpc_response}")
-
-                # def generate_response():
-                #     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
-                #         info(f"inside flask server!! {validation_grpc_response}")
-                #         response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
-                #         yield build_json_response(validation_grpc_response), response_code
-                #
-                # return app.response_class(stream_with_context(generate_response()))
-                return json.dumps({"ok": True}), HTTPStatus.OK
-
-        else:
-            err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
+    def generate():
+        validation_request_str: str = request.form["request"]
+        if validation_request_str == "":
+            err_msg = "Empty request submitted"
             error(err_msg)
             return json.dumps({
                 "id": "None",
@@ -231,14 +155,95 @@ def validation():
                 "err_msg": err_msg
             }), HTTPStatus.BAD_REQUEST
 
-    else:
-        err_msg = f"Uploaded file object is None! Please upload a valid file"
-        error(err_msg)
-        return json.dumps({
-            "id": "None",
-            "ok": False,
-            "err_msg": err_msg
-        }), HTTPStatus.BAD_REQUEST
+        validation_request: dict = json.loads(validation_request_str)
+        info(validation_request)
+        ok, err_msg = validate_request_json(validation_request)
+        if not ok:
+            return json.dumps({
+                "id": "None",
+                "ok": False,
+                "err_msg": err_msg
+            }), HTTPStatus.BAD_REQUEST
+
+        # Check if the POST request has the file part
+        if "file" not in request.files:
+            err_msg = "No file included in request"
+            error(err_msg)
+            return json.dumps({
+                "id": "None",
+                "ok": False,
+                "err_msg": err_msg
+            }), HTTPStatus.BAD_REQUEST
+
+        file: FileStorage = request.files["file"]
+
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == "":
+            err_msg = "Empty filename submitted"
+            error(err_msg)
+            return json.dumps({
+                "id": "None",
+                "ok": False,
+                "err_msg": err_msg
+            }), HTTPStatus.BAD_REQUEST
+
+        if file is not None:
+            if allowed_file(file.filename):
+                file_bytes: bytes = file.read()
+
+                hasher = hashlib.md5()
+                hasher.update(file_bytes)
+                md5_hash: str = hasher.hexdigest()
+                info(f"Uploaded file of size {len(file_bytes)} bytes, and hash: {md5_hash}")
+
+                with grpc.insecure_channel(f"{app.config['MASTER_HOSTNAME']}:{app.config['MASTER_PORT']}") as channel:
+                    stub: validation_pb2_grpc.MasterStub = validation_pb2_grpc.MasterStub(channel)
+
+                    # Build and log gRPC request
+                    validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
+                    validation_grpc_request.model_file.type = file_type(file.filename)
+                    validation_grpc_request.model_file.md5_hash = md5_hash
+                    validation_grpc_request.model_file.data = file_bytes
+
+                    info(validation_grpc_request)
+                    for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
+                        info(f"inside flask server!! {validation_grpc_response}")
+                        yield build_json_response(validation_grpc_response)
+
+                    # Submit validation job
+                    # Needs to stream back to the client
+                    # validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
+                    # info(f"Validation Response received: {validation_grpc_response}")
+
+                    # def generate_response():
+                    #     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
+                    #         info(f"inside flask server!! {validation_grpc_response}")
+                    #         response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
+                    #         yield build_json_response(validation_grpc_response), response_code
+                    #
+                    # return app.response_class(stream_with_context(generate_response()))
+                    return json.dumps({"ok": True}), HTTPStatus.OK
+
+            else:
+                err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
+                error(err_msg)
+                return json.dumps({
+                    "id": "None",
+                    "ok": False,
+                    "err_msg": err_msg
+                }), HTTPStatus.BAD_REQUEST
+
+        else:
+            err_msg = f"Uploaded file object is None! Please upload a valid file"
+            error(err_msg)
+            return json.dumps({
+                "id": "None",
+                "ok": False,
+                "err_msg": err_msg
+            }), HTTPStatus.BAD_REQUEST
+
+    return app.response_class(stream_with_context(generate()))
 
 
 def build_json_response(validation_grpc_response: ResponseMetric) -> str:
