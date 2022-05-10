@@ -11,7 +11,8 @@ from google.protobuf.json_format import MessageToJson, Parse
 from werkzeug.datastructures import FileStorage
 
 from overlay import validation_pb2_grpc
-from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType, ExperimentResponse,ResponseMetric
+from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType, ExperimentResponse, \
+    ResponseMetric
 
 UPLOAD_DIR = "./uploads"
 ALLOWED_EXTENSIONS = {"zip", "pt", "pkl", "h5"}
@@ -59,6 +60,17 @@ def get_schema():
     with open("./resources/submit_validation_job_request_schema.json", "r") as f:
         schema_json = json.load(f)
     return jsonify(schema_json)
+
+
+@app.route("/validation_service/streaming", methods=["GET"])
+def test_streaming():
+    return_vals = ["A", "B", "C", "D", "E", "F", "G"]
+
+    def generate():
+        for return_val in return_vals:
+            yield return_val
+
+    return app.response_class(stream_with_context(generate()))
 
 
 @app.route("/validation_service/submit_validation_experiment", methods=["POST"])
