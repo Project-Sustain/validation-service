@@ -4,7 +4,6 @@ import grpc
 
 from overlay import validation_pb2 as validation__pb2
 
-
 class MasterStub(object):
     """Master service definition
     """
@@ -23,7 +22,7 @@ class MasterStub(object):
         self.SubmitValidationJob = channel.unary_stream(
                 '/Master/SubmitValidationJob',
                 request_serializer=validation__pb2.ValidationJobRequest.SerializeToString,
-                response_deserializer=validation__pb2.ValidationJobResponse.FromString,
+                response_deserializer=validation__pb2.ResponseMetric.FromString,
                 )
         self.SubmitExperiment = channel.unary_unary(
                 '/Master/SubmitExperiment',
@@ -92,7 +91,7 @@ def add_MasterServicer_to_server(servicer, server):
             'SubmitValidationJob': grpc.unary_stream_rpc_method_handler(
                     servicer.SubmitValidationJob,
                     request_deserializer=validation__pb2.ValidationJobRequest.FromString,
-                    response_serializer=validation__pb2.ValidationJobResponse.SerializeToString,
+                    response_serializer=validation__pb2.ResponseMetric.SerializeToString,
             ),
             'SubmitExperiment': grpc.unary_unary_rpc_method_handler(
                     servicer.SubmitExperiment,
@@ -150,7 +149,7 @@ class Master(object):
             metadata=None):
         return grpc.experimental.unary_stream(request, target, '/Master/SubmitValidationJob',
             validation__pb2.ValidationJobRequest.SerializeToString,
-            validation__pb2.ValidationJobResponse.FromString,
+            validation__pb2.ResponseMetric.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 

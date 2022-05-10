@@ -11,7 +11,7 @@ from google.protobuf.json_format import MessageToJson, Parse
 from werkzeug.datastructures import FileStorage
 
 from overlay import validation_pb2_grpc
-from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType, ExperimentResponse
+from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType, ExperimentResponse,ResponseMetric
 
 UPLOAD_DIR = "./uploads"
 ALLOWED_EXTENSIONS = {"zip", "pt", "pkl", "h5"}
@@ -133,19 +133,31 @@ def validation():
     if validation_request_str == "":
         err_msg = "Empty request submitted"
         error(err_msg)
-        return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), HTTPStatus.BAD_REQUEST
+        return json.dumps({
+            "id": "None",
+            "ok": False,
+            "err_msg": err_msg
+        }), HTTPStatus.BAD_REQUEST
 
     validation_request: dict = json.loads(validation_request_str)
     info(validation_request)
     ok, err_msg = validate_request_json(validation_request)
     if not ok:
-        return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), HTTPStatus.BAD_REQUEST
+        return json.dumps({
+            "id": "None",
+            "ok": False,
+            "err_msg": err_msg
+        }), HTTPStatus.BAD_REQUEST
 
     # Check if the POST request has the file part
     if "file" not in request.files:
         err_msg = "No file included in request"
         error(err_msg)
-        return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), HTTPStatus.BAD_REQUEST
+        return json.dumps({
+            "id": "None",
+            "ok": False,
+            "err_msg": err_msg
+        }), HTTPStatus.BAD_REQUEST
 
     file: FileStorage = request.files["file"]
 
@@ -154,7 +166,11 @@ def validation():
     if file.filename == "":
         err_msg = "Empty filename submitted"
         error(err_msg)
-        return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), HTTPStatus.BAD_REQUEST
+        return json.dumps({
+            "id": "None",
+            "ok": False,
+            "err_msg": err_msg
+        }), HTTPStatus.BAD_REQUEST
 
     if file is not None:
         if allowed_file(file.filename):
@@ -181,26 +197,35 @@ def validation():
                 # validation_grpc_response: ValidationJobResponse = stub.SubmitValidationJob(validation_grpc_request)
                 # info(f"Validation Response received: {validation_grpc_response}")
 
-                for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
-                    info(f"inside flask server!! {validation_grpc_response}")
+                def generate_response():
+                    for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
+                        info(f"inside flask server!! {validation_grpc_response}")
+                        response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
+                        yield build_json_response(validation_grpc_response), response_code
 
-            response_code: int = HTTPStatus.OK if validation_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
-            return build_json_response(validation_grpc_response), response_code
+                return app.response_class(stream_with_context(generate_response()))
+
 
         else:
             err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
             error(err_msg)
-            return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), \
-                HTTPStatus.BAD_REQUEST
+            return json.dumps({
+                "id": "None",
+                "ok": False,
+                "err_msg": err_msg
+            }), HTTPStatus.BAD_REQUEST
 
     else:
         err_msg = f"Uploaded file object is None! Please upload a valid file"
         error(err_msg)
-        return build_json_response(ValidationJobResponse(id="None", ok=False, err_msg=err_msg)), \
-            HTTPStatus.BAD_REQUEST
+        return json.dumps({
+            "id": "None",
+            "ok": False,
+            "err_msg": err_msg
+        }), HTTPStatus.BAD_REQUEST
 
 
-def build_json_response(validation_grpc_response: ValidationJobResponse) -> str:
+def build_json_response(validation_grpc_response: ResponseMetric) -> str:
     return MessageToJson(validation_grpc_response, preserving_proto_field_name=True)
 
 

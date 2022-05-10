@@ -8,7 +8,7 @@ service Master {
   rpc UploadFile(ModelFile) returns (UploadStatus) {}
 
   // Submits a validation job to the cluster
-  rpc SubmitValidationJob(ValidationJobRequest) returns (stream ValidationJobResponse) {}  // This is going to need to be a stream too
+  rpc SubmitValidationJob(ValidationJobRequest) returns (stream ResponseMetric) {}  
 
   // Submits a validation job experiment to the cluster
   rpc SubmitExperiment(ValidationJobRequest) returns (ExperimentResponse) {}
@@ -83,6 +83,18 @@ message ValidationJobResponse {
   string error_msg = 3;
   double duration_sec = 4;
   repeated Metric metrics = 5;
+}
+
+message ResponseMetric {
+  string gis_join = 1;
+  int64  allocation = 2;
+  double loss = 3;
+  double accuracy = 4;
+  double variance = 5;
+  double duration_sec = 6;
+  bool ok = 7;
+  string error_msg = 8;
+  string job_id = 9;
 }
 
 message WorkerValidationJobResponse {

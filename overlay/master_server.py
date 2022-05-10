@@ -17,7 +17,7 @@ from overlay.profiler import Timer
 from overlay.structures import GisTree, GisNode
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
-    SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric, Metric
+    SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric, Metric, ResponseMetric
 
 
 class JobMetadata:
@@ -587,9 +587,6 @@ class Master(validation_pb2_grpc.MasterServicer):
             return WorkerRegistrationResponse(success=False)
 
     def SubmitValidationJob(self, request: ValidationJobRequest, context) -> Iterator[ValidationJobResponse]:
-        # Time the entire job from start to finish
-        profiler: Timer = Timer()
-        profiler.start()
 
         if request.spatial_coverage == SpatialCoverage.ALL:
             info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
@@ -605,16 +602,27 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         for response in worker_responses:
             info(f"in submit validation -- {response}")
+            yield ResponseMetric(
+                gis_join=response.gis_join,
+                allocation=response.allocation,
+                loss=response.loss,
+                accuracy=response.accuracy,
+                variance=response.variance,
+                duration_sec=response.duration_sec,
+                ok=response.ok,
+                error_msg=response.error_msg,
+                job_id=job_id
+            )
+            info(f"in submit validation -- {response}")
 
-        profiler.stop()
-
-        return ValidationJobResponse(
-            id=job_id,
-            ok=True,
-            error_msg="error_msg",
-            duration_sec=profiler.elapsed,
-            metrics=worker_responses
-        )
+        #
+        # return ValidationJobResponse(
+        #     id=job_id,
+        #     ok=True,
+        #     error_msg="error_msg",
+        #     duration_sec=profiler.elapsed,
+        #     metrics=worker_responses
+        # )
 
 
 
