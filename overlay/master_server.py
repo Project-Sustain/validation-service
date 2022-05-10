@@ -121,7 +121,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                 request_copy.id = worker_job.job_id
 
                 for response in stub.BeginValidationJob(request_copy):
-                    info(response)
+                    # info(response)
                     yield response
 
                 # return stub.BeginValidationJob(request_copy)
@@ -169,8 +169,10 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                     info(f"Responses size: {responses.qsize()}")
                     response = responses.get()
                     info(f"Consumed response from queue: {response}")
+                    yield response
 
-    return []
+
+
 
 
 # Returns list of WorkerValidationJobResponses
@@ -528,7 +530,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         worker_responses = []
         for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
-            info(f"Response from launch - {metric}")
+            info(f"Response from launch in process with normal budget - {metric}")
             worker_responses.append(metric)
 
         # Aggregate to state level if requested

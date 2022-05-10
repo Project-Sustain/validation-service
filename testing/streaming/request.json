@@ -1,5 +1,5 @@
 {
-  "master_job_mode": "SYNCHRONOUS",
+  "master_job_mode": "MULTITHREADED",
   "worker_job_mode": "SYNCHRONOUS",
   "model_framework": "TENSORFLOW",
   "model_category": "REGRESSION",
