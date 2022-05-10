@@ -2,6 +2,7 @@ import json
 import grpc
 import hashlib
 import jsonschema
+import time
 from jsonschema import validate
 from flask import Flask, request, jsonify, stream_with_context
 from http import HTTPStatus
@@ -68,6 +69,7 @@ def test_streaming():
 
     def generate():
         for return_val in return_vals:
+            time.sleep(2)
             yield return_val
 
     return app.response_class(stream_with_context(generate()))
