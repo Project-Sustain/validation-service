@@ -27,7 +27,7 @@ payload = {
     "request": json.dumps(request)
 }
 
-pprint(requests.Request('POST', url, data=payload, files=files).prepare().body)
+#pprint(requests.Request('POST', url, data=payload, files=files).prepare().body)
 
 response = requests.request("POST", url, data=payload, files=files, stream=True)
 
