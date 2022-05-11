@@ -146,7 +146,7 @@ def validation():
 
     def generate():
         info(request.files)
-        info(request.form.keys())
+        info(request.data)
 
         validation_request_str: str = request.form["request"]
         if validation_request_str == "":
