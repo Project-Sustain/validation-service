@@ -8,7 +8,7 @@ from flask import Flask, request, jsonify, stream_with_context
 from http import HTTPStatus
 from pprint import pprint
 from logging import info, error
-from google.protobuf.json_format import MessageToJson, Parse
+from google.protobuf.json_format import MessageToJson, Parse, MessageToDict
 from werkzeug.datastructures import FileStorage
 
 from overlay import validation_pb2_grpc
@@ -213,7 +213,9 @@ def validation():
                     info(validation_grpc_request)
                     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
                         info(f"inside flask server!! {validation_grpc_response}")
-                        yield build_json_response(validation_grpc_response)
+                        dict_response = MessageToDict(validation_grpc_response, preserving_proto_field_name=True)
+                        yield jsonify(dict_response)
+                        #yield build_json_response(validation_grpc_response)
 
                     # Submit validation job
                     # Needs to stream back to the client
@@ -227,7 +229,7 @@ def validation():
                     #         yield build_json_response(validation_grpc_response), response_code
                     #
                     # return app.response_class(stream_with_context(generate_response()))
-                    return json.dumps({"ok": True}), HTTPStatus.OK
+                    return jsonify({"ok": True}), HTTPStatus.OK
 
             else:
                 err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
@@ -250,8 +252,8 @@ def validation():
     return app.response_class(stream_with_context(generate()))
 
 
-def build_json_response(validation_grpc_response: ResponseMetric) -> str:
-    return MessageToJson(validation_grpc_response, preserving_proto_field_name=True)
+def build_json_response(grpc_msg) -> str:
+    return MessageToJson(grpc_msg, preserving_proto_field_name=True)
 
 
 def validate_request_json(request_json: dict) -> (bool, str):
