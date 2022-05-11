@@ -214,7 +214,7 @@ def validation():
                     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
                         info(f"inside flask server!! {validation_grpc_response}")
                         dict_response = MessageToDict(validation_grpc_response, preserving_proto_field_name=True)
-                        yield json.dumps(dict_response, indent=None)
+                        yield json.dumps(dict_response, indent=None) + '\n'
                         #yield build_json_response(validation_grpc_response)
 
                     # Submit validation job
