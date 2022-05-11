@@ -171,8 +171,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     info("Finished job")
 
 
-# Returns list of WorkerValidationJobResponses
-async def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
+# Returns an iterator of type metric
+def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
 
     # Define async function to launch worker job
     async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
@@ -186,7 +186,7 @@ async def launch_worker_jobs_asynchronously(job: JobMetadata, request: Validatio
             request_copy.allocations.extend(_worker_job.gis_joins)
             request_copy.id = _worker_job.job_id
 
-            return await stub.BeginValidationJob(request_copy)
+            return stub.BeginValidationJob(request_copy)
 
     # Iterate over all the worker jobs created for this job and create asyncio tasks for them
     loop = asyncio.new_event_loop()
@@ -202,7 +202,8 @@ async def launch_worker_jobs_asynchronously(job: JobMetadata, request: Validatio
     # responses = loop.run_until_complete(task_group)
     # loop.close()
 
-    for result in as_completed(tasks):
+    for task in tasks:
+        info(result)
         for metric in result:
             yield metric
 
