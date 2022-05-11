@@ -6,15 +6,15 @@ import sys
 import os
 import requests
 
-experiment_request = f"request.json"
 model_file = f"model.h5"
+request_file = f"request.json"
 
-if not os.path.exists(experiment_request):
-    print(f"{experiment_request} does not exist! Please create first (hint, use the testing/test_requests/ JSON requests as a template example)")
+if not os.path.exists(request_file):
+    print(f"{request_file} does not exist! Please create first (hint, use the testing/test_requests/ JSON requests as a template example)")
     exit(1)
 
 url = "http://lattice-150.cs.colostate.edu:5000/validation_service/submit_validation_job"
-request_file = f"request.json"
+
 
 with open(request_file, "r") as rfile:
     request = json.load(rfile)
@@ -24,7 +24,7 @@ headers = {
 }
 
 files = [
-  ('file', ('model.h5', open('model.h5', 'rb'), 'application/octet-stream'))
+  ('file', (model_file, open('model.h5', 'rb')))
 ]
 payload = {
     "request": json.dumps(request)
