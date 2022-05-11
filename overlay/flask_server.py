@@ -145,7 +145,7 @@ def validation_experiment():
 def validation():
 
     def generate():
-        info(request.json)
+        info(request.form)
 
         validation_request_str: str = request.form["request"]
         if validation_request_str == "":
