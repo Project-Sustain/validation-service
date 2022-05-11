@@ -33,7 +33,8 @@ response = requests.request("POST", url, data=payload, files=files, stream=True)
 
 pprint(response)
 for line in response.iter_lines():
-    pprint(line)
+    data = json.loads(line)
+    pprint(data)
 
 # print("RECEIVED RESPONSE")
 # print(response.text.encode('utf8'))
