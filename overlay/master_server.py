@@ -132,7 +132,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
 
 # Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
-    responses: Queue = Queue(maxsize=1024)
+    responses: Queue = Queue()
 
     # Define worker job function to be run in the thread pool
     def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
@@ -148,9 +148,8 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
 
             info(f"Iterating over stub.BeginValidationJob()'s unary channel stream...")
             for _response in stub.BeginValidationJob(request_copy):
-                while not _responses.full():
-                    info(f"Adding response to queue: {_response}")
-                    _responses.put(_response)
+                info(f"Adding response to queue: {_response}")
+                _responses.put(_response, block=True)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
@@ -163,11 +162,12 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
 
         for future in executors_list:
             while not future.done():
-                while not responses.empty():
-                    #info(f"Responses size: {responses.qsize()}")
-                    response = responses.get()
-                    #info(f"Consumed response from queue: {response}")
-                    yield response
+                info(f"Responses size: {responses.qsize()}")
+                response = responses.get(block=True)
+                info(f"Responses size: {responses.qsize()}")
+                info(f"Consumed response from queue: {response}")
+                yield response
+
     info("Finished job")
 
 
@@ -609,7 +609,6 @@ class Master(validation_pb2_grpc.MasterServicer):
                 error_msg=response.error_msg,
                 job_id=job_id
             )
-            info(f"in submit validation -- {response}")
 
         #
         # return ValidationJobResponse(
