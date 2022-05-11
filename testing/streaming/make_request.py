@@ -30,6 +30,8 @@ payload = {
 pprint(requests.Request('POST', url, data=payload, files=files).prepare().body)
 
 response = requests.request("POST", url, data=payload, files=files, stream=True)
+
+pprint(response)
 for line in response.iter_content(chunk_size=1024):
     pprint(line)
 
