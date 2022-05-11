@@ -31,7 +31,7 @@ payload = {
     "request": json.dumps(request)
 }
 
-pprint(requests.Request('POST', url, headers=headers, data=payload, files=files).prepare().body.decode('utf8'))
+pprint(requests.Request('POST', url, headers=headers, data=payload, files=files).prepare().body)
 
 response = requests.request("POST", url, headers=headers, data=payload, files=files)
 
