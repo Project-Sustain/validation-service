@@ -6,6 +6,44 @@ import sys
 import os
 import requests
 from pprint import pprint
+import time
+
+
+class Timer:
+
+    def __init__(self, func=time.perf_counter):
+        self.elapsed = 0.0
+        self._func = func
+        self._start = None
+
+    # starting the module
+    def start(self):
+        if self._start is not None:
+            raise RuntimeError('Already started')
+        self._start = self._func()
+
+    # stopping the timer
+    def stop(self):
+        if self._start is None:
+            raise RuntimeError('Not started')
+        end = self._func()
+        self.elapsed += end - self._start
+        self._start = None
+
+    # resetting the timer
+    def reset(self):
+        self.elapsed = 0.0
+
+    def running(self):
+        return self._start is not None
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, *args):
+        self.stop()
+
 
 model_file = f"model.h5"
 request_file = f"request.json"
@@ -27,45 +65,21 @@ payload = {
     "request": json.dumps(request)
 }
 
-#pprint(requests.Request('POST', url, data=payload, files=files).prepare().body)
+count: int = 0
+profiler: Timer = Timer()
+profiler.start()
 
 response = requests.request("POST", url, data=payload, files=files, stream=True)
-
-pprint(response)
+response_timestamps = []
 for line in response.iter_lines():
+    response_timestamps.append(profiler.elapsed)
     data = json.loads(line)
     pprint(data)
 
-# print("RECEIVED RESPONSE")
-# print(response.text.encode('utf8'))
-#
-# conn = http.client.HTTPConnection("lattice-150.cs.colostate.edu", 5000)
-# dataList = []
-# boundary = 'wL36Yn8afVp8Ag7AmP8qZ0SA4n1v9T'
-# dataList.append(encode('--' + boundary))
-# dataList.append(encode(f"Content-Disposition: form-data; name=file; filename={model_file}"))
-#
-# fileType = mimetypes.guess_type(model_file)[0] or 'application/octet-stream'
-# dataList.append(encode('Content-Type: {}'.format(fileType)))
-# dataList.append(encode(''))
-#
-# with open(model_file, 'rb') as f:
-#   dataList.append(f.read())
-# dataList.append(encode('--' + boundary))
-# dataList.append(encode('Content-Disposition: form-data; name=request;'))
-#
-# dataList.append(encode('Content-Type: {}'.format('text/plain')))
-# dataList.append(encode(''))
-# dataList.append(encode(json.dumps(request)))
-#
-# dataList.append(encode('--'+boundary+'--'))
-# dataList.append(encode(''))
-# body = b'\r\n'.join(dataList)
-# payload = body
-# headers = {
-#    'Content-type': 'multipart/form-data; boundary={}'.format(boundary)
-# }
-# conn.request("POST", "/validation_service/submit_validation_job", payload, headers)
-# res = conn.getresponse()
-# data = res.read()
-# print(data.decode("utf-8"))
+profiler.stop()
+results = {
+    "start_sec": 0,
+    "stop_sec": profiler.elapsed,
+    "result_arrivals": response_timestamps
+}
+
