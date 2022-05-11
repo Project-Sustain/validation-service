@@ -95,7 +95,7 @@ def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> Itera
         return launch_worker_jobs_multithreaded(job, request)
     elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
         info("Launching jobs in asynchronous mode")
-        # worker_validation_job_responses = launch_worker_jobs_asynchronously(job, request)
+        return launch_worker_jobs_asynchronously(job, request)
     else:
         info("Launching jobs in synchronous mode")
         return launch_worker_jobs_synchronously(job, request)
