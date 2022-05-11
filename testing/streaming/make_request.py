@@ -35,6 +35,7 @@ pprint(requests.Request('POST', url, data=payload, files=files).prepare().body)
 
 response = requests.request("POST", url, data=payload, files=files)
 
+print("RECEIVED RESPONSE")
 print(response.text.encode('utf8'))
 #
 # conn = http.client.HTTPConnection("lattice-150.cs.colostate.edu", 5000)
