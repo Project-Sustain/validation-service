@@ -214,7 +214,7 @@ def validation():
                     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
                         info(f"inside flask server!! {validation_grpc_response}")
                         dict_response = MessageToDict(validation_grpc_response, preserving_proto_field_name=True)
-                        yield jsonify(dict_response)
+                        yield json.dumps(dict_response, indent=None)
                         #yield build_json_response(validation_grpc_response)
 
                     # Submit validation job
@@ -229,7 +229,7 @@ def validation():
                     #         yield build_json_response(validation_grpc_response), response_code
                     #
                     # return app.response_class(stream_with_context(generate_response()))
-                    return jsonify({"ok": True}), HTTPStatus.OK
+                    return json.dumps({"ok": True}, indent=None), HTTPStatus.OK
 
             else:
                 err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
