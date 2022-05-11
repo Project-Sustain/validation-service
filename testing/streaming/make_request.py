@@ -21,7 +21,7 @@ with open(request_file, "r") as rfile:
     request = json.load(rfile)
 
 files = [
-  ('file', (model_file, open('model.h5', 'rb')))
+  ('file', (model_file, open('/s/parsons/b/others/sustain/SustainProject/validation-service/testing/streaming/model.h5', 'rb')))
 ]
 payload = {
     "request": json.dumps(request)
@@ -30,7 +30,7 @@ payload = {
 pprint(requests.Request('POST', url, data=payload, files=files).prepare().body)
 
 response = requests.request("POST", url, data=payload, files=files, stream=True)
-for line in response.iter_lines():
+for line in response.iter_content(chunk_size=1024):
     pprint(line)
 
 # print("RECEIVED RESPONSE")
