@@ -5,6 +5,7 @@ import json
 import sys
 import os
 import requests
+from pprint import pprint
 
 model_file = f"model.h5"
 request_file = f"request.json"
@@ -30,7 +31,10 @@ payload = {
     "request": json.dumps(request)
 }
 
+pprint(requests.Request('POST', url, headers=headers, data=payload, files=files).prepare().body.decode('utf8'))
+
 response = requests.request("POST", url, headers=headers, data=payload, files=files)
+
 print(response.text.encode('utf8'))
 #
 # conn = http.client.HTTPConnection("lattice-150.cs.colostate.edu", 5000)
