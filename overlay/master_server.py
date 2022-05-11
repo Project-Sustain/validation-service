@@ -175,7 +175,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
 async def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
 
     # Define async function to launch worker job
-    async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
+    async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
         info("Launching async run_worker_job()...")
         _worker = _worker_job.worker
         async with grpc.aio.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
