@@ -83,3 +83,5 @@ results = {
     "result_arrivals": response_timestamps
 }
 
+with open("streaming_results.json", "w") as f:
+    json.dump(results, f)
