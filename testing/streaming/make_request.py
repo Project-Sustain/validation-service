@@ -20,10 +20,6 @@ url = "http://lattice-150.cs.colostate.edu:5000/validation_service/submit_valida
 with open(request_file, "r") as rfile:
     request = json.load(rfile)
 
-headers = {
-    'Content-Type': 'multipart/form-data; boundary=--------------------------531818130631649698349478'
-}
-
 files = [
   ('file', (model_file, open('model.h5', 'rb')))
 ]
@@ -33,10 +29,12 @@ payload = {
 
 pprint(requests.Request('POST', url, data=payload, files=files).prepare().body)
 
-response = requests.request("POST", url, data=payload, files=files)
+response = requests.request("POST", url, data=payload, files=files, stream=True)
+for line in response.iter_lines():
+    pprint(line)
 
-print("RECEIVED RESPONSE")
-print(response.text.encode('utf8'))
+# print("RECEIVED RESPONSE")
+# print(response.text.encode('utf8'))
 #
 # conn = http.client.HTTPConnection("lattice-150.cs.colostate.edu", 5000)
 # dataList = []

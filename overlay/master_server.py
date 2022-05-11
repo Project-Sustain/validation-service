@@ -168,9 +168,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                     response = responses.get()
                     #info(f"Consumed response from queue: {response}")
                     yield response
-
-
-
+    info("Finished job")
 
 
 # Returns list of WorkerValidationJobResponses
