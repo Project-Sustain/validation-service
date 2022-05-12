@@ -95,9 +95,6 @@ def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> Itera
     if request.master_job_mode == JobMode.MULTITHREADED:
         info("Launching jobs in multi-threaded mode")
         return launch_worker_jobs_multithreaded(job, request)
-    elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
-        info("Launching jobs in asynchronous mode")
-        return launch_worker_jobs_asynchronously(job, request)
     else:
         info("Launching jobs in synchronous mode")
         return launch_worker_jobs_synchronously(job, request)
@@ -171,90 +168,6 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 yield response
 
     info("Finished job")
-
-
-# Returns an iterator of type metric
-def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
-    responses: Queue = Queue()
-
-    # Define async function to launch worker job
-    async def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
-        info("Launching async run_worker_job()...")
-        _worker = _worker_job.worker
-        async with grpc.aio.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
-            stub = validation_pb2_grpc.WorkerStub(channel)
-            request_copy = ValidationJobRequest()
-            request_copy.CopyFrom(_request)
-            del request_copy.allocations[:]
-            request_copy.allocations.extend(_worker_job.gis_joins)
-            request_copy.id = _worker_job.job_id
-
-            info(f"Iterating over stub.BeginValidationJob()'s unary channel stream...")
-            for _response in stub.BeginValidationJob(request_copy):
-                info(f"Adding response to queue: {_response}")
-                _responses.put(_response, block=True)
-
-            # return stub.BeginValidationJob(request_copy)
-
-    tasks = []
-
-    def threaded_function(_responses: Queue, _tasks: list, _job: JobMetadata, _request: ValidationJobRequest):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        for worker_hostname, worker_job in _job.worker_jobs.items():
-            if len(worker_job.gis_joins) > 0:
-                _tasks.append(loop.create_task(run_worker_job(_responses, worker_job, _request)))
-
-    thread = Thread(target=threaded_function, args=(responses, tasks, job, request))
-    thread.start()
-    thread.join()
-
-    for task in tasks:
-        while not task.done():
-            info(f"Responses size: {responses.qsize()}")
-            response = responses.get(block=True)
-            info(f"Responses size: {responses.qsize()}")
-            info(f"Consumed response from queue: {response}")
-            yield response
-
-
-    # Iterate over all the worker jobs created for this job and create asyncio tasks for them
-    # loop = asyncio.new_event_loop()
-    # asyncio.set_event_loop(loop)
-    #
-    # tasks = []
-    # for worker_hostname, worker_job in job.worker_jobs.items():
-    #     if len(worker_job.gis_joins) > 0:
-    #         tasks.append(loop.create_task(run_worker_job(responses, worker_job, request)))
-
-    # for task in tasks:
-    #     while not task.done():
-    #         info(f"Responses size: {responses.qsize()}")
-    #         response = responses.get(block=True)
-    #         info(f"Responses size: {responses.qsize()}")
-    #         info(f"Consumed response from queue: {response}")
-    #         yield response
-
-
-    # task_group = asyncio.gather(*tasks)
-    # responses = loop.run_until_complete(task_group)
-    # loop.close()
-
-    # for task in tasks:
-    #     info(result)
-    #     for metric in result:
-    #         yield metric
-
-    # for task in tasks:
-    #     while not task.done():
-    #         info(f"Responses size: {responses.qsize()}")
-    #         response = responses.get(block=True)
-    #         info(f"Responses size: {responses.qsize()}")
-    #         info(f"Consumed response from queue: {response}")
-    #         yield response
-
-    # return list(responses)
 
 
 def save_intermediate_response_data(total_budget: int, initial_allocation: int, initial_response_metrics: list) -> None:
