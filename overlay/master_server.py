@@ -213,7 +213,7 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
     #     for metric in result:
     #         yield metric
 
-    for future in executors_list:
+    for task in tasks:
         while not future.done():
             info(f"Responses size: {responses.qsize()}")
             response = responses.get(block=True)
