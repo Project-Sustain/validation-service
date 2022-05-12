@@ -2,6 +2,8 @@ import uuid
 import asyncio
 import socket
 import json
+from threading import Threadred
+
 import grpc
 import numpy as np
 import uuid
@@ -194,14 +196,45 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
 
             # return stub.BeginValidationJob(request_copy)
 
-    # Iterate over all the worker jobs created for this job and create asyncio tasks for them
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
     tasks = []
-    for worker_hostname, worker_job in job.worker_jobs.items():
-        if len(worker_job.gis_joins) > 0:
-            tasks.append(loop.create_task(run_worker_job(responses, worker_job, request)))
+
+    def threaded_function(_responses: Queue, _tasks: list, _job: JobMetadata, _request: ValidationJobRequest):
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+        for worker_hostname, worker_job in _job.worker_jobs.items():
+            if len(worker_job.gis_joins) > 0:
+                _tasks.append(loop.create_task(run_worker_job(_responses, worker_job, _request)))
+
+    thread = Thread(target=threaded_function, args=(responses, tasks, job, request))
+    thread.start()
+    thread.join()
+
+    for task in tasks:
+        while not task.done():
+            info(f"Responses size: {responses.qsize()}")
+            response = responses.get(block=True)
+            info(f"Responses size: {responses.qsize()}")
+            info(f"Consumed response from queue: {response}")
+            yield response
+
+
+    # Iterate over all the worker jobs created for this job and create asyncio tasks for them
+    # loop = asyncio.new_event_loop()
+    # asyncio.set_event_loop(loop)
+    #
+    # tasks = []
+    # for worker_hostname, worker_job in job.worker_jobs.items():
+    #     if len(worker_job.gis_joins) > 0:
+    #         tasks.append(loop.create_task(run_worker_job(responses, worker_job, request)))
+
+    # for task in tasks:
+    #     while not task.done():
+    #         info(f"Responses size: {responses.qsize()}")
+    #         response = responses.get(block=True)
+    #         info(f"Responses size: {responses.qsize()}")
+    #         info(f"Consumed response from queue: {response}")
+    #         yield response
 
 
     # task_group = asyncio.gather(*tasks)
@@ -213,13 +246,13 @@ def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRe
     #     for metric in result:
     #         yield metric
 
-    for task in tasks:
-        while not task.done():
-            info(f"Responses size: {responses.qsize()}")
-            response = responses.get(block=True)
-            info(f"Responses size: {responses.qsize()}")
-            info(f"Consumed response from queue: {response}")
-            yield response
+    # for task in tasks:
+    #     while not task.done():
+    #         info(f"Responses size: {responses.qsize()}")
+    #         response = responses.get(block=True)
+    #         info(f"Responses size: {responses.qsize()}")
+    #         info(f"Consumed response from queue: {response}")
+    #         yield response
 
     # return list(responses)
 
