@@ -2,7 +2,7 @@ import uuid
 import asyncio
 import socket
 import json
-from threading import Threadred
+from threading import Thread
 
 import grpc
 import numpy as np
