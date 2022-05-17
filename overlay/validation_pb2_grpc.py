@@ -4,6 +4,7 @@ import grpc
 
 from overlay import validation_pb2 as validation__pb2
 
+
 class MasterStub(object):
     """Master service definition
     """

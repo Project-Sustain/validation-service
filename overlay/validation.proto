@@ -193,9 +193,8 @@ enum BudgetType {
 enum JobMode {
   DEFAULT_JOB_MODE = 0;
   SYNCHRONOUS = 1;
-  ASYNCHRONOUS = 2;
-  MULTITHREADED = 3;
-  MULTIPROCESSING = 4;
+  MULTITHREADED = 2;
+  MULTIPROCESSING = 3;
 }
 
 enum ModelFramework {
