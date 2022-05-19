@@ -15,7 +15,7 @@ def main():
     bar = ProgressBar(maxval=total, widgets=widgets).start()
     for doc in all_docs_cursor:
         doc_id = doc["_id"]
-        col.find_one_and_update({"_id": doc_id}, {"$set": {"SEQUENCE": seq}})
+        col.find_one_and_update(filter={"_id": doc_id}, update={"$set": {"SEQUENCE": seq}})
         seq += 1
 
         if seq % 100 == 0:
