@@ -9,8 +9,8 @@ def main():
     client = MongoClient("mongodb://localhost:27018")
     db = client["sustaindb"]
     col = db["noaa_nam"]
-    total = col.count_documents()
-    all_docs_cursor = col.find()
+    total = col.count_documents(filter={})
+    all_docs_cursor = col.find(filter={})
     seq = 0
     bar = ProgressBar(maxval=total, widgets=widgets).start()
     for doc in all_docs_cursor:
