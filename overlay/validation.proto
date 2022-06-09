@@ -177,6 +177,7 @@ enum ModelFramework {
 
 enum ModelCategory {
   REGRESSION = 0;
+  CLASSIFICATION = 1;
 }
 
 enum ModelFileType {
