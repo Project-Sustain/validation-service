@@ -23,8 +23,8 @@ class Querier:
         # username = urllib.parse.quote_plus(os.environ.get('READ_MONGO_USER'))
         # password = urllib.parse.quote_plus(os.environ.get('READ_MONGO_PASS'))
 
-        username = "sqsclient"
-        password = "ElongatedMuskrat76"
+        username = "root"
+        password = "rootPass"
 
 
         self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
