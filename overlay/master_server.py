@@ -422,7 +422,12 @@ class Master(validation_pb2_grpc.MasterServicer):
         sum_of_filtered_variances = 0.0
         for metric in all_gis_join_metrics:
             # If variance > 2 standard deviations above mean
-            if abs((metric.variance - mean_of_all_variances) / std_dev_all_variances) >= 2.0:
+            if variance_budget.use_threshold:
+                std_devs_away_from_mean = abs((metric.variance - mean_of_all_variances) / std_dev_all_variances)
+                if std_devs_away_from_mean >= variance_budget.std_devs_threshold:
+                    filtered_gis_join_metrics.append(metric)
+                    sum_of_filtered_variances += metric.variance
+            else:
                 filtered_gis_join_metrics.append(metric)
                 sum_of_filtered_variances += metric.variance
 
