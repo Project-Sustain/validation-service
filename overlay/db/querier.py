@@ -20,8 +20,12 @@ class Querier:
         self.mongo_host = mongo_host
         # authorization --> don't commit to this branch
 
-        username = urllib.parse.quote_plus(os.environ.get('READ_MONGO_USER'))
-        password = urllib.parse.quote_plus(os.environ.get('READ_MONGO_PASS'))
+        # username = urllib.parse.quote_plus(os.environ.get('READ_MONGO_USER'))
+        # password = urllib.parse.quote_plus(os.environ.get('READ_MONGO_PASS'))
+
+        username = "sqsclient"
+        password = "ElongatedMuskrat76"
+
 
         self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
 
