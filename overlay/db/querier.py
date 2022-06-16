@@ -27,6 +27,7 @@ class Querier:
         password = "rootPass"
         #
         #
+        info("inside querier")
         self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
 
         # end authorization
