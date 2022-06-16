@@ -23,15 +23,15 @@ class Querier:
         # username = urllib.parse.quote_plus(os.environ.get('READ_MONGO_USER'))
         # password = urllib.parse.quote_plus(os.environ.get('READ_MONGO_PASS'))
 
-        # username = "root"
-        # password = "rootPass"
+        username = "root"
+        password = "rootPass"
         #
         #
-        # self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
+        self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
 
         # end authorization
 
-        self.mongo_uri = f"mongodb://{mongo_host}:{mongo_port}"  # Old URI pre authorization
+        # self.mongo_uri = f"mongodb://{mongo_host}:{mongo_port}"  # Old URI pre authorization
 
         self.replica_set_status = locality.get_replica_set_status()
         self.db_name = db_name
