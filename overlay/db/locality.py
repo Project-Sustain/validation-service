@@ -29,6 +29,9 @@ def discover_gis_joins() -> dict:
     # client: MongoClient = MongoClient("mongodb://localhost:27017")
     # username = "root"
     # password = "rootPass"
+    info(f"printing username: {username}")
+    info(f"printing password: {password}")
+
     client: MongoClient = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
     info("below error")
     db = client["sustaindb"]
