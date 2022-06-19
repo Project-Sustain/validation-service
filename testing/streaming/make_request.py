@@ -52,7 +52,7 @@ if not os.path.exists(request_file):
     print(f"{request_file} does not exist! Please create first (hint, use the testing/test_requests/ JSON requests as a template example)")
     exit(1)
 
-url = "http://lattice-150.cs.colostate.edu:5000/validation_service/submit_validation_job"
+url = "http://lattice-100.cs.colostate.edu:5000/validation_service/submit_validation_job"
 
 
 with open(request_file, "r") as rfile:
