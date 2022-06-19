@@ -72,6 +72,7 @@ profiler.start()
 response = requests.request("POST", url, data=payload, files=files, stream=True)
 response_timestamps = []
 for line in response.iter_lines():
+    pprint(line)
     profiler.stop()
     response_timestamps.append(profiler.elapsed)
     profiler.start()
