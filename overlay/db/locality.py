@@ -5,6 +5,7 @@ import socket
 from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
 from logging import info
+from constants import username, password
 
 import urllib
 
@@ -13,8 +14,8 @@ from overlay.db.shards import ShardMetadata
 
 # Progress Bar widgets
 widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
-username = os.environ.get('ROOT_MONGO_USER')
-password = os.environ.get('ROOT_MONGO_PASS')
+# username = os.environ.get('ROOT_MONGO_USER')
+# password = os.environ.get('ROOT_MONGO_PASS')
 
 GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 
