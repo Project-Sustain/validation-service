@@ -22,7 +22,9 @@ def discover_gis_joins() -> dict:
     # Connect to local mongod instance; connecting to mongos instance will find all GISJOINs in entire cluster,
     # rather than just the local shards.
     gis_join_counts: dict = {}  # { gis_join -> count }
+    info("Inside locality.py, just above the call to mongod")
     client: MongoClient = MongoClient("mongodb://localhost:27017")
+    info("below error")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     distinct_gis_joins: list = coll.distinct("GISJOIN")

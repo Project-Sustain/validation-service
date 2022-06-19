@@ -39,6 +39,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.saved_models_path: str = MODELS_DIR
         self.is_registered = False
         self.gis_tree: GisTree = GisTree()
+        info("Made it into worker_server, just above disvocer_gis_joins()")
         self.local_gis_joins: dict = discover_gis_joins()  # { gis_join -> count }
         for gis_join, count in self.local_gis_joins.items():
             self.gis_tree.insert_county(gis_join, {"count": count})
