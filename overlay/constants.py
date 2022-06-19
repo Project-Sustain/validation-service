@@ -11,8 +11,13 @@ DB_NAME = os.environ.get("DB_NAME")
 MODELS_DIR = os.environ.get("MODELS_DIR")
 # username = urllib.parse.quote_plus(str(os.environ.get('ROOT_MONGO_USER')))
 # password = urllib.parse.quote_plus(str(os.environ.get('ROOT_MONGO_PASS')))
-username = "root"
-password = "rootPass"
+# username = "root"
+# password = "rootPass"
+
+username = "sqsclient"
+password = "ElongatedMuskrat76"
+# export READ_MONGO_PASS="ElongatedMuskrat76"
+# export READ_MONGO_USER="sqsclient"
 
 if __name__ == "__main__":
     print(f'DB_HOST: {DB_HOST}')
