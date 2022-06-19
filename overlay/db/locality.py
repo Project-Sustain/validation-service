@@ -13,8 +13,8 @@ from overlay.db.shards import ShardMetadata
 
 # Progress Bar widgets
 widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
-username = os.environ.get('READ_MONGO_USER')
-password = os.environ.get('READ_MONGO_PASS')
+username = os.environ.get('ROOT_MONGO_USER')
+password = os.environ.get('ROOT_MONGO_PASS')
 
 GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 
@@ -27,8 +27,8 @@ def discover_gis_joins() -> dict:
     gis_join_counts: dict = {}  # { gis_join -> count }
     info("Inside locality.py, just above the call to mongod")
     # client: MongoClient = MongoClient("mongodb://localhost:27017")
-    username = "root"
-    password = "rootPass"
+    # username = "root"
+    # password = "rootPass"
     client: MongoClient = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
     info("below error")
     db = client["sustaindb"]
