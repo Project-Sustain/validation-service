@@ -16,7 +16,7 @@ from sklearn.preprocessing import MinMaxScaler
 from overlay.constants import username, password
 
 # MongoDB Stuff
-URI = "mongodb://{username}:{password}@lattice-100.cs.colostate.edu:27018/"
+URI = "mongodb://lattice-150.cs.colostate.edu:27018/"
 DATABASE = "sustaindb"
 COLLECTION = "noaa_nam"
 GIS_JOIN = "G3500170"
