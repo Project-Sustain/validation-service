@@ -5,11 +5,10 @@ import socket
 from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
 from logging import info
-from constants import username, password
 
 import urllib
 
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, username, password
 from overlay.db.shards import ShardMetadata
 
 # Progress Bar widgets
