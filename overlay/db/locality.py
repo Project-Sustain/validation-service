@@ -4,7 +4,7 @@ import os
 import socket
 from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
-from logging import info
+from logging import info, root
 
 import urllib
 
@@ -181,7 +181,7 @@ def get_hostname():
 
 # Returns one of ["SECONDARY", "PRIMARY", "NOT_FOUND"]
 def get_replica_set_status() -> str:
-    client = MongoClient("mongodb://{username}:{password}@localhost:27017")
+    client = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
     repl_set_status = client.admin.command("replSetGetStatus")
     for member in repl_set_status["members"]:
         member_name = member["name"]

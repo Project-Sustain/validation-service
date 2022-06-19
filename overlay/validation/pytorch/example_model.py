@@ -14,7 +14,7 @@ from overlay.constants import username, password
 # --- Global Variables ---
 
 # MongoDB Stuff
-URI = "mongodb://{username}:{password}@lattice-100.cs.colostate.edu:27018/"
+URI = f"mongodb://{username}:{password}@lattice-100.cs.colostate.edu:27018/"
 DATABASE = "sustaindb"
 COLLECTION = "noaa_nam"
 

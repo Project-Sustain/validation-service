@@ -51,7 +51,7 @@ class Timer:
 
 
 # MongoDB Stuff
-URI = "mongodb://{username}:{password}@lattice-100:27018/"
+URI = f"mongodb://{username}:{password}@lattice-100:27018/"
 DATABASE = "sustaindb"
 COLLECTION = "noaa_nam"
 GIS_JOIN = "G3500170"
@@ -70,7 +70,7 @@ BATCH_SIZE = 32
 def train_and_evaluate(GISJOIN: str):
 
     # Pull in data from MongoDB into Pandas DataFrame
-    client = MongoClient("mongodb://{username}:{password}@lattice-150:27018/")
+    client = MongoClient(f"mongodb://{username}:{password}@lattice-150:27018/")
     database = client["sustaindb"]
     collection = database["noaa_nam"]
     match = {"GISJOIN": GISJOIN}

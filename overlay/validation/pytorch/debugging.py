@@ -502,7 +502,7 @@ def run(gis_join):
     profiler.reset()
 
     profiler.start()
-    client = MongoClient("mongodb://{username}:{password}@localhost:27017")
+    client = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     query = {"GISJOIN": gis_join}
