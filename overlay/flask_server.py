@@ -1,4 +1,5 @@
 import json
+import os
 import grpc
 import hashlib
 import jsonschema
@@ -10,6 +11,7 @@ from pprint import pprint
 from logging import info, error
 from google.protobuf.json_format import MessageToJson, Parse, MessageToDict
 from werkzeug.datastructures import FileStorage
+import urllib
 
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType, ExperimentResponse, \
@@ -24,6 +26,9 @@ app.config["UPLOAD_DIR"] = UPLOAD_DIR
 
 # Main entrypoint
 def run(master_hostname="localhost", master_port=50051, flask_port=5000):
+    username = os.environ.get('ROOT_MONGO_USER')
+    password = os.environ.get('ROOT_MONGO_PASS')
+    print("Testing environment variables: ", username, password)
     print("Running flask server...")
     app.config["MASTER_HOSTNAME"] = master_hostname
     app.config["MASTER_PORT"] = master_port
