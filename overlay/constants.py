@@ -1,19 +1,14 @@
 import os
 from dotenv import load_dotenv
 
-import urllib.parse
-
-username = os.environ.get('ROOT_MONGO_USER')
-password = os.environ.get('ROOT_MONGO_PASS')
-
 load_dotenv()
 
 DB_HOST = os.environ.get("DB_HOST")
 DB_PORT = int(os.environ.get("DB_PORT"))
 DB_NAME = os.environ.get("DB_NAME")
 MODELS_DIR = os.environ.get("MODELS_DIR")
-# username = os.environ.get('ROOT_MONGO_USER')
-# password = os.environ.get('ROOT_MONGO_PASS')
+username = os.environ.get('ROOT_MONGO_USER')
+password = os.environ.get('ROOT_MONGO_PASS')
 # username = "root"
 # password = "rootPass"
 
