@@ -27,10 +27,6 @@ def discover_gis_joins() -> dict:
     gis_join_counts: dict = {}  # { gis_join -> count }
     info("Inside locality.py, just above the call to mongod")
     # client: MongoClient = MongoClient("mongodb://localhost:27017")
-    # username = "root"
-    # password = "rootPass"
-    info(f"printing username: {username}")
-    info(f"printing password: {password}")
 
     client: MongoClient = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
     info("below error")

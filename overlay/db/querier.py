@@ -3,6 +3,7 @@ import os
 import pymongo
 from pymongo import cursor, ReadPreference
 from logging import info
+from overlay.constants import username, password
 
 from overlay.db import locality
 
@@ -19,14 +20,7 @@ class Querier:
         self.mongo_port = mongo_port
         self.mongo_host = mongo_host
         # authorization --> don't commit to this branch
-
-        # username = urllib.parse.quote_plus(os.environ.get('READ_MONGO_USER'))
-        # password = urllib.parse.quote_plus(os.environ.get('READ_MONGO_PASS'))
-
-        username = "root"
-        password = "rootPass"
-        #
-        #
+        
         info("inside querier")
         self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
 
