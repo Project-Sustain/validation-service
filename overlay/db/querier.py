@@ -30,7 +30,6 @@ class Querier:
                                                      authSource=DB_AUTH_SOURCE)
         else:
             self.db_connection = pymongo.MongoClient(self.mongo_uri,
-                                                     readPreference=self.read_preference,
                                                      username=DB_USERNAME,
                                                      password=DB_PASSWORD,
                                                      authSource=DB_AUTH_SOURCE)
