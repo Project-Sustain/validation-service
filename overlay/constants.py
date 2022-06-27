@@ -15,4 +15,6 @@ if __name__ == "__main__":
     print(f'DB_HOST: {DB_HOST}')
     print(f'DB_PORT: {DB_PORT}')
     print(f'DB_NAME: {DB_NAME}')
+    print(f'DB_USERNAME: {DB_USERNAME}')
+    print(f'DB_PASSWORD: {DB_PASSWORD}')
     print(f'MODELS_DIR: {MODELS_DIR}')
