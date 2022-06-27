@@ -12,7 +12,7 @@ import socket
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
     ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR, DB_USERNAME, DB_AUTH_SOURCE
 from overlay.profiler import Timer
 from overlay.validation.tensorflow import TensorflowValidator
 from overlay.validation.scikitlearn import ScikitLearnValidator
@@ -20,7 +20,6 @@ from overlay.validation.pytorch import PyTorchValidator
 from overlay.db.shards import get_rs_member_state
 from overlay.db.locality import discover_gis_joins
 from overlay.structures import GisTree
-
 
 # Loky shared, reusable ProcessPoolExecutor
 shared_executor = get_reusable_executor(max_workers=8, timeout=10)
@@ -202,7 +201,12 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> No
 
     make_models_dir_if_not_exists()
 
-    info(f"Environment: DB_HOST={DB_HOST}, DB_PORT={DB_PORT}, DB_NAME={DB_NAME}, MODELS_DIR={MODELS_DIR}")
+    info(f"Environment: DB_HOST={DB_HOST}, "
+         f"DB_PORT={DB_PORT}, "
+         f"DB_NAME={DB_NAME}, "
+         f"DB_USERNAME={DB_USERNAME}, "
+         f"DB_AUTH_SOURCE={DB_AUTH_SOURCE}, "
+         f"MODELS_DIR={MODELS_DIR}")
 
     # Initialize server and worker
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
