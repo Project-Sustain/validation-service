@@ -3,6 +3,7 @@ from pymongo import cursor, ReadPreference
 from logging import info
 
 from overlay.db import locality
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, DB_AUTH_SOURCE
 
 
 class Querier:
@@ -22,7 +23,11 @@ class Querier:
         self.read_preference = read_preference
         self.read_concern = read_concern
         if mongo_port == 27018:
-            self.db_connection = pymongo.MongoClient(self.mongo_uri, readPreference=self.read_preference)
+            self.db_connection = pymongo.MongoClient(self.mongo_uri,
+                                                     readPreference=self.read_preference,
+                                                     username=DB_USERNAME,
+                                                     password=DB_PASSWORD,
+                                                     authSource=DB_AUTH_SOURCE)
         else:
             self.db_connection = pymongo.MongoClient(self.mongo_uri)
         self.db = self.db_connection[self.db_name]

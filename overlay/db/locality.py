@@ -6,7 +6,7 @@ from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
 from logging import info
 
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, DB_AUTH_SOURCE
 from overlay.db.shards import ShardMetadata
 
 # Progress Bar widgets
@@ -24,7 +24,7 @@ def discover_gis_joins() -> dict:
     client: MongoClient = MongoClient("mongodb://localhost:27017",
                                       username=DB_USERNAME,
                                       password=DB_PASSWORD,
-                                      authSource="admin")
+                                      authSource=DB_AUTH_SOURCE)
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     distinct_gis_joins: list = coll.distinct("GISJOIN")
@@ -63,7 +63,7 @@ def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     mongo_client: MongoClient = MongoClient(f"mongodb://{DB_HOST}:{DB_PORT}",
                                             username=DB_USERNAME,
                                             password=DB_PASSWORD,
-                                            authSource="admin")
+                                            authSource=DB_AUTH_SOURCE)
     db = mongo_client[DB_NAME]
     collection = db["noaa_nam"]
     gis_joins_to_shards = {}
@@ -105,7 +105,7 @@ def discover_gis_join_counts():
     mongo_client: MongoClient = MongoClient(f"mongodb://{DB_HOST}:{DB_PORT}",
                                             username=DB_USERNAME,
                                             password=DB_PASSWORD,
-                                            authSource="admin")
+                                            authSource=DB_AUTH_SOURCE)
     db = mongo_client[DB_NAME]
     collection = db["noaa_nam"]
     counter = 0
@@ -181,7 +181,7 @@ def get_replica_set_status() -> str:
     client: MongoClient = MongoClient("mongodb://localhost:27017",
                                       username=DB_USERNAME,
                                       password=DB_PASSWORD,
-                                      authSource="admin")
+                                      authSource=DB_AUTH_SOURCE)
     repl_set_status = client.admin.command("replSetGetStatus")
     for member in repl_set_status["members"]:
         member_name = member["name"]
