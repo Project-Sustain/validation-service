@@ -6,12 +6,11 @@ from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
 from logging import info
 
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
 from overlay.db.shards import ShardMetadata
 
 # Progress Bar widgets
 widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
-
 
 GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 
@@ -22,7 +21,10 @@ def discover_gis_joins() -> dict:
     # Connect to local mongod instance; connecting to mongos instance will find all GISJOINs in entire cluster,
     # rather than just the local shards.
     gis_join_counts: dict = {}  # { gis_join -> count }
-    client: MongoClient = MongoClient("mongodb://localhost:27017")
+    client: MongoClient = MongoClient("mongodb://localhost:27017",
+                                      username=DB_USERNAME,
+                                      password=DB_PASSWORD,
+                                      authSource="admin")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     distinct_gis_joins: list = coll.distinct("GISJOIN")
@@ -181,4 +183,3 @@ def get_replica_set_status() -> str:
 
     client.close()
     return "NOT_FOUND"
-
