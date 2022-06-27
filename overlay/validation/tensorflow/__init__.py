@@ -10,13 +10,37 @@ class TensorflowValidator(Validator):
 
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
-        self.validate_model_function = validate_model
+        if request.model_category == "REGRESSION":
+            self.validate_model_function = validate_regression_model
+        elif request.model_category == "CLASSIFICATION":
+            self.validate_model_function = validate_classification_model
+
+
+def validate_classification_model(
+        gis_join: str,
+        gis_join_count: int,
+        model_path: str,
+        feature_fields: list,
+        label_field: str,
+        loss_function: str,
+        mongo_host: str,
+        mongo_port: int,
+        read_preference: str,
+        read_concern: str,
+        database: str,
+        collection: str,
+        limit: int,
+        sample_rate: float,
+        normalize_inputs: bool,
+        verbose: bool = True) -> (str, int, float, float, bool, str, float):
+    # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
+    raise NotImplementedError("validate_classification_model() is not implemented for class TensorflowValidator.")
 
 
 # Independent function designed to be launched either within the same thread as the main process,
 # on separate threads (but same Global Interpreter Lock) as the main process, or as separate child processes each
 # with their own Global Interpreter Lock. Thus, all parameters have to be serializable.
-def validate_model(
+def validate_regression_model(
         gis_join: str,
         gis_join_count: int,
         model_path: str,
