@@ -91,6 +91,13 @@ message WorkerValidationJobResponse {
 }
 
 message ValidationMetric {
+  oneof validation_metric {
+    RegressionValidationMetric regression_validation_metric = 1;
+    ClassificationValidationMetric classification_validation_metric = 2;
+  }
+}
+
+message RegressionValidationMetric {
   string gis_join = 1;
   int64  allocation = 2;
   double loss = 3;
@@ -100,6 +107,17 @@ message ValidationMetric {
   int32 iteration = 7;
   bool ok = 8;
   string error_msg = 9;
+}
+
+message ClassificationValidationMetric {
+  string gis_join = 1;
+  int64 allocation = 2;
+  bool ok = 3;
+  double duration_sec = 4;
+  string error_message = 5;
+  double precision = 6;
+  double recall = 7;
+  double f1_score = 8;
 }
 
 message ModelFile {
