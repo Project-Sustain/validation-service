@@ -29,10 +29,15 @@ class Querier:
                                                      password=DB_PASSWORD,
                                                      authSource=DB_AUTH_SOURCE)
         else:
-            self.db_connection = pymongo.MongoClient(self.mongo_uri)
+            self.db_connection = pymongo.MongoClient(self.mongo_uri,
+                                                     readPreference=self.read_preference,
+                                                     username=DB_USERNAME,
+                                                     password=DB_PASSWORD,
+                                                     authSource=DB_AUTH_SOURCE)
         self.db = self.db_connection[self.db_name]
 
-    # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
+        # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
+
     def spatial_query(self,
                       collection_name: str,
                       gis_join: str,
