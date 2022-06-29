@@ -1,9 +1,11 @@
 import os
+import socket
+from typing import Iterator
 import psutil
 from logging import info, error
 from concurrent.futures import as_completed, ThreadPoolExecutor
 
-from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, JobMode, LossFunction
+from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, JobMode, LossFunction, Metric
 from overlay.constants import MODELS_DIR
 
 
@@ -15,6 +17,7 @@ class Validator:
         self.shared_executor = shared_executor
         self.gis_join_counts = gis_join_counts  # { gis_join -> count }
         self.validate_model_function = validate_model
+        self.hostname = socket.gethostname()
 
     def get_model_path(self):
         model_path = f"{MODELS_DIR}/{self.request.id}/"
@@ -22,7 +25,7 @@ class Validator:
         model_path += first_entry
         return model_path
 
-    def validate_gis_joins(self, verbose: bool = True) -> list:
+    def validate_gis_joins(self, verbose: bool = True) -> Iterator[Metric]: #This needs to be a generator, so it needs to yield the futures as they come in
 
         info(f"Launching validation job for {len(self.request.gis_joins)} GISJOINs")
 
@@ -31,7 +34,7 @@ class Validator:
         for feature_field in self.request.feature_fields:
             feature_fields.append(feature_field)
 
-        metrics = []  # list of protobuf ValidationMetric objects to return
+        # metrics = []  # list of protobuf ValidationMetric objects to return
 
         # Synchronous job mode
         if self.request.worker_job_mode == JobMode.SYNCHRONOUS:
@@ -40,7 +43,7 @@ class Validator:
             for spatial_allocation in self.request.allocations:
                 gis_join: str = spatial_allocation.gis_join
                 gis_join_count: int = self.gis_join_counts[gis_join]
-                returned_gis_join, allocation, loss, variance, ok, error_msg, duration_sec = \
+                returned_gis_join, allocation, loss, variance, iteration, ok, error_msg, duration_sec = \
                     self.validate_model_function(
                         gis_join=gis_join,
                         gis_join_count=gis_join_count,
@@ -60,15 +63,27 @@ class Validator:
                         verbose=verbose
                     )
 
-                metrics.append(ValidationMetric(
-                    gis_join=returned_gis_join,
+                # TODO // implement streaming
+                # metrics.append(ValidationMetric(
+                #     gis_join=returned_gis_join,
+                #     allocation=allocation,
+                #     loss=loss,
+                #     variance=variance,
+                #     duration_sec=duration_sec,
+                #     ok=ok,
+                #     error_msg=error_msg
+                # ))
+                yield Metric(
+                    gis_join=gis_join,
                     allocation=allocation,
                     loss=loss,
                     variance=variance,
                     duration_sec=duration_sec,
+                    iteration=iteration,
                     ok=ok,
-                    error_msg=error_msg
-                ))
+                    error_msg=error_msg,
+                    hostname=self.hostname
+                )
 
         # Job mode not single-threaded; use either the shared ProcessPoolExecutor or ThreadPoolExecutor
         else:
@@ -131,17 +146,28 @@ class Validator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                gis_join, allocation, loss, variance, ok, error_msg, duration_sec = \
-                    future.result()
-                metrics.append(ValidationMetric(
+                gis_join, allocation, loss, variance, iteration, ok, error_msg, duration_sec = future.result()
+                # metrics.append(ValidationMetric(
+                #     gis_join=gis_join,
+                #     allocation=allocation,
+                #     loss=loss,
+                #     variance=variance,
+                #     duration_sec=duration_sec,
+                #     ok=ok,
+                #     error_msg=error_msg
+                # ))
+                info(f"Yielding metric for gis_join={gis_join}")
+                yield Metric(
                     gis_join=gis_join,
                     allocation=allocation,
                     loss=loss,
                     variance=variance,
                     duration_sec=duration_sec,
+                    iteration=iteration,
                     ok=ok,
-                    error_msg=error_msg
-                ))
+                    error_msg=error_msg,
+                    hostname=self.hostname
+                )
 
             # all tasks completed. kill all child processes
             # parent_pid = os.getpid()
@@ -150,8 +176,11 @@ class Validator:
             #     info(f"Terminating Child Process: {child}")
             #     child.kill()
 
-        info(f"metrics: {len(metrics)} responses")
-        return metrics
+        # info(f"metrics: {len(metrics)} responses")
+        # return metrics
+        # // needs to be yield instead of return
+
+
 
 
 # Stub for function that needs to be implemented in concrete subclasses

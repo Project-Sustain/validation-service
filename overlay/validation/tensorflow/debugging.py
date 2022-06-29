@@ -8,7 +8,7 @@ import time
 from pymongo import MongoClient
 from sklearn.preprocessing import MinMaxScaler
 from math import sqrt
-
+from overlay.constants import username, password
 
 class Timer:
 
@@ -73,7 +73,7 @@ def run(gis_join):
     profiler.reset()
 
     profiler.start()
-    client = MongoClient("mongodb://localhost:27017")
+    client = MongoClient("mongodb://{username}:{password}@localhost:27017")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     query = {"GISJOIN": gis_join}

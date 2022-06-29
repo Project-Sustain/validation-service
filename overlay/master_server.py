@@ -2,11 +2,15 @@ import uuid
 import asyncio
 import socket
 import json
+from threading import Thread
+
 import grpc
 import numpy as np
 import uuid
+from queue import Queue
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from logging import info, error
+from typing import Iterator
 
 from overlay import validation_pb2_grpc
 from overlay.db import shards, locality
@@ -15,7 +19,7 @@ from overlay.profiler import Timer
 from overlay.structures import GisTree, GisNode
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, ValidationJobResponse, \
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
-    SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric
+    SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric, Metric, ResponseMetric
 
 
 class JobMetadata:
@@ -84,52 +88,55 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
 
 # Launches a round of worker jobs based on the master job mode selected.
 # Returns a list of WorkerValidationJobResponse objects.
-def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> list:
+def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> Iterator[Metric]:
     # Select strategy for submitting the job from the master
+    # all of these will need to yield the responses back
+
     if request.master_job_mode == JobMode.MULTITHREADED:
         info("Launching jobs in multi-threaded mode")
-        worker_validation_job_responses = launch_worker_jobs_multithreaded(job, request)
-    elif request.master_job_mode == JobMode.ASYNCHRONOUS or request.master_job_mode == JobMode.DEFAULT_JOB_MODE:
-        info("Launching jobs in asynchronous mode")
-        worker_validation_job_responses = launch_worker_jobs_asynchronously(job, request)
+        return launch_worker_jobs_multithreaded(job, request)
     else:
         info("Launching jobs in synchronous mode")
-        worker_validation_job_responses = launch_worker_jobs_synchronously(job, request)
+        return launch_worker_jobs_synchronously(job, request)
 
-    info("Received all validation responses, returning...")
-    return worker_validation_job_responses
+
 
 
 # Returns list of WorkerValidationJobResponses
-def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
+def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
     responses = []
 
     # Iterate over all the worker jobs created for this job and launch them serially
     for worker_hostname, worker_job in job.worker_jobs.items():
         if len(worker_job.gis_joins) > 0:
-            info("Launching async run_worker_job()...")
+            info("Launching run_worker_job()...")
             worker = worker_job.worker
             with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
                 stub = validation_pb2_grpc.WorkerStub(channel)
                 request_copy = ValidationJobRequest()
                 request_copy.CopyFrom(request)
                 del request_copy.allocations[:]
-                request_copy.allocations.extend(job.gis_joins)
+                request_copy.allocations.extend(worker_job.gis_joins)
                 request_copy.id = worker_job.job_id
 
-                responses.append(stub.BeginValidationJob(request_copy))
+                for response in stub.BeginValidationJob(request_copy):
+                    info(response)
+                    yield response
 
-    return responses
+                # return stub.BeginValidationJob(request_copy)
+
+
+    # return responses # also needs to yield the response from stub.BeginValidationJob(request_copy)
 
 
 # Returns list of WorkerValidationJobResponses
-def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> list:
-    responses = []
+def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
+    responses: Queue = Queue()
 
     # Define worker job function to be run in the thread pool
-    def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
-        info("Launching run_worker_job()...")
+    def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
         _worker = _worker_job.worker
+        info(f"Launching run_worker_job() for {_worker.hostname}:{_worker.port}")
         with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
             request_copy = ValidationJobRequest()
@@ -138,54 +145,29 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
             request_copy.allocations.extend(_worker_job.gis_joins)
             request_copy.id = _worker_job.job_id
 
-            return stub.BeginValidationJob(request_copy)
+            info(f"Iterating over stub.BeginValidationJob()'s unary channel stream...")
+            for _response in stub.BeginValidationJob(request_copy):
+                info(f"Adding response to queue: {_response}")
+                _responses.put(_response, block=True)
 
     # Iterate over all the worker jobs created for this job and submit them to the thread pool executor
     executors_list = []
     with ThreadPoolExecutor(max_workers=10) as executor:
         for worker_hostname, worker_job in job.worker_jobs.items():
             if len(worker_job.gis_joins) > 0:
-                executors_list.append(executor.submit(run_worker_job, worker_job, request))
+                executors_list.append(
+                    executor.submit(run_worker_job, responses, worker_job, request)
+                )
 
-    # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
-    for future in as_completed(executors_list):
-        info(future)
-        responses.append(future.result())
+        for future in executors_list:
+            while not future.done():
+                info(f"Responses size: {responses.qsize()}")
+                response = responses.get(block=True)
+                info(f"Responses size: {responses.qsize()}")
+                info(f"Consumed response from queue: {response}")
+                yield response
 
-    return responses
-
-
-# Returns list of WorkerValidationJobResponses
-def launch_worker_jobs_asynchronously(job: JobMetadata, request: ValidationJobRequest) -> list:
-
-    # Define async function to launch worker job
-    async def run_worker_job(_worker_job: WorkerJobMetadata, _request: ValidationJobRequest) -> ValidationJobResponse:
-        info("Launching async run_worker_job()...")
-        _worker = _worker_job.worker
-        async with grpc.aio.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
-            stub = validation_pb2_grpc.WorkerStub(channel)
-            request_copy = ValidationJobRequest()
-            request_copy.CopyFrom(_request)
-            del request_copy.allocations[:]
-            request_copy.allocations.extend(_worker_job.gis_joins)
-            request_copy.id = _worker_job.job_id
-
-            return await stub.BeginValidationJob(request_copy)
-
-    # Iterate over all the worker jobs created for this job and create asyncio tasks for them
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    tasks = []
-    for worker_hostname, worker_job in job.worker_jobs.items():
-        if len(worker_job.gis_joins) > 0:
-            tasks.append(loop.create_task(run_worker_job(worker_job, request)))
-
-    task_group = asyncio.gather(*tasks)
-    responses = loop.run_until_complete(task_group)
-    loop.close()
-
-    return list(responses)
+    info("Finished job")
 
 
 def save_intermediate_response_data(total_budget: int, initial_allocation: int, initial_response_metrics: list) -> None:
@@ -393,6 +375,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         all_gis_join_variances: list = []
         sum_of_all_variances: int = 0
         budget_used: int = 0
+
         for worker_response in worker_responses:
             for metric in worker_response.metrics:
                 all_gis_join_metrics.append(metric)
@@ -420,6 +403,8 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         filtered_gis_join_metrics: list = []
         sum_of_filtered_variances = 0.0
+
+
         for metric in all_gis_join_metrics:
             # If variance > 2 standard deviations above mean
             if variance_budget.use_threshold:
@@ -467,7 +452,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
     # Processes a job with either a default budget or static budget.
     # Returns a list of WorkerValidationJobResponse objects.
-    def process_job_with_normal_budget(self, request: ValidationJobRequest) -> (str, list):
+    def process_job_with_normal_budget(self, request: ValidationJobRequest) -> (str, Iterator[Metric]):
 
         # Defaults
         strata_limit = 0
@@ -503,12 +488,20 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         # Create and launch a job from allocations
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
-        worker_responses: list = launch_worker_jobs(request, job)  # list(WorkerValidationJobResponse)
 
-        # Aggregate to state level if requested
-        #if request.spatial_resolution == SpatialResolution.STATE:
 
-        return job.job_id, worker_responses
+        # worker_responses = []
+        # for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
+        #     info(f"Response from launch in process with normal budget - {metric}")
+        #     worker_responses.append(metric)
+        #
+        # # Aggregate to state level if requested
+        # #if request.spatial_resolution == SpatialResolution.STATE:
+        #
+        # return job.job_id, worker_responses
+
+        return job.job_id, launch_worker_jobs(request, job)
+
 
     # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
     # for the ShardMetadata objects.
@@ -555,10 +548,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             error(f"Worker {request.hostname} is not registered, can't remove")
             return WorkerRegistrationResponse(success=False)
 
-    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> ValidationJobResponse:
-        # Time the entire job from start to finish
-        profiler: Timer = Timer()
-        profiler.start()
+    def SubmitValidationJob(self, request: ValidationJobRequest, context) -> Iterator[ResponseMetric]:
 
         if request.spatial_coverage == SpatialCoverage.ALL:
             info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
@@ -572,38 +562,41 @@ class Master(validation_pb2_grpc.MasterServicer):
         else:  # Default or static budget
             job_id, worker_responses = self.process_job_with_normal_budget(request)
 
-        # Flattened list of metrics, instead of being nested in respective Worker responses
-        flattened_metrics: list = []
-        errors = []
-        ok = True
+        for response in worker_responses:
+            info(f"in submit validation -- {response}")
+            yield ResponseMetric(
+                gis_join=response.gis_join,
+                allocation=response.allocation,
+                loss=response.loss,
+                accuracy=response.accuracy,
+                variance=response.variance,
+                duration_sec=response.duration_sec,
+                ok=response.ok,
+                error_msg=response.error_msg,
+                job_id=job_id
+            )
 
-        if len(worker_responses) == 0:
-            error_msg = "Did not receive any responses from workers"
-            ok = False
-            error(error_msg)
-            errors.append(error_msg)
-        else:
-            for worker_response in worker_responses:
-                if not worker_response.ok:
-                    ok = False
-                    error_msg = f"{worker_response.hostname} error: {worker_response.error_msg}"
-                    errors.append(error_msg)
-                for metric in worker_response.metrics:
-                    flattened_metrics.append(metric)
+        #
+        # return ValidationJobResponse(
+        #     id=job_id,
+        #     ok=True,
+        #     error_msg="error_msg",
+        #     duration_sec=profiler.elapsed,
+        #     metrics=worker_responses
+        # )
 
-        if request.spatial_resolution == SpatialResolution.STATE:
-            flattened_metrics = aggregate_metrics_by_state(flattened_metrics)
 
-        error_msg = f"errors: {errors}"
-        profiler.stop()
 
-        return ValidationJobResponse(
-            id=job_id,
-            ok=ok,
-            error_msg=error_msg,
-            duration_sec=profiler.elapsed,
-            metrics=flattened_metrics
-        )
+
+        # profiler.stop()
+        #
+        # return ValidationJobResponse(
+        #     id=job_id,
+        #     ok=True,
+        #     error_msg="error_msg",
+        #     duration_sec=profiler.elapsed,
+        #     metrics=worker_responses
+        # )
 
     def SubmitExperiment(self, request: ValidationJobRequest, context) -> ExperimentResponse:
         # Time the entire job from start to finish
@@ -653,7 +646,7 @@ def run(master_port=50051) -> None:
 
     # Initialize server and master
     master_hostname: str = socket.gethostname()
-    server = grpc.server(ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(ThreadPoolExecutor(max_workers=32))
     master: Master = Master(master_hostname, master_port)
     validation_pb2_grpc.add_MasterServicer_to_server(master, server)
 

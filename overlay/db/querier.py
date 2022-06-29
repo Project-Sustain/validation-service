@@ -1,6 +1,9 @@
+import urllib
+import os
 import pymongo
 from pymongo import cursor, ReadPreference
 from logging import info
+from overlay.constants import username, password
 
 from overlay.db import locality
 
@@ -16,7 +19,15 @@ class Querier:
 
         self.mongo_port = mongo_port
         self.mongo_host = mongo_host
-        self.mongo_uri = f"mongodb://{mongo_host}:{mongo_port}"
+        # authorization --> don't commit to this branch
+        
+        info("inside querier")
+        self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
+
+        # end authorization
+
+        # self.mongo_uri = f"mongodb://{mongo_host}:{mongo_port}"  # Old URI pre authorization
+
         self.replica_set_status = locality.get_replica_set_status()
         self.db_name = db_name
         self.read_preference = read_preference
