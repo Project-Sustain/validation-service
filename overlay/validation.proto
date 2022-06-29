@@ -163,6 +163,8 @@ message ValidationBudget {
 message IncrementalVarianceBudget {
   int64 total_budget = 1; // Total budget
   int64 initial_allocation = 2; // Initial equal allocation for all GISJOINs
+  bool use_threshold = 3; // Whether or not to use a threshold for variances or just re-run all counties
+  float std_devs_threshold = 4; // Threshold in standard deviations from the mean variance, above which will be re-allocated.
 }
 
 message StaticBudget {
