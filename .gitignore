@@ -156,5 +156,3 @@ overlay/resources/gis_join_chunk_locations.json*
 *.mon_id
 */**/nohup.out
 
-
-# The Protocol Buffer Compiler generates this file
