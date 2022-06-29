@@ -158,5 +158,3 @@ overlay/resources/gis_join_chunk_locations.json*
 
 
 # The Protocol Buffer Compiler generates this file
-
-overlay/validation_pb2.py
