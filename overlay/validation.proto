@@ -8,7 +8,7 @@ service Master {
   rpc UploadFile(ModelFile) returns (UploadStatus) {}
 
   // Submits a validation job to the cluster
-  rpc SubmitValidationJob(ValidationJobRequest) returns (stream ResponseMetric) {}  
+  rpc SubmitValidationJob(ValidationJobRequest) returns (stream ResponseMetric) {}
 
   // Submits a validation job experiment to the cluster
   rpc SubmitExperiment(ValidationJobRequest) returns (ExperimentResponse) {}
@@ -147,6 +147,17 @@ message ClassificationValidationMetric {
   double precision = 6;
   double recall = 7;
   double f1_score = 8;
+  message RocGraph {
+    message Point {
+      int32 x = 1;
+      int32 y = 2;
+    }
+    repeated Point points = 1;
+    string graph_title = 2;
+    string x_title = 3;
+    string y_title = 4;
+  }
+  RocGraph roc_graph = 9;
 }
 
 message ModelFile {
