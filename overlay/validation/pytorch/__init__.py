@@ -55,7 +55,7 @@ def validate_regression_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, float, float, bool, str, float):
+        verbose: bool = True) -> (str, int, float, float, int,  bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
 
     import torch
@@ -72,6 +72,7 @@ def validate_regression_model(
 
     ok = True
     error_msg = ""
+    iteration = 0
 
     profiler: Timer = Timer()
     profiler.start()
@@ -136,7 +137,7 @@ def validate_regression_model(
     if allocation == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
         error(error_msg)
-        return gis_join, 0, -1.0, -1.0, not ok, error_msg, 0.0
+        return gis_join, 0, -1.0, -1.0, iteration, not ok, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
@@ -193,19 +194,19 @@ def validate_regression_model(
         profiler.stop()
         error_msg = "PyTorch validation: negative log-likelihood loss unimplemented"
         warning(error_msg)
-        return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
+        return gis_join, allocation, -1.0, -1.0, iteration, not ok, error_msg, profiler.elapsed
 
     elif loss_function == "CROSS_ENTROPY_LOSS":
         profiler.stop()
         error_msg = "PyTorch validation: cross-entropy loss unimplemented"
         warning(error_msg)
-        return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
+        return gis_join, allocation, -1.0, -1.0, iteration, not ok, error_msg, profiler.elapsed
 
     else:
         profiler.stop()
         error_msg = f"PyTorch validation: Unknown loss function: {loss_function}"
         warning(error_msg)
-        return gis_join, allocation, -1.0, -1.0, not ok, error_msg, profiler.elapsed
+        return gis_join, allocation, -1.0, -1.0, iteration, not ok, error_msg, profiler.elapsed
 
     info(f"m = {m}, s = {s}, loss = {loss}")
 
@@ -218,6 +219,7 @@ def validate_regression_model(
     # Merging old metrics in with new metrics using Welford's method (if applicable)
     prev_allocation = current_model_metrics["allocation"]
     if prev_allocation > 0:
+        iteration = 1
         prev_m = current_model_metrics["m"]
         prev_s = current_model_metrics["s"]
         new_allocation = prev_allocation + allocation
@@ -244,4 +246,4 @@ def validate_regression_model(
     profiler.stop()
 
     info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
-    return gis_join, allocation, loss, variance, ok, "", profiler.elapsed
+    return gis_join, allocation, loss, variance, iteration, ok, "", profiler.elapsed

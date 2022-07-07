@@ -11,8 +11,8 @@ import socket
 
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
-    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR, DB_USERNAME, DB_AUTH_SOURCE
+    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata, Metric
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.profiler import Timer
 from overlay.validation.tensorflow import TensorflowValidator
 from overlay.validation.scikitlearn import ScikitLearnValidator
@@ -20,6 +20,7 @@ from overlay.validation.pytorch import PyTorchValidator
 from overlay.db.shards import get_rs_member_state
 from overlay.db.locality import discover_gis_joins
 from overlay.structures import GisTree
+
 
 # Loky shared, reusable ProcessPoolExecutor
 shared_executor = get_reusable_executor(max_workers=8, timeout=10)
@@ -37,6 +38,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.saved_models_path: str = MODELS_DIR
         self.is_registered = False
         self.gis_tree: GisTree = GisTree()
+        info("Made it into worker_server, just above disvocer_gis_joins()")
         self.local_gis_joins: dict = discover_gis_joins()  # { gis_join -> count }
         for gis_join, count in self.local_gis_joins.items():
             self.gis_tree.insert_county(gis_join, {"count": count})
@@ -74,9 +76,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
     def __repr__(self) -> str:
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
-    def BeginValidationJob(self, request: ValidationJobRequest, context) -> WorkerValidationJobResponse:
-        profiler: Timer = Timer()
-        profiler.start()
+    def BeginValidationJob(self, request: ValidationJobRequest, context) -> Iterator[Metric]:
 
         info(f"Received BeginValidationJob Request: {request}")
 
@@ -85,38 +85,31 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             err_msg = f"Unable to save {str(request.model_framework)} model file with type " \
                       f"{str(request.model_file.type)}!"
             error(err_msg)
-            return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
+            return
 
         # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
 
             tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
-            metrics = tf_validator.validate_gis_joins()
+            for metric in tf_validator.validate_gis_joins():
+                info(f"Yielding metric from worker_server: {metric}")
+                yield metric
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
             skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor, self.local_gis_joins)
-            metrics = skl_validator.validate_gis_joins(request)
+            return skl_validator.validate_gis_joins()
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
             pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor, self.local_gis_joins)
-            metrics = pytorch_validator.validate_gis_joins(request)
+            return pytorch_validator.validate_gis_joins()
 
         else:
             err_msg = f"Unsupported model framework type {ModelFramework.Name(request.model_framework)}"
             error(err_msg)
-            return WorkerValidationJobResponse(ok=False, hostname=self.hostname, error_msg=err_msg)
-
-        # Create and return response from aggregated metrics
-        profiler.stop()
-
-        return WorkerValidationJobResponse(
-            ok=True,
-            hostname=self.hostname,
-            duration_sec=profiler.elapsed,
-            metrics=metrics
-        )
+            return
+        return
 
     def save_model(self, request: ValidationJobRequest) -> bool:
         ok = True
@@ -201,12 +194,7 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> No
 
     make_models_dir_if_not_exists()
 
-    info(f"Environment: DB_HOST={DB_HOST}, "
-         f"DB_PORT={DB_PORT}, "
-         f"DB_NAME={DB_NAME}, "
-         f"DB_USERNAME={DB_USERNAME}, "
-         f"DB_AUTH_SOURCE={DB_AUTH_SOURCE}, "
-         f"MODELS_DIR={MODELS_DIR}")
+    info(f"Environment: DB_HOST={DB_HOST}, DB_PORT={DB_PORT}, DB_NAME={DB_NAME}, MODELS_DIR={MODELS_DIR}")
 
     # Initialize server and worker
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

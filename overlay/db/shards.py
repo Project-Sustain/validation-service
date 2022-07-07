@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from logging import info, error
 
 
-from overlay.constants import DB_HOST, DB_PORT
+from overlay.constants import DB_HOST, DB_PORT, username, password
 from overlay.validation_pb2 import ReplicaSetMembership
 
 
@@ -36,7 +36,7 @@ class ShardMetadata:
 #       }
 def discover_shards():
     info("Discovering MongoDB shards...")
-    client = MongoClient(f"mongodb://{DB_HOST}:{DB_PORT}")
+    client = MongoClient(f"mongodb://{username}:{password}@{DB_HOST}:{DB_PORT}")
     shard_status = client.admin.command({"listShards": 1})
     shard_metadata = None
     if shard_status["ok"] == 1.0:
@@ -64,7 +64,7 @@ def discover_shards():
 # Example return value: ("shard7rs", ReplicaSetMembership.SECONDARY)
 def get_rs_member_state() -> (str, ReplicaSetMembership):
     info("Discovering MongoDB shards...")
-    client = MongoClient(f"mongodb://localhost:27017")
+    client = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
     rs_status = client.admin.command({"replSetGetStatus": 1})
     rs_name: str = rs_status["set"]
     rs_state: int = rs_status["myState"]  # https://www.mongodb.com/docs/manual/reference/replica-states/

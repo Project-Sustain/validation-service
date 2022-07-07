@@ -8,7 +8,7 @@ service Master {
   rpc UploadFile(ModelFile) returns (UploadStatus) {}
 
   // Submits a validation job to the cluster
-  rpc SubmitValidationJob(ValidationJobRequest) returns (ValidationJobResponse) {}
+  rpc SubmitValidationJob(ValidationJobRequest) returns (stream ResponseMetric) {}  
 
   // Submits a validation job experiment to the cluster
   rpc SubmitExperiment(ValidationJobRequest) returns (ExperimentResponse) {}
@@ -38,7 +38,11 @@ message WorkerRegistrationResponse {
 service Worker {
 
   // Registers a Worker to track via heartbeats
-  rpc BeginValidationJob(ValidationJobRequest) returns (WorkerValidationJobResponse) {}
+  rpc BeginValidationJob(ValidationJobRequest) returns (stream Metric) {}
+
+  // For debugging
+  rpc DebugBeginValidationJob(ValidationJobRequest) returns (stream Metric) {}
+
 }
 
 // Worker job request for a set of GISJOINs, and a model to validate
@@ -78,7 +82,19 @@ message ValidationJobResponse {
   bool ok = 2;
   string error_msg = 3;
   double duration_sec = 4;
-  repeated ValidationMetric metrics = 5;
+  repeated Metric metrics = 5;
+}
+
+message ResponseMetric {
+  string gis_join = 1;
+  int64  allocation = 2;
+  double loss = 3;
+  double accuracy = 4;
+  double variance = 5;
+  double duration_sec = 6;
+  bool ok = 7;
+  string error_msg = 8;
+  string job_id = 9;
 }
 
 message WorkerValidationJobResponse {
@@ -88,6 +104,19 @@ message WorkerValidationJobResponse {
   double duration_sec = 4;
   int32 iteration = 5;
   repeated ValidationMetric metrics = 6;
+}
+
+message Metric {
+  string gis_join = 1;
+  int64  allocation = 2;
+  double loss = 3;
+  double accuracy = 4;
+  double variance = 5;
+  double duration_sec = 6;
+  int32 iteration = 7;
+  bool ok = 8;
+  string error_msg = 9;
+  string hostname = 10;
 }
 
 message ValidationMetric {
@@ -184,9 +213,8 @@ enum BudgetType {
 enum JobMode {
   DEFAULT_JOB_MODE = 0;
   SYNCHRONOUS = 1;
-  ASYNCHRONOUS = 2;
-  MULTITHREADED = 3;
-  MULTIPROCESSING = 4;
+  MULTITHREADED = 2;
+  MULTIPROCESSING = 3;
 }
 
 enum ModelFramework {
