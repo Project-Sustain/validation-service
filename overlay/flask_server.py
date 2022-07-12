@@ -155,8 +155,7 @@ def validation():
         info(request.form)
 
         validation_request_str: str = request.form["request"]
-        info("printing request string", str)
-        info("printing file", request.form["file"])
+        info("printing request string", validation_request_str)
 
         if validation_request_str == "":
             err_msg = "Empty request submitted"
