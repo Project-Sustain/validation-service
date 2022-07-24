@@ -14,6 +14,7 @@ from overlay.db.shards import ShardMetadata
 # Progress Bar widgets
 widgets = [SimpleProgress(), Percentage(), Bar(), Timer()]
 
+
 GIS_JOIN_CHUNK_LOCATION_FILE = "overlay/resources/gis_join_chunk_locations.json"
 
 
@@ -28,7 +29,7 @@ def discover_gis_joins() -> dict:
 
     # client: MongoClient = MongoClient("mongodb://localhost:27017")
 
-    
+
     client: MongoClient = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
     info("below error")
     db = client["sustaindb"]

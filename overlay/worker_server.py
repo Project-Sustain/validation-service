@@ -4,7 +4,6 @@ import os
 import io
 import zipfile
 import signal
-from typing import Iterator
 from concurrent import futures
 from loky import get_reusable_executor
 
