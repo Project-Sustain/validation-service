@@ -12,7 +12,7 @@ from logging import info, error
 from google.protobuf.json_format import MessageToJson, Parse, MessageToDict
 from werkzeug.datastructures import FileStorage
 import urllib
-
+import pymongo
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType, ExperimentResponse, \
     ResponseMetric
@@ -255,6 +255,33 @@ def validation():
             }), HTTPStatus.BAD_REQUEST
 
     return app.response_class(stream_with_context(generate()))
+
+# Below is a method for streaming a collection back from mongo
+@app.route("/validation_service/testFloods", methods=["GET"])
+def test_floods():
+
+    def generate():
+        username = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_USER'))
+        password = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_PASS'))
+        mongo = pymongo.MongoClient(f'mongodb://{username}:{password}@lattice-100:27018/')
+        db = mongo['sustaindb']
+        collection = db['flood_zones_geo'].find()
+
+        count = 0
+        for document in collection:
+            del document['_id']
+
+            if count > 3: 
+                break
+            else:
+                yield json.dumps(document, indent=None) + '\n'
+
+            count +=1
+
+    return app.response_class(stream_with_context(generate()))
+
+
+# Above has nothing to do with Athena/ Validation service.
 
 
 def build_json_response(grpc_msg) -> str:
