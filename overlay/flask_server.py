@@ -275,7 +275,7 @@ def test_floods():
                 break
             else:
                 info(count)
-                info(json.dumps(document))
+                info(document)
                 yield json.dumps(document, indent=None) + '\n'
 
             count +=1
