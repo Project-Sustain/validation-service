@@ -276,7 +276,7 @@ def test_floods():
             else:
                 info(count)
                 info(document)
-                yield json.dumps(document, indent=None) + '\n'
+                yield json.dumps(document) + '\n'
 
             count +=1
             time.sleep(.001)
