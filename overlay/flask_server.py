@@ -274,7 +274,7 @@ def test_floods():
             if count > 100: 
                 break
             else:
-                info("Number of Documents Sent: ", count)
+                info(count)
                 info(json.dumps(document))
                 yield json.dumps(document, indent=None) + '\n'
 
