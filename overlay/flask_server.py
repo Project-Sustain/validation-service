@@ -279,6 +279,7 @@ def test_floods():
                 yield json.dumps(document, indent=None) + '\n'
 
             count +=1
+            time.sleep(.001)
 
     return app.response_class(stream_with_context(generate()))
 
