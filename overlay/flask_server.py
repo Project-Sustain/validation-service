@@ -276,10 +276,13 @@ def test_floods():
             # else:
                 # info(count)
             # info(document)
+            info(count)
             yield json.dumps(document) + '\n'
 
-            # count +=1
+            count +=1
             # time.sleep(.001)
+
+
 
     return app.response_class(stream_with_context(generate()))
 
