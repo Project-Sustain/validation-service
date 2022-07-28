@@ -267,7 +267,7 @@ def test_floods():
         db = mongo['sustaindb']
         california_document = db['state_geo'].find({'GISJOIN': 'G060'}).next()
         california_coordinates = california_document['geometry']['coordinates']
-        all_flood_zones = db['flood_zones_geo'].find()
+        all_flood_zones = db['flood_zones_geo']
         geowithin_query = {
             'geomtry': {
                 '$geoWithin': {
