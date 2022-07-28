@@ -282,7 +282,8 @@ def test_floods():
 
         for document in california_flood_zones:
             del document['_id']
-            yield json.dumps(document) + '\n'
+            # yield json.dumps(document) + '\n'
+            info(document)
 
         # count = 0
         # for document in collection:
@@ -327,3 +328,13 @@ def get_schema() -> dict:
     with open("resources/submit_validation_job_request_schema.json", "r") as file:
         schema: dict = json.load(file)
     return schema
+
+def main():
+    test_floods()
+  
+  
+# Using the special variable 
+# __name__
+if __name__=="__main__":
+    main()
+
