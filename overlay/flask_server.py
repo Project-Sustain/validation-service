@@ -272,8 +272,8 @@ def test_floods():
             del document['_id']
 
             info(count)
-            if count % 25 == 0:
-                yield json.dumps(document) + '\n'
+            
+            yield json.dumps(document) + '\n'
 
             count +=1
             # time.sleep(.001)
