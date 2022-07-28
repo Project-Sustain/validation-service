@@ -271,13 +271,9 @@ def test_floods():
         for document in collection:
             del document['_id']
 
-            # if count > 100: 
-            #     break
-            # else:
-                # info(count)
-            # info(document)
             info(count)
-            yield json.dumps(document) + '\n'
+            if count % 25 == 0:
+                yield json.dumps(document) + '\n'
 
             count +=1
             # time.sleep(.001)
