@@ -265,38 +265,36 @@ def test_floods():
         password = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_PASS'))
         mongo = pymongo.MongoClient(f'mongodb://{username}:{password}@lattice-100:27018/')
         db = mongo['sustaindb']
-        california_document = db['state_geo'].find({'GISJOIN': 'G060'}).next()
-        california_coordinates = california_document['geometry']['coordinates']
-        all_flood_zones = db['flood_zones_geo']
-        geowithin_query = {
-            'geomtry': {
-                '$geoWithin': {
-                    '$geometry': {
-                        'type': 'MultiPolygon',
-                        'coordinates': california_coordinates
-                    }
-                }
-            }
-        }
-        california_flood_zones = all_flood_zones.find(geowithin_query, no_cursor_timeout=True)
-
-        for document in california_flood_zones:
-            del document['_id']
-            # yield json.dumps(document) + '\n'
-            info(document)
-
-        # count = 0
-        # for document in collection:
-        #     del document['_id']
-
-        #     info(count)
-            
-        #     yield json.dumps(document) + '\n'
+    
+        collection = db['flood_zones_geo'].find()
+        for document in collection:
+            del document['_id']       
+            yield json.dumps(document) + '\n'
 
         #     count +=1
             # time.sleep(.001)
 
+              # california_document = db['state_geo'].find({'GISJOIN': 'G060'}).next()
+        # california_coordinates = california_document['geometry']['coordinates']
+        # all_flood_zones = db['flood_zones_geo']
+        # geowithin_query = {
+        #     'geomtry': {
+        #         '$geoWithin': {
+        #             '$geometry': {
+        #                 'type': 'MultiPolygon',
+        #                 'coordinates': california_coordinates
+        #             }
+        #         }
+        #     }
+        # }
+        # california_flood_zones = all_flood_zones.find(geowithin_query, no_cursor_timeout=True)
 
+        # for document in california_flood_zones:
+        #     del document['_id']
+        #     # yield json.dumps(document) + '\n'
+        #     info(document)
+
+        # count = 0
 
     return app.response_class(stream_with_context(generate()))
 
