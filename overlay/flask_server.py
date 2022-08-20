@@ -271,32 +271,42 @@ def test_floods():
             del document['_id']       
             yield json.dumps(document) + '\n'
 
-        #     count +=1
-            # time.sleep(.001)
+    return app.response_class(stream_with_context(generate()))
 
-              # california_document = db['state_geo'].find({'GISJOIN': 'G060'}).next()
-        # california_coordinates = california_document['geometry']['coordinates']
-        # all_flood_zones = db['flood_zones_geo']
-        # geowithin_query = {
-        #     'geomtry': {
-        #         '$geoWithin': {
-        #             '$geometry': {
-        #                 'type': 'MultiPolygon',
-        #                 'coordinates': california_coordinates
-        #             }
-        #         }
-        #     }
-        # }
-        # california_flood_zones = all_flood_zones.find(geowithin_query, no_cursor_timeout=True)
+@app.route("/validation_service/testFloodsMed", methods=["GET"])
+def test_floods():
 
-        # for document in california_flood_zones:
-        #     del document['_id']
-        #     # yield json.dumps(document) + '\n'
-        #     info(document)
-
-        # count = 0
+    def generate():
+        username = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_USER'))
+        password = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_PASS'))
+        mongo = pymongo.MongoClient(f'mongodb://{username}:{password}@lattice-100:27018/')
+        db = mongo['sustaindb']
+    
+        collection = db['flood_zones_geo_med_res'].find()
+        for document in collection:
+            del document['_id']       
+            yield json.dumps(document) + '\n'
 
     return app.response_class(stream_with_context(generate()))
+
+@app.route("/validation_service/testFloodsLow", methods=["GET"])
+def test_floods():
+
+    def generate():
+        username = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_USER'))
+        password = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_PASS'))
+        mongo = pymongo.MongoClient(f'mongodb://{username}:{password}@lattice-100:27018/')
+        db = mongo['sustaindb']
+    
+        collection = db['flood_zones_geo_low_res'].find()
+        for document in collection:
+            del document['_id']       
+            yield json.dumps(document) + '\n'
+
+    return app.response_class(stream_with_context(generate()))
+
+
+
 
 
 # Above has nothing to do with Athena/ Validation service.
