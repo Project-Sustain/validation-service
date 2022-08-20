@@ -274,7 +274,7 @@ def test_floods():
     return app.response_class(stream_with_context(generate()))
 
 @app.route("/validation_service/testFloodsMed", methods=["GET"])
-def test_floods():
+def test_floods_med():
 
     def generate():
         username = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_USER'))
@@ -290,7 +290,7 @@ def test_floods():
     return app.response_class(stream_with_context(generate()))
 
 @app.route("/validation_service/testFloodsLow", methods=["GET"])
-def test_floods():
+def test_floods_low():
 
     def generate():
         username = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_USER'))
