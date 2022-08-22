@@ -321,6 +321,22 @@ def test_floods_coarse():
 
     return app.response_class(stream_with_context(generate()))
 
+@app.route("/validation_service/testFloodsSuperCoarse", methods=["GET"])
+def test_floods_super_coarse():
+
+    def generate():
+        username = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_USER'))
+        password = urllib.parse.quote_plus(os.environ.get('ROOT_MONGO_PASS'))
+        mongo = pymongo.MongoClient(f'mongodb://{username}:{password}@lattice-100:27018/')
+        db = mongo['sustaindb']
+    
+        collection = db['flood_zones_geo_super_coarse_res'].find()
+        for document in collection:
+            del document['_id']       
+            yield json.dumps(document) + '\n'
+
+    return app.response_class(stream_with_context(generate()))
+
 
 
 
