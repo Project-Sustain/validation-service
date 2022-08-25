@@ -33,6 +33,51 @@ def validate_classification_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, int, float, float, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
+
+    import pandas as pd
+    import os
+    import json
+    import pickle
+    import numpy as np
+    from math import sqrt
+    from sklearn.preprocessing import MinMaxScaler
+
+    from overlay.db.querier import Querier
+
+    ok = True
+    error_msg = ""
+    iteration = 0
+    profiler: Timer = Timer()
+    profiler.start()
+
+    # Load ScikitLearn classification model from disk
+    info(f"Loading Scikit-Learn classification model from {model_path}")
+    model = pickle.load(open(model_path, 'rb'))
+
+    # Create or load persisted model metrics
+    model_path_parts = model_path.split("/")[:-1]
+    model_dir = "/".join(model_path_parts)
+    model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
+    if os.path.exists(model_metrics_path):
+        info(f"P{model_metrics_path} exists, loading")
+        with open(model_metrics_path, "r") as f:
+            current_model_metrics = json.load(f)
+    else:
+        info(f"P{model_metrics_path} does not exist, initializing for first time")
+        # First time calculating variance/errors for model
+        current_model_metrics = {
+            "gis_join": gis_join,
+            "allocation": 0,
+            "variance": 0.0,
+            "m": 0.0,
+            "s": 0.0,
+            "loss": 0.0
+        }
+        
+    if verbose:
+        model_type = type(model).__name__
+        info(f"Model type (from binary): {model_type}")
+
     raise NotImplementedError("validate_classification_model() is not implemented for class ScikitLearnValidator.")
 
 
