@@ -73,7 +73,7 @@ def validate_classification_model(
             "s": 0.0,
             "loss": 0.0
         }
-        
+
     if verbose:
         model_type = type(model).__name__
         info(f"Model type (from binary): {model_type}")
