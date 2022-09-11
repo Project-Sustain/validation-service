@@ -42,6 +42,7 @@ def allowed_file(filename) -> bool:
 
 def file_type(filename) -> ModelFileType:
     extension = filename.rsplit(".", 1)[1].lower()
+    info(f"Model file extension: {extension}")
     if extension == "pt":
         return ModelFileType.PYTORCH_TORCHSCRIPT
     elif extension == "zip":
@@ -134,21 +135,20 @@ def validation_experiment():
             return build_json_response(experiment_grpc_response), response_code
 
         else:
-            err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pickle, or .h5 files"
+            err_msg = f"File extension not allowed! Please upload only .zip, .pth, .pkl, or .h5 files"
             error(err_msg)
             return build_json_response(ExperimentResponse(id="None", ok=False, err_msg=err_msg)), \
-                HTTPStatus.BAD_REQUEST
+                   HTTPStatus.BAD_REQUEST
 
     else:
         err_msg = f"Uploaded file object is None! Please upload a valid file"
         error(err_msg)
         return build_json_response(ExperimentResponse(id="None", ok=False, err_msg=err_msg)), \
-            HTTPStatus.BAD_REQUEST
+               HTTPStatus.BAD_REQUEST
 
 
 @app.route("/validation_service/submit_validation_job", methods=["POST"])
 def validation():
-
     def generate():
         info(request.files)
         info(request.data)
@@ -210,7 +210,8 @@ def validation():
                     stub: validation_pb2_grpc.MasterStub = validation_pb2_grpc.MasterStub(channel)
 
                     # Build and log gRPC request
-                    validation_grpc_request: ValidationJobRequest = Parse(validation_request_str, ValidationJobRequest())
+                    validation_grpc_request: ValidationJobRequest = Parse(validation_request_str,
+                                                                          ValidationJobRequest())
                     validation_grpc_request.model_file.type = file_type(file.filename)
                     validation_grpc_request.model_file.md5_hash = md5_hash
                     validation_grpc_request.model_file.data = file_bytes
@@ -220,7 +221,7 @@ def validation():
                         info(f"inside flask server!! {validation_grpc_response}")
                         dict_response = MessageToDict(validation_grpc_response, preserving_proto_field_name=True)
                         yield json.dumps(dict_response, indent=None) + '\n'
-                        #yield build_json_response(validation_grpc_response)
+                        # yield build_json_response(validation_grpc_response)
 
                     # Submit validation job
                     # Needs to stream back to the client
