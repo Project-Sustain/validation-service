@@ -11,6 +11,7 @@ HOST = "lattice-100"
 experiment_dir = sys.argv[1]
 experiment_request = f"{experiment_dir}/request.json"
 print(f"[INFO] experiment_request: {experiment_request}")
+
 experiment_dir_parts = experiment_dir.split("/")
 exp_framework_path = experiment_dir_parts[0]  # i.e. pytorch, tensorflow, scikitlearn
 exp_model_category_path = f"{exp_framework_path}/{experiment_dir_parts[1]}"
