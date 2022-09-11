@@ -28,7 +28,12 @@ CLASSIFICATION_LABEL_FIELD = [
 
 QUERY = True
 
-mongo_url = "mongodb://lattice-100:27018"
+HOST = "lattice-100"
+MONGO_USERNAME = os.environ["ROOT_MONGO_USER"]
+MONGO_PASSWORD = os.environ["ROOT_MONGO_PASS"]
+
+mongo_url = f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{HOST}:27018"
+print(f"[INFO]: Mongo URL: {mongo_url}")
 sustain_client = pymongo.MongoClient(mongo_url)
 sustain_db = sustain_client['sustaindb']
 
@@ -62,4 +67,3 @@ print('INFO: Model created')
 
 dtree_predictions = dtree_model.predict(X_test)
 pickle.dump(dtree_model, open('./classification_model.pkl', 'wb'))
-
