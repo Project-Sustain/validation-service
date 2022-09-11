@@ -26,7 +26,7 @@ CLASSIFICATION_LABEL_FIELD = [
     "CATEGORICAL_SNOW_SURFACE_BINARY"
 ]
 
-QUERY = True
+QUERY = False 
 
 HOST = "lattice-100"
 MONGO_USERNAME = os.environ["ROOT_MONGO_USER"]
@@ -66,4 +66,5 @@ dtree_model = DecisionTreeClassifier(max_depth=2).fit(X_train, y_train)
 print('INFO: Model created')
 
 dtree_predictions = dtree_model.predict(X_test)
-pickle.dump(dtree_model, open('./classification_model.pkl', 'wb'))
+pickle.dump(dtree_model, open('./pickles/classification_model.pkl', 'wb'))
+print("[INFO] Model serialized to file")
