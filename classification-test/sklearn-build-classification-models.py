@@ -26,11 +26,27 @@ CLASSIFICATION_LABEL_FIELD = [
     "CATEGORICAL_SNOW_SURFACE_BINARY"
 ]
 
-path_to_noaa_csv: str = "~/noaa_nam_normalized.csv"
-all_df: pd.DataFrame = pd.read_csv(path_to_noaa_csv, header=0)
+QUERY = True
 
-X_df: pd.DataFrame = all_df[CLASSIFICATION_FEATURES_FIELDS]
-y_df: pd.DataFrame = all_df[CLASSIFICATION_LABEL_FIELD]
+mongo_url = "mongodb://lattice-100:27018"
+sustain_client = pymongo.MongoClient(mongo_url)
+sustain_db = sustain_client['sustaindb']
+
+if QUERY:
+    raw_data = sustain_db['noaa_nam'].find({'GISJOIN': 'G0600470'})
+    df = pd.DataFrame(list(raw_data))
+    pickle.dump(df, open('pickles/noaa_df.pkl', 'wb'))
+    print('INFO: DF created')
+else:
+    df = pickle.load(open('pickles/noaa_df.pkl', 'rb'))
+    print('INFO: DF loaded')
+
+# available on lattice-176
+# path_to_noaa_csv: str = "~/noaa_nam_normalized.csv"
+# all_df: pd.DataFrame = pd.read_csv(path_to_noaa_csv, header=0)
+
+X_df: pd.DataFrame = df[CLASSIFICATION_FEATURES_FIELDS]
+y_df: pd.DataFrame = df[CLASSIFICATION_LABEL_FIELD]
 
 X_train, X_test, y_train, y_test = train_test_split(X_df, y_df, test_size=0.25)
 
@@ -45,4 +61,5 @@ dtree_model = DecisionTreeClassifier(max_depth=2).fit(X_train, y_train)
 print('INFO: Model created')
 
 dtree_predictions = dtree_model.predict(X_test)
+pickle.dump(dtree_model, open('./classification_model.pkl', 'wb'))
 
