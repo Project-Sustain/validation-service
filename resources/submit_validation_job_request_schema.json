@@ -17,7 +17,8 @@
     "model_category": {
       "description": "The category of model used for validation.",
       "enum": [
-        "REGRESSION"
+        "REGRESSION",
+        "CLASSIFICATION"
       ]
     },
     "database": {
