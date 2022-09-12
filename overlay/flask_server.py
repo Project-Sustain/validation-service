@@ -108,6 +108,7 @@ def validation_experiment():
         return build_json_response(ExperimentResponse(id="None", ok=False, err_msg=err_msg)), HTTPStatus.BAD_REQUEST
 
     if file is not None:
+        info(f"file.filename: {file.filename}")
         if allowed_file(file.filename):
             file_bytes: bytes = file.read()
 
