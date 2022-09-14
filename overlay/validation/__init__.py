@@ -17,11 +17,11 @@ class Validator:
         self.shared_executor = shared_executor
         self.gis_join_counts = gis_join_counts  # { gis_join -> count }
         if request.model_category == "REGRESSION":
-            info(f"Selecting validation_regression_model()")
+            info(f"Selecting validate_regression_model()")
             self.validate_model_function = validate_regression_model
         elif request.model_category == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
-        info(f"Selecting validation_classification_model()")
+        info(f"Selecting validate_classification_model()")
         self.hostname = socket.gethostname()
 
     def get_model_path(self):

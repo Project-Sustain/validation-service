@@ -35,6 +35,7 @@ def validate_classification_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, int, float, float, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
+    info(f"Starting ScikitLearnValidator::validate_classification_model()")
 
     import pandas as pd
     import os
@@ -104,6 +105,7 @@ def validate_regression_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, int, float, float, int, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, iteration, ok status, error message, and duration
+    info("Starting ScikitLearnValidator::validate_regression_model()")
 
     import pandas as pd
     import os
