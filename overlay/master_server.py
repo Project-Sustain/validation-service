@@ -100,8 +100,6 @@ def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> Itera
         return launch_worker_jobs_synchronously(job, request)
 
 
-
-
 # Returns list of WorkerValidationJobResponses
 def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobRequest) -> Iterator[Metric]:
     responses = []
@@ -124,7 +122,6 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
                     yield response
 
                 # return stub.BeginValidationJob(request_copy)
-
 
     # return responses # also needs to yield the response from stub.BeginValidationJob(request_copy)
 
@@ -223,6 +220,7 @@ def save_gis_join_counts(counts) -> None:
 
     info(f"Saved {filename}")
 
+
 def aggregate_metrics_by_state(flattened_metrics: list) -> list:  # returns list(ValidationMetric) at State level
 
     # Build a prefix tree with the contents of gis_join -> {"metric": ValidationMetric}
@@ -271,11 +269,11 @@ class Master(validation_pb2_grpc.MasterServicer):
         self.saved_models_path = "testing/master/saved_models"
 
         # Data structures
-        self.tracked_workers = {}       # Mapping of { hostname -> WorkerMetadata }
-        self.tracked_jobs = []          # list(JobMetadata)
-        self.gis_join_locations = {}    # Mapping of { gis_join -> ShardMetadata }
-        self.gis_join_metadata = {}     # Mapping of { gis_join -> count }
-        self.shard_metadata = {}        # Mapping of { shard_name -> ShardMetadata }
+        self.tracked_workers = {}  # Mapping of { hostname -> WorkerMetadata }
+        self.tracked_jobs = []  # list(JobMetadata)
+        self.gis_join_locations = {}  # Mapping of { gis_join -> ShardMetadata }
+        self.gis_join_metadata = {}  # Mapping of { gis_join -> count }
+        self.shard_metadata = {}  # Mapping of { shard_name -> ShardMetadata }
 
     def is_worker_registered(self, hostname):
         return hostname in self.tracked_workers
@@ -404,7 +402,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         filtered_gis_join_metrics: list = []
         sum_of_filtered_variances = 0.0
 
-
         for metric in all_gis_join_metrics:
             # If variance > 2 standard deviations above mean
             if variance_budget.use_threshold:
@@ -489,7 +486,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Create and launch a job from allocations
         job: JobMetadata = self.create_job_from_allocations(spatial_allocations)
 
-
         # worker_responses = []
         # for metric in launch_worker_jobs(request, job):  # list(WorkerValidationJobResponse)
         #     info(f"Response from launch in process with normal budget - {metric}")
@@ -501,7 +497,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         # return job.job_id, worker_responses
 
         return job.job_id, launch_worker_jobs(request, job)
-
 
     # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
     # for the ShardMetadata objects.
@@ -585,9 +580,6 @@ class Master(validation_pb2_grpc.MasterServicer):
         #     metrics=worker_responses
         # )
 
-
-
-
         # profiler.stop()
         #
         # return ValidationJobResponse(
@@ -643,7 +635,6 @@ class Master(validation_pb2_grpc.MasterServicer):
 
 
 def run(master_port=50051) -> None:
-
     # Initialize server and master
     master_hostname: str = socket.gethostname()
     server = grpc.server(ThreadPoolExecutor(max_workers=32))
