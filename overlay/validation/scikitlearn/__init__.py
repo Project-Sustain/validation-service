@@ -9,6 +9,7 @@ class ScikitLearnValidator(Validator):
 
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
+        info(f"ScikitLearnValidator::__init__(): model_category: {request.model_category}")
         if request.model_category == "REGRESSION":
             self.validate_model_function = validate_regression_model
         elif request.model_category == "CLASSIFICATION":
