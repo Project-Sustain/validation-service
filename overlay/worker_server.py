@@ -23,7 +23,6 @@ from overlay.db.shards import get_rs_member_state
 from overlay.db.locality import discover_gis_joins
 from overlay.structures import GisTree
 
-
 # Loky shared, reusable ProcessPoolExecutor
 shared_executor = get_reusable_executor(max_workers=8, timeout=10)
 
@@ -89,6 +88,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             error(err_msg)
             return
 
+        info(f"Worker::BeginValidationJob(): Model Framework: {ModelFramework.Name(request.model_framework)}")
         # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
 
