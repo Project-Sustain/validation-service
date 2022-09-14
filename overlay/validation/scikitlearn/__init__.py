@@ -1,8 +1,8 @@
 from logging import info, error
 
 from overlay.profiler import Timer
-from overlay.validation_pb2 import ValidationJobRequest, ModelCategory
 from overlay.validation import Validator
+from overlay.validation_pb2 import ValidationJobRequest, ModelCategory
 
 
 class ScikitLearnValidator(Validator):
@@ -40,9 +40,8 @@ def validate_classification_model(
     import os
     import json
     import pickle
-    import numpy as np
-    from math import sqrt
     from sklearn.preprocessing import MinMaxScaler
+    from sklearn import metrics
 
     from overlay.db.querier import Querier
 
@@ -79,6 +78,101 @@ def validate_classification_model(
     if verbose:
         model_type = type(model).__name__
         info(f"Model type (from binary): {model_type}")
+
+    querier = Querier(
+        mongo_host=mongo_host,
+        mongo_port=mongo_port,
+        db_name=database,
+        read_preference=read_preference,
+        read_concern=read_concern
+    )
+
+    documents = querier.spatial_query(
+        collection_name=collection,
+        gis_join=gis_join,
+        features=feature_fields,
+        label=label_field,
+        limit=limit,
+        sample_rate=sample_rate
+    )
+
+    # Load MongoDB Documents into Pandas DataFrame
+    features_df = pd.DataFrame(list(documents))
+    querier.close()
+
+    allocation: int = len(features_df.index)
+    info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+
+    if allocation == 0:
+        error_msg = f"No records found for GISJOIN {gis_join}"
+        error(error_msg)
+        return gis_join, 0, -1.0, -1.0, iteration, not ok, error_msg, 0.0
+
+    # Normalize features, if requested
+    if normalize_inputs:
+        scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        features_df = pd.DataFrame(scaled, columns=features_df.columns)
+        info(f"Normalized Pandas DataFrame")
+
+    # Pop the label column off into its own DataFrame
+    label_df = features_df.pop(label_field)
+
+    if verbose:
+        info(f"label_df: {label_df}")
+
+    # Get predictions (clasification)
+    inputs_numpy = features_df.to_numpy()
+    y_true = label_df.to_numpy()
+    y_pred_class = model.predict(inputs_numpy)
+
+    if verbose:
+        info(f"y_true: {y_true}")
+
+    # calculate accuracy (percentage of correct predictions)
+    accuracy = metrics.accuracy_score(y_true, y_pred_class)
+    info(f"Accuracy: {accuracy}")
+
+    # value counts
+    # TODO: check conversion format of y_true
+    info(f"Value counts: {y_true.value_counts()}")
+
+    # percentage of ones
+    info(f"Percentage of 1s: {y_true.mean()}")
+
+    # percentage of zeroes
+    info(f"Percentage of 0s: {1 - y_true.mean()}")
+
+    # null accuracy (for binary classification)
+    info(f"Null accuracy: {max(y_true.mean(), 1 - y_true.mean())}")
+
+    # save confusion matrix and slice into four pieces
+    confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
+
+    info(f"Confusion matrix: {confusion_matrix}")
+
+    TP = confusion_matrix[1, 1]
+    TN = confusion_matrix[0, 0]
+    FP = confusion_matrix[0, 1]
+    FN = confusion_matrix[1, 0]
+
+    info(f"False positivity rate: {TN / (TN + FP)}")
+    precision = metrics.precision_score(y_true, y_pred_class)
+    info(f"Precision: {precision}")
+
+    # ROC Curves and Area Under the Curve (AUC)
+    y_pred_prob = model.predict_proba(features_df)[:, 1]
+    fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
+
+    def evaluate_threshold(threshold):
+        sensitivity = tpr[thresholds > threshold][-1]
+        specificity = 1 - fpr[thresholds > threshold][-1]
+        return [sensitivity, specificity]
+
+    sensitivity1, specificity1 = evaluate_threshold(0.5)
+    sensitivity2, specificity2 = evaluate_threshold(0.3)
+
+    roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
+    info(f"roc_auc_score: {roc_auc_score}")
 
     raise NotImplementedError("validate_classification_model() is not implemented for class ScikitLearnValidator.")
 
