@@ -17,9 +17,11 @@ class Validator:
         self.shared_executor = shared_executor
         self.gis_join_counts = gis_join_counts  # { gis_join -> count }
         if request.model_category == "REGRESSION":
+            info(f"Selecting validation_regression_model()")
             self.validate_model_function = validate_regression_model
         elif request.model_category == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
+        info(f"Selecting validation_classification_model()")
         self.hostname = socket.gethostname()
 
     def get_model_path(self):
@@ -28,7 +30,8 @@ class Validator:
         model_path += first_entry
         return model_path
 
-    def validate_gis_joins(self, verbose: bool = True) -> Iterator[Metric]: #This needs to be a generator, so it needs to yield the futures as they come in
+    def validate_gis_joins(self, verbose: bool = True) -> \
+            Iterator[Metric]:  # This needs to be a generator, so it needs to yield the futures as they come in
 
         info(f"Launching validation job for {len(self.request.gis_joins)} GISJOINs")
 
@@ -182,8 +185,6 @@ class Validator:
         # info(f"metrics: {len(metrics)} responses")
         # return metrics
         # // needs to be yield instead of return
-
-
 
 
 # Stub for function that needs to be implemented in concrete subclasses
