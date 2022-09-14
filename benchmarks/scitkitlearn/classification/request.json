@@ -1,6 +1,6 @@
 {
   "master_job_mode": "ASYNCHRONOUS",
-  "worker_job_mode": "MULTIPROCESSING",
+  "worker_job_mode": "SYNCHRONOUS",
   "model_framework": "SCIKIT_LEARN",
   "model_category": "CLASSIFICATION",
   "mongo_host": "localhost",
