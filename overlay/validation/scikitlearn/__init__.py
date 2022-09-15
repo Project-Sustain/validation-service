@@ -174,6 +174,12 @@ def validate_classification_model(
     roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
     info(f"roc_auc_score: {roc_auc_score}")
 
+    # TODO: MVC design patterns
+    # pivot the data for different views
+    # implement a data structure
+    # where the client can to pivots easily
+    # partial streaming on the client side
+
     raise NotImplementedError("validate_classification_model() is not implemented for class ScikitLearnValidator.")
 
 
