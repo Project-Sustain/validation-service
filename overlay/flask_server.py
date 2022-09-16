@@ -126,7 +126,14 @@ def validation_experiment():
                 validation_grpc_request.model_file.md5_hash = md5_hash
                 validation_grpc_request.model_file.data = file_bytes
 
-                info(validation_grpc_request)
+                # Log request
+                # info(validation_grpc_request)
+                info(f"request.model_file.type: {file_type(file.filename)}")
+                info(f"request.model_file.md5_hash: {md5_hash}")
+                info(f"request.model_file.data.length: {len(file_bytes)}")
+                info(f"request.mongo_host: {validation_grpc_request.mongo_host}")
+                info(f"request.mongo_port: {validation_grpc_request.mongo_port}")
+                info(f"request.read_config: {validation_grpc_request.read_config}")
 
                 # Submit validation experiment job
                 experiment_grpc_response: ExperimentResponse = stub.SubmitExperiment(validation_grpc_request)
