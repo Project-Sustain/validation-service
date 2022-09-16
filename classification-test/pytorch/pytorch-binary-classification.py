@@ -102,7 +102,7 @@ print(test_acc)
 
 # Save model
 model_scripted = torch.jit.script(model)
-model_scripted.save('model.pt')
+# model_scripted.save('model.pt')
 
 # Loading
 # model = torch.jit.load('model.pt')

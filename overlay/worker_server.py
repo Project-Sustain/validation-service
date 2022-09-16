@@ -79,7 +79,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
     def BeginValidationJob(self, request: ValidationJobRequest, context) -> Iterator[Metric]:
 
-        info(f"Received BeginValidationJob Request: {request}")
+        info(f"Worker::BeginValidationJob(): Received Request: {request}")
 
         # Save model
         if not self.save_model(request):
@@ -94,7 +94,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
             tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
             for metric in tf_validator.validate_gis_joins():
-                info(f"Yielding metric from worker_server: {metric}")
+                info(f"Worker::BeingValidationJob(): Yielding metric from: {metric}")
                 yield metric
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
@@ -119,7 +119,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         # Make the directory
         model_dir = f"{self.saved_models_path}/{request.id}"
         os.mkdir(model_dir)
-        info(f"Created directory {model_dir}")
+        info(f"Worker::save_model(): Created directory {model_dir}")
 
         file_extension = "pkl"  # Default for Scikit-Learn pickle type
 
@@ -157,7 +157,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         with open(model_file_path, "wb") as binary_file:
             binary_file.write(request.model_file.data)
 
-        info(f"Finished saving model to {model_file_path}")
+        info(f"Worker::save_model(): Finished saving model to {model_file_path}")
         return ok
 
     def deregister(self):

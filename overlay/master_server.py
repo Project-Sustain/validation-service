@@ -53,8 +53,8 @@ class WorkerJobMetadata:
         for gis_join in self.gis_joins:
             gis_joins_str += "  {gis_join=%s, strata_limit=%d, sample_rate=%.2f}\n" \
                              % (gis_join.gis_join, gis_join.strata_limit, gis_join.sample_rate)
-        return f"WorkerJobMetadata: job_id={self.job_id}, worker={self.worker.hostname}, status={self.status}, " \
-               f"gis_joins=[\n{gis_joins_str}\n]"
+        return f"Master: WorkerJobMetadata: job_id={self.job_id}, worker={self.worker.hostname}, " \
+               f"status={self.status}, gis_joins=[\n{gis_joins_str}\n]"
 
 
 class WorkerMetadata:
@@ -91,7 +91,7 @@ def get_or_create_worker_job(worker: WorkerMetadata, job_id: str) -> WorkerJobMe
 def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> Iterator[Metric]:
     # Select strategy for submitting the job from the master
     # all of these will need to yield the responses back
-
+    info(f"Master::launch_worker_jobs(): master_job_mode: {JobMode.Name(request.master_job_mode)}")
     if request.master_job_mode == JobMode.MULTITHREADED:
         info("Launching jobs in multi-threaded mode")
         return launch_worker_jobs_multithreaded(job, request)
@@ -133,7 +133,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
     # Define worker job function to be run in the thread pool
     def run_worker_job(_responses: Queue, _worker_job: WorkerJobMetadata, _request: ValidationJobRequest):
         _worker = _worker_job.worker
-        info(f"Launching run_worker_job() for {_worker.hostname}:{_worker.port}")
+        info(f"Master: Launching run_worker_job() for {_worker.hostname}:{_worker.port}")
         with grpc.insecure_channel(f"{_worker.hostname}:{_worker.port}") as channel:
             stub = validation_pb2_grpc.WorkerStub(channel)
             request_copy = ValidationJobRequest()

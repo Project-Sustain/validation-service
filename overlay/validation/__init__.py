@@ -33,7 +33,7 @@ class Validator:
     def validate_gis_joins(self, verbose: bool = True) -> \
             Iterator[Metric]:  # This needs to be a generator, so it needs to yield the futures as they come in
 
-        info(f"Launching validation job for {len(self.request.gis_joins)} GISJOINs")
+        info(f"Validator::validate_gis_joins(): Launching validation job for {len(self.request.gis_joins)} GISJOINs")
 
         # Convert protobuf "repeated" field type to a python list
         feature_fields = []
@@ -96,6 +96,7 @@ class Validator:
             # Create a child process object or thread object for each GISJOIN validation job
             executors_list: list = []
 
+            info(f"Validator::validate_gis_joins(): JobMode: {JobMode.Name(self.request.worker_job_mode)}")
             if self.request.worker_job_mode == JobMode.MULTITHREADED:
                 with ThreadPoolExecutor(max_workers=10) as executor:
                     for spatial_allocation in self.request.allocations:
