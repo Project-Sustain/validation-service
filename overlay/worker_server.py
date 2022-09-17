@@ -79,7 +79,25 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
     def BeginValidationJob(self, request: ValidationJobRequest, context) -> Iterator[Metric]:
 
-        info(f"Worker::BeginValidationJob(): Received Request: {request}")
+        # info(f"Worker::BeginValidationJob(): Received Request: {request}")
+        info(f"Worker::BeginValidationJob(): Received Request:")
+        info(f"model_file.type: {request.model_file.type}")
+        info(f"model_file.md5_hash: {request.model_flle.md5_hash}")
+        info(f"model_file.data.length: {len(request.model_file.data)} bytes")
+        info(f"mongo_host: {request.mongo_host}")
+        info(f"mongo_port: {request.mongo_port}")
+        info(f"read_config: {request.read_config}")
+        info(f"database: {request.database}")
+        info(f"collection: {request.collection}")
+        info(f"normalize_inputs: {request.normalize_inputs}")
+        info(f"label_field: {request.label_field}")
+        info(f"feature_fields: {request.feature_fields}")
+        info(f"model_framework: {request.model_framework}")
+        info(f"model_category: {request.model_category}")
+        info(f"loss_function: {request.loss_function}")
+        info(f"spatial_coverage: {request.spatial_coverage}")
+        info(f"allocations: {request.allocations}")
+        info("==========================================================")
 
         # Save model
         if not self.save_model(request):

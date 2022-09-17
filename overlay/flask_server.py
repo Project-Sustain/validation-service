@@ -237,7 +237,6 @@ def validation():
                     info(f"loss_function: {validation_grpc_request.loss_function}")
                     info(f"spatial_coverage: {validation_grpc_request.spatial_coverage}")
                     info(f"allocations: {validation_grpc_request.allocations}")
-                    # info(f"allocations: ")
                     info("==========================================================")
 
                     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
