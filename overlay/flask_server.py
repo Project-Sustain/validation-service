@@ -236,6 +236,7 @@ def validation():
                     info(f"model_category: {validation_grpc_request.model_category}")
                     info(f"loss_function: {validation_grpc_request.loss_function}")
                     info(f"spatial_coverage: {validation_grpc_request.spatial_coverage}")
+                    info(f"allocations: {validation_grpc_request.allocations}")
                     # info(f"allocations: ")
                     info("==========================================================")
 
