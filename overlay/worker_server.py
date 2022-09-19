@@ -107,7 +107,6 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             error(err_msg)
             return
 
-        info(f"Worker::BeginValidationJob(): Model Framework: {ModelFramework.Name(request.model_framework)}")
         # Select model framework, then launch jobs
         if request.model_framework == ModelFramework.TENSORFLOW:
 

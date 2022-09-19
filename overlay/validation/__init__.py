@@ -5,7 +5,7 @@ import psutil
 from logging import info, error
 from concurrent.futures import as_completed, ThreadPoolExecutor
 
-from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, JobMode, LossFunction, Metric
+from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, JobMode, LossFunction, Metric, ModelCategory
 from overlay.constants import MODELS_DIR
 
 
@@ -16,12 +16,11 @@ class Validator:
         self.model_path = self.get_model_path()
         self.shared_executor = shared_executor
         self.gis_join_counts = gis_join_counts  # { gis_join -> count }
+        info(f"Validator::__init__(): request.model_category: {ModelCategory.Name(request.model_category)}")
         if request.model_category == "REGRESSION":
-            info(f"Validator::__init__(): Selecting validate_regression_model()")
             self.validate_model_function = validate_regression_model
         elif request.model_category == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
-        info(f"Validator::__init__(): Selecting validate_classification_model()")
         self.hostname = socket.gethostname()
 
     def get_model_path(self):
