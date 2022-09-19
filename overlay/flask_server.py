@@ -15,7 +15,7 @@ import urllib
 
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import ValidationJobRequest, ValidationJobResponse, ModelFileType, ExperimentResponse, \
-    ResponseMetric
+    ResponseMetric, ModelFramework, ModelCategory, LossFunction, SpatialCoverage
 
 UPLOAD_DIR = "./uploads"
 ALLOWED_EXTENSIONS = {"zip", "pt", "pkl", "h5"}
@@ -232,10 +232,10 @@ def validation():
                     info(f"normalize_inputs: {validation_grpc_request.normalize_inputs}")
                     info(f"label_field: {validation_grpc_request.label_field}")
                     info(f"feature_fields: {validation_grpc_request.feature_fields}")
-                    info(f"model_framework: {validation_grpc_request.model_framework}")
-                    info(f"model_category: {validation_grpc_request.model_category}")
-                    info(f"loss_function: {validation_grpc_request.loss_function}")
-                    info(f"spatial_coverage: {validation_grpc_request.spatial_coverage}")
+                    info(f"model_framework: {ModelFramework.Name(validation_grpc_request.model_framework)}")
+                    info(f"model_category: {ModelCategory.Name(validation_grpc_request.model_category)}")
+                    info(f"loss_function: {LossFunction.Name(validation_grpc_request.loss_function)}")
+                    info(f"spatial_coverage: {SpatialCoverage.Name(validation_grpc_request.spatial_coverage)}")
                     info(f"allocations: {validation_grpc_request.allocations}")
                     info("==========================================================")
 
