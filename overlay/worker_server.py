@@ -81,8 +81,9 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
         # info(f"Worker::BeginValidationJob(): Received Request: {request}")
         info(f"Worker::BeginValidationJob(): Received Request:")
-        info(f"request attributes: {dir(request)}")
-        info(f"model_file: {request.model_file}")
+        info(f"model_file.type: {request.model_file.type}")
+        info(f"model_file.md5_hash: {request.model_file.md5_hash}")
+        info(f"model_file.data.length: {len(request.model_file.data)}")
         info(f"mongo_host: {request.mongo_host}")
         info(f"mongo_port: {request.mongo_port}")
         info(f"read_config: {request.read_config}")
