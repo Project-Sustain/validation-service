@@ -221,7 +221,7 @@ def validation():
                     # Log request
                     # info(validation_grpc_request)
                     info("REQUEST INFO ===============================================")
-                    info(f"model_file.type: {validation_grpc_request.model_file.type}")
+                    info(f"model_file.type: {ModelFileType.Name(validation_grpc_request.model_file.type)}")
                     info(f"model_file.md5_hash: {md5_hash}")
                     info(f"model_file.data.length: {len(file_bytes)} bytes")
                     info(f"mongo_host: {validation_grpc_request.mongo_host}")
