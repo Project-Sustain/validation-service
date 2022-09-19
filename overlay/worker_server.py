@@ -102,8 +102,8 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
         # Save model
         if not self.save_model(request):
-            err_msg = f"Unable to save {str(request.model_framework)} model file with type " \
-                      f"{str(request.model_file.type)}!"
+            err_msg = f"Unable to save {ModelFramework.Name(request.model_framework)} model file with type " \
+                      f"{ModelFileType.Name(request.model_file.type)}!"
             error(err_msg)
             return
 
