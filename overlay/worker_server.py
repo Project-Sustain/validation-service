@@ -13,7 +13,8 @@ import socket
 
 from overlay import validation_pb2_grpc
 from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistrationResponse, JobMode, ModelFramework, \
-    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata, Metric
+    ValidationJobRequest, WorkerValidationJobResponse, ModelFileType, GisJoinMetadata, Metric, ModelCategory, \
+    LossFunction, SpatialCoverage
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, MODELS_DIR
 from overlay.profiler import Timer
 from overlay.validation.tensorflow import TensorflowValidator
@@ -92,10 +93,10 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         info(f"normalize_inputs: {request.normalize_inputs}")
         info(f"label_field: {request.label_field}")
         info(f"feature_fields: {request.feature_fields}")
-        info(f"model_framework: {request.model_framework}")
-        info(f"model_category: {request.model_category}")
-        info(f"loss_function: {request.loss_function}")
-        info(f"spatial_coverage: {request.spatial_coverage}")
+        info(f"model_framework: {ModelFramework.Name(request.model_framework)}")
+        info(f"model_category: {ModelCategory.Name(request.model_category)}")
+        info(f"loss_function: {LossFunction.Name(request.loss_function)}")
+        info(f"spatial_coverage: {SpatialCoverage.Name(request.spatial_coverage)}")
         info(f"allocations: {request.allocations}")
         info("==========================================================")
 
