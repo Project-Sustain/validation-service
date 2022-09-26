@@ -120,12 +120,14 @@ class Worker(validation_pb2_grpc.WorkerServicer):
             skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor, self.local_gis_joins)
             for metric in skl_validator.validate_gis_joins():
                 info(f"Worker[ScikitLearn]::BeginValidationJob():: Yielding metric from: {metric}")
+                yield metric
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
             pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor, self.local_gis_joins)
             for metric in pytorch_validator.validate_gis_joins():
                 info(f"Worker[PyTorch]::BeginValidationJob():: Yielding metric from: {metric}")
+                yield metric
 
         else:
             err_msg = f"Unsupported model framework type {ModelFramework.Name(request.model_framework)}"
