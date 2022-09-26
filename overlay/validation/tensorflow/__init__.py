@@ -37,6 +37,19 @@ def validate_classification_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, int, float, float, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
+
+    import tensorflow as tf
+    import pandas as pd
+    import json
+    import numpy as np
+    import logging
+    from logging import info, error
+    from sklearn.preprocessing import MinMaxScaler
+
+    from overlay.db.querier import Querier
+
+    info(f"Starting TensorflowValidator::validate_classification_model()")
+
     raise NotImplementedError("validate_classification_model() is not implemented for class TensorflowValidator.")
 
 
@@ -71,6 +84,8 @@ def validate_regression_model(
     from sklearn.preprocessing import MinMaxScaler
 
     from overlay.db.querier import Querier
+
+    info(f"Starting TensorflowValidator::validate_regression_model()")
 
     ok = True
     error_msg = ""

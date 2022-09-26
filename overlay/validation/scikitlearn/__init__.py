@@ -34,7 +34,6 @@ def validate_classification_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, int, float, float, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
-    info(f"Starting ScikitLearnValidator::validate_classification_model()")
 
     import pandas as pd
     import os
@@ -44,6 +43,8 @@ def validate_classification_model(
     from sklearn import metrics
 
     from overlay.db.querier import Querier
+
+    info(f"Starting ScikitLearnValidator::validate_classification_model()")
 
     ok = True
     error_msg = ""
