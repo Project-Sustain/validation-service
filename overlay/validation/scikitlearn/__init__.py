@@ -177,7 +177,7 @@ def validate_classification_model(
     # TODO: MVC design patterns
     # pivot the data for different views
     # implement a data structure
-    # where the client can to pivots easily
+    # where the client pivots easily
     # partial streaming on the client side
 
     raise NotImplementedError("validate_classification_model() is not implemented for class ScikitLearnValidator.")

@@ -1,7 +1,9 @@
+from logging import info, error
+
 import os
 from math import sqrt
 
-from overlay.validation_pb2 import ValidationJobRequest
+from overlay.validation_pb2 import ValidationJobRequest, ModelCategory
 from overlay.profiler import Timer
 from overlay.validation import Validator
 
@@ -10,6 +12,7 @@ class TensorflowValidator(Validator):
 
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
+        info(f"TensorflowValidator::__init__(): model_category: {ModelCategory.Name(request.model_category)}")
         if request.model_category == "REGRESSION":
             self.validate_model_function = validate_regression_model
         elif request.model_category == "CLASSIFICATION":
