@@ -16,11 +16,14 @@ class Validator:
         self.model_path = self.get_model_path()
         self.shared_executor = shared_executor
         self.gis_join_counts = gis_join_counts  # { gis_join -> count }
-        info(f"Validator::__init__(): request.model_category: {ModelCategory.Name(request.model_category)}")
-        if request.model_category == "REGRESSION":
+        model_category_name = ModelCategory.Name(request.model_category)
+        info(f"Validator::__init__(): request.model_category: {model_category_name}")
+        if str(model_category_name) == "REGRESSION":
             self.validate_model_function = validate_regression_model
-        elif request.model_category == "CLASSIFICATION":
+        elif str(model_category_name) == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
+        else:
+            error(f"Unsupported model category: {model_category_name}")
         self.hostname = socket.gethostname()
 
     def get_model_path(self):

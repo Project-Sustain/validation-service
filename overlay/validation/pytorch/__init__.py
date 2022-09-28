@@ -9,13 +9,6 @@ class PyTorchValidator(Validator):
 
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
-        info(f"PyTorchValidator::__init__(): model_category: {ModelCategory.Name(request.model_category)}")
-        if request.model_category == "REGRESSION":
-            self.validate_model_function = validate_regression_model
-        elif request.model_category == "CLASSIFICATION":
-            self.validate_model_function = validate_classification_model
-        else:
-            error(f"Unsupported model category: {ModelCategory.Name(request.model_category)}")
 
 
 def validate_classification_model(
@@ -58,7 +51,7 @@ def validate_regression_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, float, float, int,  bool, str, float):
+        verbose: bool = True) -> (str, int, float, float, int, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
 
     import torch

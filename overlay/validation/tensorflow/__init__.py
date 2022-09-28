@@ -12,14 +12,6 @@ class TensorflowValidator(Validator):
 
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
-        model_category_name = ModelCategory.Name(request.model_category)
-        info(f"TensorflowValidator::__init__(): model_category: {model_category_name}")
-        if str(model_category_name) == "REGRESSION":
-            self.validate_model_function = validate_regression_model
-        elif str(model_category_name) == "CLASSIFICATION":
-            self.validate_model_function = validate_classification_model
-        else:
-            error(f"Unsupported model category: {model_category_name}")
 
 
 def validate_classification_model(
