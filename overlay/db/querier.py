@@ -6,7 +6,7 @@ from logging import info
 from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 from overlay.db import locality
-from overlay.constants import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, DB_AUTH_SOURCE
+from overlay.constants import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
 
 
 class Querier:
@@ -21,7 +21,7 @@ class Querier:
         self.mongo_port = mongo_port
         self.mongo_host = mongo_host
         # authorization --> don't commit to this branch
-        
+
         info("inside querier")
         self.mongo_uri = f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@{mongo_host}:{mongo_port}"
 
@@ -34,16 +34,9 @@ class Querier:
         self.read_preference = read_preference
         self.read_concern = read_concern
         if mongo_port == 27018:
-            self.db_connection = pymongo.MongoClient(self.mongo_uri,
-                                                     readPreference=self.read_preference,
-                                                     username=DB_USERNAME,
-                                                     password=DB_PASSWORD,
-                                                     authSource=DB_AUTH_SOURCE)
+            self.db_connection = pymongo.MongoClient(self.mongo_uri, readPreference=self.read_preference)
         else:
-            self.db_connection = pymongo.MongoClient(self.mongo_uri,
-                                                     username=DB_USERNAME,
-                                                     password=DB_PASSWORD,
-                                                     authSource=DB_AUTH_SOURCE)
+            self.db_connection = pymongo.MongoClient(self.mongo_uri)
         self.db = self.db_connection[self.db_name]
 
         # Executes a spatial query on a MongoDB collection, projecting it to return only the features and label values.
