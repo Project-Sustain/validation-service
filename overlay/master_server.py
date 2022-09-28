@@ -93,10 +93,10 @@ def launch_worker_jobs(request: ValidationJobRequest, job: JobMetadata) -> Itera
     # all of these will need to yield the responses back
     info(f"Master::launch_worker_jobs(): master_job_mode: {JobMode.Name(request.master_job_mode)}")
     if request.master_job_mode == JobMode.MULTITHREADED:
-        info("Launching jobs in multi-threaded mode")
+        info("Master: Launching jobs in multi-threaded mode")
         return launch_worker_jobs_multithreaded(job, request)
     else:
-        info("Launching jobs in synchronous mode")
+        info("Master: Launching jobs in synchronous mode")
         return launch_worker_jobs_synchronously(job, request)
 
 
@@ -107,7 +107,7 @@ def launch_worker_jobs_synchronously(job: JobMetadata, request: ValidationJobReq
     # Iterate over all the worker jobs created for this job and launch them serially
     for worker_hostname, worker_job in job.worker_jobs.items():
         if len(worker_job.gis_joins) > 0:
-            info("Launching run_worker_job()...")
+            info("Master: Launching run_worker_job()...")
             worker = worker_job.worker
             with grpc.insecure_channel(f"{worker.hostname}:{worker.port}") as channel:
                 stub = validation_pb2_grpc.WorkerStub(channel)
@@ -300,7 +300,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         job_id: str = generate_job_id()  # Random UUID for the job
         job: JobMetadata = JobMetadata(job_id, [allocation.gis_join for allocation in spatial_allocations])
-        info(f"Created job id {job_id}")
+        info(f"Master: Created job id {job_id}")
 
         # Find and select workers with GISJOINs local to them
         for spatial_allocation in spatial_allocations:
@@ -308,7 +308,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             shard_hosting_gis_join: ShardMetadata = self.gis_join_locations[gis_join]
             worker: WorkerMetadata = self.choose_worker_from_shard(shard_hosting_gis_join, job_id)
             if worker is None:
-                error(f"Unable to find registered worker for GISJOIN {gis_join}")
+                error(f"Master: Unable to find registered worker for GISJOIN {gis_join}")
                 continue
 
             # Found a registered worker for this GISJOIN, get or create a job for it, and update jobs map
@@ -354,7 +354,8 @@ class Master(validation_pb2_grpc.MasterServicer):
         variance_budget: IncrementalVarianceBudget = request.validation_budget.variance_budget
         total_budget: int = variance_budget.total_budget
         initial_allocation: int = variance_budget.initial_allocation
-        info(f"Establishing initial allocation of {initial_allocation} for {len(self.gis_join_locations)} GISJOINs")
+        info(f"Master: Establishing initial allocation of {initial_allocation} for {len(self.gis_join_locations)} "
+             f"GISJOINs")
         spatial_allocations, ok, err_msg = self.get_request_allocations(
             request, initial_allocation, 0.0
         )
@@ -382,19 +383,19 @@ class Master(validation_pb2_grpc.MasterServicer):
                 sum_of_all_variances += metric.variance
 
         budget_left: int = total_budget - budget_used
-        info(f"This leaves us with a leftover budget of {total_budget} - {budget_used} = {budget_left}")
+        info(f"Master: This leaves us with a leftover budget of {total_budget} - {budget_used} = {budget_left}")
 
         # Calculate mean of all variances
         mean_of_all_variances = sum_of_all_variances / len(all_gis_join_variances)
-        info(f"Mean of all variances: {mean_of_all_variances}")
+        info(f"Master: Mean of all variances: {mean_of_all_variances}")
 
         # Calculate standard deviation of all variances
         variances_numpy = np.array(all_gis_join_variances)
         std_dev_all_variances = variances_numpy.std()
-        info(f"Standard deviation of all variances: {std_dev_all_variances}")
+        info(f"Master: Standard deviation of all variances: {std_dev_all_variances}")
         sorted_variances = np.sort(variances_numpy, axis=-1)[::-1]
         std_devs_away = (sorted_variances - mean_of_all_variances) / std_dev_all_variances
-        info(f"Std devs away: {std_devs_away}")
+        info(f"Master: Std devs away: {std_devs_away}")
 
         save_intermediate_response_data(total_budget, initial_allocation, all_gis_join_metrics)
         save_numpy_array(std_devs_away)
@@ -474,7 +475,8 @@ class Master(validation_pb2_grpc.MasterServicer):
                 if static_budget.total_limit > requested_gis_join_count:
                     strata_limit = static_budget.total_limit // requested_gis_join_count
                 else:
-                    info("Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
+                    info(
+                        "Master: Specified a total limit less than the number of GISJOINs. Defaulting to 1 per GISJOIN")
                     strata_limit = 1
 
         spatial_allocations, ok, err_msg = self.get_request_allocations(request, strata_limit, sample_rate)
@@ -501,7 +503,7 @@ class Master(validation_pb2_grpc.MasterServicer):
     # Registers a Worker, using the reported GisJoinMetadata objects to populate the known GISJOINs and counts
     # for the ShardMetadata objects.
     def RegisterWorker(self, request: WorkerRegistrationRequest, context) -> WorkerRegistrationResponse:
-        info(f"Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
+        info(f"Master: Received WorkerRegistrationRequest: hostname={request.hostname}, port={request.port}")
 
         # Create a ShardMetadata for the registered worker if its shard is not already known
         if request.rs_name not in self.shard_metadata:
@@ -527,28 +529,28 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Create a WorkerMetadata object for tracking
         shard: ShardMetadata = self.shard_metadata[request.rs_name]
         worker: WorkerMetadata = WorkerMetadata(request.hostname, request.port, shard)
-        info(f"Successfully added Worker: {worker}, responsible for {len(shard.gis_join_metadata)} GISJOINs")
+        info(f"Master: Successfully added Worker: {worker}, responsible for {len(shard.gis_join_metadata)} GISJOINs")
         self.tracked_workers[request.hostname] = worker
         return WorkerRegistrationResponse(success=True)
 
     def DeregisterWorker(self, request, context) -> WorkerRegistrationResponse:
-        info(f"Received Worker(De)RegistrationRequest: hostname={request.hostname}, port={request.port}")
+        info(f"Master: Received Worker(De)RegistrationRequest: hostname={request.hostname}, port={request.port}")
 
         if self.is_worker_registered(request.hostname):
-            info(f"Worker {request.hostname} is registered. Removing...")
+            info(f"Master: Worker {request.hostname} is registered. Removing...")
             del self.tracked_workers[request.hostname]
-            info(f"Worker {request.hostname} is now deregistered and removed.")
+            info(f"Master: Worker {request.hostname} is now deregistered and removed.")
             return WorkerRegistrationResponse(success=True)
         else:
-            error(f"Worker {request.hostname} is not registered, can't remove")
+            error(f"Master: Worker {request.hostname} is not registered, can't remove")
             return WorkerRegistrationResponse(success=False)
 
     def SubmitValidationJob(self, request: ValidationJobRequest, context) -> Iterator[ResponseMetric]:
 
         if request.spatial_coverage == SpatialCoverage.ALL:
-            info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
+            info(f"Master: SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
         else:
-            info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
+            info(f"Master: SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
 
         # Process the job with either a variance budget or static/default budget
         if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
@@ -596,9 +598,9 @@ class Master(validation_pb2_grpc.MasterServicer):
         profiler.start()
 
         if request.spatial_coverage == SpatialCoverage.ALL:
-            info(f"SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
+            info(f"Master: SubmitValidationJob request for ALL {len(self.gis_join_locations)} GISJOINs")
         else:
-            info(f"SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
+            info(f"Master: SubmitValidationJob request for {len(request.gis_joins)} GISJOINs")
 
         # Process the job with either a variance budget or static/default budget
         if request.validation_budget.budget_type == BudgetType.INCREMENTAL_VARIANCE_BUDGET:
