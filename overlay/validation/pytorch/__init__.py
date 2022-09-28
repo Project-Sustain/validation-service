@@ -1,6 +1,6 @@
 from logging import info, warning, error
 
-from overlay.validation_pb2 import ValidationJobRequest
+from overlay.validation_pb2 import ValidationJobRequest, ModelCategory
 from overlay.validation import Validator
 from overlay.profiler import Timer
 
@@ -9,10 +9,13 @@ class PyTorchValidator(Validator):
 
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
+        info(f"PyTorchValidator::__init__(): model_category: {ModelCategory.Name(request.model_category)}")
         if request.model_category == "REGRESSION":
             self.validate_model_function = validate_regression_model
         elif request.model_category == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
+        else:
+            error(f"Unsupported model category: {ModelCategory.Name(request.model_category)}")
 
 
 def validate_classification_model(

@@ -14,6 +14,8 @@ class ScikitLearnValidator(Validator):
             self.validate_model_function = validate_regression_model
         elif request.model_category == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
+        else:
+            error(f"Unsupported model category: {ModelCategory.Name(request.model_category)}")
 
 
 def validate_classification_model(
