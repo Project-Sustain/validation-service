@@ -8,7 +8,7 @@ import time
 from pymongo import MongoClient
 from sklearn.preprocessing import MinMaxScaler
 from math import sqrt
-from overlay.constants import username, password
+from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 class Timer:
 

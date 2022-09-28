@@ -10,7 +10,7 @@ import pymongo
 from pymongo import MongoClient
 from sklearn.preprocessing import MinMaxScaler
 from math import sqrt
-from overlay.constants import username, password
+from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 lattice_157_gis_joins = [
     "G0100630", "G0100650", "G0100670", "G0100690", "G0100710", "G0100730", "G0100750", "G0100770", "G0100790",

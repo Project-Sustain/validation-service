@@ -8,13 +8,13 @@ import torch.optim as optim
 import numpy as np
 from sklearn import datasets
 import os
-from overlay.constants import username, password
+from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 
 # --- Global Variables ---
 
 # MongoDB Stuff
-URI = f"mongodb://{username}:{password}@lattice-100.cs.colostate.edu:27018/"
+URI = f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@lattice-100.cs.colostate.edu:27018/"
 DATABASE = "sustaindb"
 COLLECTION = "noaa_nam"
 

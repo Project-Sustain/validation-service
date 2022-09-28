@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from sklearn.preprocessing import MinMaxScaler
 from math import sqrt
 from torch.utils.data import Dataset, DataLoader
-from overlay.constants import username, password
+from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 lattice_157_gis_joins = [
     "G0100630",
@@ -502,7 +502,7 @@ def run(gis_join):
     profiler.reset()
 
     profiler.start()
-    client = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
+    client = MongoClient(f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@localhost:27017")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     query = {"GISJOIN": gis_join}

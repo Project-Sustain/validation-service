@@ -3,7 +3,7 @@ import os
 import pymongo
 from pymongo import cursor, ReadPreference
 from logging import info
-from overlay.constants import username, password
+from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 from overlay.db import locality
 from overlay.constants import DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD, DB_AUTH_SOURCE
@@ -23,7 +23,7 @@ class Querier:
         # authorization --> don't commit to this branch
         
         info("inside querier")
-        self.mongo_uri = f"mongodb://{username}:{password}@{mongo_host}:{mongo_port}"
+        self.mongo_uri = f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@{mongo_host}:{mongo_port}"
 
         # end authorization
 

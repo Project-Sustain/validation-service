@@ -13,7 +13,7 @@ from logging import info
 from pymongo import MongoClient
 from bson.json_util import dumps
 from sklearn.preprocessing import MinMaxScaler
-from overlay.constants import username, password
+from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 # MongoDB Stuff
 URI = "mongodb://lattice-150.cs.colostate.edu:27018/"
