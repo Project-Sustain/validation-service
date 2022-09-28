@@ -138,7 +138,7 @@ def validate_classification_model(
 
     # value counts
     # TODO: check conversion format of y_true
-    info(f"Value counts: {y_true.value_counts()}")
+    # info(f"Value counts: {y_true.value_counts()}")
 
     # percentage of ones
     info(f"Percentage of 1s: {y_true.mean()}")
