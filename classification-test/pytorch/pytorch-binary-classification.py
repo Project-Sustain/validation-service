@@ -23,12 +23,12 @@ print(X_test.shape)
 
 
 class BinaryClassification(torch.nn.Module):
-    def __init__(self, input_dimension):
+    def __init__(self, input_dimension_):
         super().__init__()
-        self.linear = torch.nn.Linear(input_dimension, 1)
+        self.linear = torch.nn.Linear(input_dimension_, 1)
 
-    def forward(self, input_dimension):
-        return self.linear(input_dimension)
+    def forward(self, input_dimension_):
+        return self.linear(input_dimension_)
 
 
 _, input_dimension = X_train.shape

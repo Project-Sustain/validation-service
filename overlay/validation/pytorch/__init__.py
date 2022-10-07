@@ -37,6 +37,118 @@ def validate_classification_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, int, float, float, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
+
+    import torch
+    import os
+    import json
+    import pandas as pd
+    import numpy as np
+    import gc
+    from sklearn.preprocessing import MinMaxScaler
+    from math import sqrt
+    from torch.utils.data import Dataset, DataLoader
+
+    from overlay.db.querier import Querier
+
+    ok = True
+    error_msg = ""
+    iteration = 0
+
+    profiler: Timer = Timer()
+    profiler.start()
+
+    # Load TorchScript PyTorch model from disk (OS should cache in memory for future loads)
+    model = torch.jit.load(model_path)
+    model.eval()
+
+    # Create or load persisted model metrics
+    model_path_parts = model_path.split("/")[:-1]
+    model_dir = "/".join(model_path_parts)
+    model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
+    if os.path.exists(model_metrics_path):
+        info(f"P{model_metrics_path} exists, loading")
+        with open(model_metrics_path, "r") as f:
+            current_model_metrics = json.load(f)
+    else:
+        info(f"P{model_metrics_path} does not exist, initializing for first time")
+        # First time calculating variance/errors for model
+        current_model_metrics = {
+            "gis_join": gis_join,
+            "allocation": 0,
+            "variance": 0.0,
+            "m": 0.0,
+            "s": 0.0,
+            "loss": 0.0
+        }
+
+    if verbose:
+        model_description = f'{model}\nParameters:\n'
+        for param in model.parameters():
+            model_description = f'{param}\n'
+
+        info(f"Model: {model_description}")
+        info('Logging model.code...')
+        info(model.code)
+
+    querier = Querier(
+        mongo_host=mongo_host,
+        mongo_port=mongo_port,
+        db_name=database,
+        read_preference=read_preference,
+        read_concern=read_concern
+    )
+
+    documents = querier.spatial_query(
+        collection_name=collection,
+        gis_join=gis_join,
+        features=feature_fields,
+        label=label_field,
+        limit=limit,
+        sample_rate=sample_rate
+    )
+
+    # Load MongoDB Documents into Pandas DataFrame
+    features_df = pd.DataFrame(list(documents))
+    querier.close()
+
+    allocation: int = len(features_df.index)
+    info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+
+    if allocation == 0:
+        error_msg = f"No records found for GISJOIN {gis_join}"
+        error(error_msg)
+        return gis_join, 0, -1.0, -1.0, iteration, not ok, error_msg, 0.0
+
+    # Normalize features, if requested
+    if normalize_inputs:
+        scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        features_df = pd.DataFrame(scaled, columns=features_df.columns)
+        info(f"Normalized Pandas DataFrame")
+
+    # Pop the label column off into its own DataFrame
+    label_df = features_df.pop(label_field)
+
+    if verbose:
+        info(f"label_df: {label_df}")
+
+    # Create Tensors from Pandas input/output dataframes
+    inputs_tensor = torch.tensor(features_df.values, dtype=torch.float32, requires_grad=False)
+    y_true_tensor = torch.tensor(label_df.values, dtype=torch.float32, requires_grad=False)
+    y_true_tensor = y_true_tensor.view(y_true_tensor.shape[0], 1).squeeze(-1)
+
+    n_samples, n_features = inputs_tensor.shape
+    info(f'n_samples: {n_samples}, n_features: {n_features}')
+
+    # Get model predictions
+    with torch.no_grad():
+        # criterion = torch.nn.MSELoss()
+        info("PyTorchValidator::validate_classification_model(): creating y_predicted_tensor")
+        y_predicted_tensor = model(inputs_tensor)
+        info(f"y_predicted: {y_predicted_tensor}")
+        info(f"y_true_tensor: {y_true_tensor}")
+        y_predicted_numpy = y_predicted_tensor.numpy()
+        y_true_numpy = y_true_tensor.numpy()
+
     raise NotImplementedError("validate_classification_model() is not implemented for class PyTorchValidator.")
 
 
