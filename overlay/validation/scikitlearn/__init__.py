@@ -161,7 +161,9 @@ def validate_classification_model(
 
     info(f"False positivity rate: {TN / (TN + FP)}")
     precision = metrics.precision_score(y_true, y_pred_class)
+    recall = metrics.recall_score(y_true, y_pred_class)
     info(f"Precision: {precision}")
+    info(f"Recall: {recall}")
 
     # ROC Curves and Area Under the Curve (AUC)
     y_pred_prob = model.predict_proba(features_df)[:, 1]

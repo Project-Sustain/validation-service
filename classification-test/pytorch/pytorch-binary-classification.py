@@ -4,6 +4,8 @@ import torch
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+from torchmetrics import ROC
+from sklearn import metrics
 
 data = load_breast_cancer()
 X, Y = data.data, data.target
@@ -82,7 +84,7 @@ train_losses, test_losses = full_gd(model, criterion, optimizer, X_train, y_trai
 plt.plot(train_losses, label='train loss')
 plt.plot(test_losses, label='test loss')
 plt.legend()
-plt.show()
+# plt.show()
 
 """evaluate model"""
 
@@ -93,12 +95,28 @@ with torch.no_grad():
     train_acc = np.mean(y_train.numpy() == p_train)
 
     p_test = model(X_test)
+    p_probs = torch.nn.functional.softmax(p_test, dim=1)
     p_test = (p_test.numpy() > 0)
 
     test_acc = np.mean(y_test.numpy() == p_test)
 
-print(train_acc)
-print(test_acc)
+print(f'train_acc: {train_acc}')
+print(f'test_acc: {test_acc}')
+print()
+print(f'type(p_test): {type(p_test)}')
+print(f'type(y_test): {type(y_test)}')
+
+print(f'p_probs: {p_probs}')
+# p_test_tensor = torch.from_numpy(p_test)
+y_test_numpy = y_test.numpy()
+
+# Calculate ROC
+# roc = ROC(pos_label=1)
+
+# fpr, tpr, thresholds = roc(p_test_tensor, y_test)
+# print(f'fpr: {fpr}')
+# print(f'tpr: {tpr}')
+# print(f'thresholds: {thresholds}')
 
 # Save model
 model_scripted = torch.jit.script(model)
