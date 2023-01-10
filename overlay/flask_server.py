@@ -10,7 +10,6 @@ from http import HTTPStatus
 from pprint import pprint
 
 from loguru import logger
-from logtail import LogtailHandler
 
 from google.protobuf.json_format import MessageToJson, Parse, MessageToDict
 from werkzeug.datastructures import FileStorage
@@ -25,10 +24,6 @@ ALLOWED_EXTENSIONS = {"zip", "pt", "pkl", "h5"}
 
 app = Flask(__name__)
 app.config["UPLOAD_DIR"] = UPLOAD_DIR
-
-# Logtail - Validation Service - Flask Server
-logtail_handler = LogtailHandler(source_token="c8MjVJuDeG5TCkLtRiCMx8ev")
-logger.add(logtail_handler)
 
 
 # Main entrypoint

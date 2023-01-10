@@ -11,7 +11,6 @@ from queue import Queue
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from loguru import logger
-from logtail import LogtailHandler
 
 from typing import Iterator
 
@@ -24,10 +23,6 @@ from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistration
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
     SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric, Metric, ResponseMetric
 
-
-# Logtail - Validation Service - Master Server
-logtail_handler = LogtailHandler(source_token="YN2gJuRDYKmTHqK2ZL3zPVe1")
-logger.add(logtail_handler)
 
 class JobMetadata:
 
@@ -361,8 +356,9 @@ class Master(validation_pb2_grpc.MasterServicer):
         variance_budget: IncrementalVarianceBudget = request.validation_budget.variance_budget
         total_budget: int = variance_budget.total_budget
         initial_allocation: int = variance_budget.initial_allocation
-        logger.info(f"Master: Establishing initial allocation of {initial_allocation} for {len(self.gis_join_locations)} "
-             f"GISJOINs")
+        logger.info(
+            f"Master: Establishing initial allocation of {initial_allocation} for {len(self.gis_join_locations)} "
+            f"GISJOINs")
         spatial_allocations, ok, err_msg = self.get_request_allocations(
             request, initial_allocation, 0.0
         )
@@ -536,7 +532,8 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Create a WorkerMetadata object for tracking
         shard: ShardMetadata = self.shard_metadata[request.rs_name]
         worker: WorkerMetadata = WorkerMetadata(request.hostname, request.port, shard)
-        logger.info(f"Master: Successfully added Worker: {worker}, responsible for {len(shard.gis_join_metadata)} GISJOINs")
+        logger.info(
+            f"Master: Successfully added Worker: {worker}, responsible for {len(shard.gis_join_metadata)} GISJOINs")
         self.tracked_workers[request.hostname] = worker
         return WorkerRegistrationResponse(success=True)
 

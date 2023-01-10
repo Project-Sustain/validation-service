@@ -1,5 +1,4 @@
 from loguru import logger
-from logtail import LogtailHandler
 from typing import Iterator
 
 import grpc
@@ -28,10 +27,6 @@ from overlay.structures import GisTree
 # Loky shared, reusable ProcessPoolExecutor
 shared_executor = get_reusable_executor(max_workers=8, timeout=10)
 
-
-# Logtail - Validation Service - Worker Server
-logtail_handler = LogtailHandler(source_token="zTHVkAxMQDdnyVWcKyrhc34H")
-logger.add(logtail_handler)
 
 class Worker(validation_pb2_grpc.WorkerServicer):
 

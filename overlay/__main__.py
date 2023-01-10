@@ -88,6 +88,6 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname) - 4s %(message)s',
                         level=logging.INFO, datefmt='%d-%b-%y %H:%M:%S')
 
-    # logtail_handler = LogtailHandler(source_token="XNNnZVaULWn2HqDDjekp85Dq")
-    # logger.add(logtail_handler)
+    logtail_handler = LogtailHandler(source_token="XNNnZVaULWn2HqDDjekp85Dq")
+    logger.add(logtail_handler)
     main()
