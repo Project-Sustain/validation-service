@@ -2,7 +2,7 @@ import os
 import socket
 from typing import Iterator
 import psutil
-from logging import info, error
+from loguru import logger
 from concurrent.futures import as_completed, ThreadPoolExecutor
 
 from overlay.validation_pb2 import ValidationMetric, ValidationJobRequest, JobMode, LossFunction, Metric, ModelCategory
@@ -17,7 +17,7 @@ class Validator:
         self.shared_executor = shared_executor
         self.gis_join_counts = gis_join_counts  # { gis_join -> count }
         model_category_name = ModelCategory.Name(request.model_category)
-        info(f"Validator::__init__(): request.model_category: {model_category_name}")
+        logger.info(f"Validator::__init__(): request.model_category: {model_category_name}")
         self.hostname = socket.gethostname()
 
     def get_model_path(self):
@@ -29,7 +29,7 @@ class Validator:
     def validate_gis_joins(self, verbose: bool = True) -> \
             Iterator[Metric]:  # This needs to be a generator, so it needs to yield the futures as they come in
 
-        info(f"Validator::validate_gis_joins(): Launching validation job for {len(self.request.gis_joins)} GISJOINs")
+        logger.info(f"Validator::validate_gis_joins(): Launching validation job for {len(self.request.gis_joins)} GISJOINs")
 
         # Convert protobuf "repeated" field type to a python list
         feature_fields = []
@@ -92,13 +92,13 @@ class Validator:
             # Create a child process object or thread object for each GISJOIN validation job
             executors_list: list = []
 
-            info(f"Validator::validate_gis_joins(): JobMode: {JobMode.Name(self.request.worker_job_mode)}")
+            logger.info(f"Validator::validate_gis_joins(): JobMode: {JobMode.Name(self.request.worker_job_mode)}")
             if self.request.worker_job_mode == JobMode.MULTITHREADED:
                 with ThreadPoolExecutor(max_workers=10) as executor:
                     for spatial_allocation in self.request.allocations:
                         gis_join: str = spatial_allocation.gis_join
                         gis_join_count: int = self.gis_join_counts[gis_join]
-                        info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
+                        logger.info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
                         executors_list.append(
                             executor.submit(
                                 self.validate_model_function,
@@ -124,7 +124,7 @@ class Validator:
                 for spatial_allocation in self.request.allocations:
                     gis_join: str = spatial_allocation.gis_join
                     gis_join_count: int = self.gis_join_counts[gis_join]
-                    info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
+                    logger.info(f"Launching validation job for GISJOIN {spatial_allocation.gis_join}")
                     executors_list.append(
                         self.shared_executor.submit(
                             self.validate_model_function,
@@ -159,7 +159,7 @@ class Validator:
                 #     ok=ok,
                 #     error_msg=error_msg
                 # ))
-                info(f"Yielding metric for gis_join={gis_join}")
+                logger.info(f"Yielding metric for gis_join={gis_join}")
                 yield Metric(
                     gis_join=gis_join,
                     allocation=allocation,
@@ -176,10 +176,10 @@ class Validator:
             # parent_pid = os.getpid()
             # parent = psutil.Process(parent_pid)
             # for child in parent.children(recursive=True):
-            #     info(f"Terminating Child Process: {child}")
+            #     logger.info(f"Terminating Child Process: {child}")
             #     child.kill()
 
-        # info(f"metrics: {len(metrics)} responses")
+        # logger.info(f"metrics: {len(metrics)} responses")
         # return metrics
         # // needs to be yield instead of return
 

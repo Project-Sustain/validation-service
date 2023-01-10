@@ -19,3 +19,4 @@ loky
 welford
 jsonschema
 psutil
+loguru

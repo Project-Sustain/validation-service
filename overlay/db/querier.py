@@ -2,7 +2,7 @@ import urllib
 import os
 import pymongo
 from pymongo import cursor, ReadPreference
-from logging import info
+from loguru import logger
 from overlay.constants import DB_USERNAME, DB_PASSWORD
 
 from overlay.db import locality
@@ -22,7 +22,7 @@ class Querier:
         self.mongo_host = mongo_host
         # authorization --> don't commit to this branch
 
-        info("inside querier")
+        logger.info("inside querier")
         self.mongo_uri = f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@{mongo_host}:{mongo_port}"
 
         # end authorization
@@ -61,7 +61,7 @@ class Querier:
         query = {"GISJOIN": gis_join}
 
         if sample_rate > 0.0:
-            info(f"Sampling GISJOIN {gis_join} documents with a rate of {sample_rate}")
+            logger.info(f"Sampling GISJOIN {gis_join} documents with a rate of {sample_rate}")
             query["$sampleRate"] = sample_rate
 
         # Build projection
@@ -71,7 +71,7 @@ class Querier:
         projection[label] = 1
 
         if limit > 0:
-            info(f"Limiting GISJOIN {gis_join} query to {limit} records")
+            logger.info(f"Limiting GISJOIN {gis_join} query to {limit} records")
             sample = {"size": limit}
             return collection.aggregate(
                 [

@@ -1,4 +1,4 @@
-from logging import info, error
+from loguru import logger
 from typing import Iterator
 
 import grpc
@@ -40,7 +40,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.saved_models_path: str = MODELS_DIR
         self.is_registered = False
         self.gis_tree: GisTree = GisTree()
-        info("Made it into worker_server, just above discover_gis_joins()")
+        logger.info("Made it into worker_server, just above discover_gis_joins()")
         self.local_gis_joins: dict = discover_gis_joins()  # { gis_join -> count }
         for gis_join, count in self.local_gis_joins.items():
             self.gis_tree.insert_county(gis_join, {"count": count})
@@ -71,40 +71,40 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
             if registration_response.success:
                 self.is_registered = True
-                info(f"Successfully registered worker {self.hostname}:{self.port}")
+                logger.info(f"Successfully registered worker {self.hostname}:{self.port}")
             else:
-                error(f"Failed to register worker {self.hostname}:{self.port}: {registration_response}")
+                logger.error(f"Failed to register worker {self.hostname}:{self.port}: {registration_response}")
 
     def __repr__(self) -> str:
         return f"Worker: hostname={self.hostname}, port={self.port}, jobs={self.jobs}"
 
     def BeginValidationJob(self, request: ValidationJobRequest, context) -> Iterator[Metric]:
 
-        # info(f"Worker::BeginValidationJob(): Received Request: {request}")
-        info(f"Worker::BeginValidationJob(): Received Request:")
-        info(f"model_file.type: {ModelFileType.Name(request.model_file.type)}")
-        info(f"model_file.md5_hash: {request.model_file.md5_hash}")
-        info(f"model_file.data.length: {len(request.model_file.data)}")
-        info(f"mongo_host: {request.mongo_host}")
-        info(f"mongo_port: {request.mongo_port}")
-        info(f"read_config: {request.read_config}")
-        info(f"database: {request.database}")
-        info(f"collection: {request.collection}")
-        info(f"normalize_inputs: {request.normalize_inputs}")
-        info(f"label_field: {request.label_field}")
-        info(f"feature_fields: {request.feature_fields}")
-        info(f"model_framework: {ModelFramework.Name(request.model_framework)}")
-        info(f"model_category: {ModelCategory.Name(request.model_category)}")
-        info(f"loss_function: {LossFunction.Name(request.loss_function)}")
-        info(f"spatial_coverage: {SpatialCoverage.Name(request.spatial_coverage)}")
-        info(f"allocations: {request.allocations}")
-        info("==========================================================")
+        # logger.info(f"Worker::BeginValidationJob(): Received Request: {request}")
+        logger.info(f"Worker::BeginValidationJob(): Received Request:")
+        logger.info(f"model_file.type: {ModelFileType.Name(request.model_file.type)}")
+        logger.info(f"model_file.md5_hash: {request.model_file.md5_hash}")
+        logger.info(f"model_file.data.length: {len(request.model_file.data)}")
+        logger.info(f"mongo_host: {request.mongo_host}")
+        logger.info(f"mongo_port: {request.mongo_port}")
+        logger.info(f"read_config: {request.read_config}")
+        logger.info(f"database: {request.database}")
+        logger.info(f"collection: {request.collection}")
+        logger.info(f"normalize_inputs: {request.normalize_inputs}")
+        logger.info(f"label_field: {request.label_field}")
+        logger.info(f"feature_fields: {request.feature_fields}")
+        logger.info(f"model_framework: {ModelFramework.Name(request.model_framework)}")
+        logger.info(f"model_category: {ModelCategory.Name(request.model_category)}")
+        logger.info(f"loss_function: {LossFunction.Name(request.loss_function)}")
+        logger.info(f"spatial_coverage: {SpatialCoverage.Name(request.spatial_coverage)}")
+        logger.info(f"allocations: {request.allocations}")
+        logger.info("==========================================================")
 
         # Save model
         if not self.save_model(request):
             err_msg = f"Unable to save {ModelFramework.Name(request.model_framework)} model file with type " \
                       f"{ModelFileType.Name(request.model_file.type)}!"
-            error(err_msg)
+            logger.error(err_msg)
             return
 
         # Select model framework, then launch jobs
@@ -112,26 +112,26 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
             tf_validator: TensorflowValidator = TensorflowValidator(request, shared_executor, self.local_gis_joins)
             for metric in tf_validator.validate_gis_joins():
-                info(f"Worker[Tensorflow]::BeingValidationJob(): Yielding metric from: {metric}")
+                logger.info(f"Worker[Tensorflow]::BeingValidationJob(): Yielding metric from: {metric}")
                 yield metric
 
         elif request.model_framework == ModelFramework.SCIKIT_LEARN:
 
             skl_validator: ScikitLearnValidator = ScikitLearnValidator(request, shared_executor, self.local_gis_joins)
             for metric in skl_validator.validate_gis_joins():
-                info(f"Worker[ScikitLearn]::BeginValidationJob():: Yielding metric from: {metric}")
+                logger.info(f"Worker[ScikitLearn]::BeginValidationJob():: Yielding metric from: {metric}")
                 yield metric
 
         elif request.model_framework == ModelFramework.PYTORCH:
 
             pytorch_validator: PyTorchValidator = PyTorchValidator(request, shared_executor, self.local_gis_joins)
             for metric in pytorch_validator.validate_gis_joins():
-                info(f"Worker[PyTorch]::BeginValidationJob():: Yielding metric from: {metric}")
+                logger.info(f"Worker[PyTorch]::BeginValidationJob():: Yielding metric from: {metric}")
                 yield metric
 
         else:
             err_msg = f"Unsupported model framework type {ModelFramework.Name(request.model_framework)}"
-            error(err_msg)
+            logger.error(err_msg)
             return
         return
 
@@ -141,7 +141,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         # Make the directory
         model_dir = f"{self.saved_models_path}/{request.id}"
         os.mkdir(model_dir)
-        info(f"Worker::save_model(): Created directory {model_dir}")
+        logger.info(f"Worker::save_model(): Created directory {model_dir}")
 
         file_extension = "pkl"  # Default for Scikit-Learn pickle type
 
@@ -179,7 +179,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         with open(model_file_path, "wb") as binary_file:
             binary_file.write(request.model_file.data)
 
-        info(f"Worker::save_model(): Finished saving model to {model_file_path}")
+        logger.info(f"Worker::save_model(): Finished saving model to {model_file_path}")
         return ok
 
     def deregister(self):
@@ -192,12 +192,12 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                 )
 
                 if registration_response.success:
-                    info(f"Successfully deregistered worker: {registration_response}")
+                    logger.info(f"Successfully deregistered worker: {registration_response}")
                     self.is_registered = False
                 else:
-                    error(f"Failed to deregister worker: {registration_response}")
+                    logger.error(f"Failed to deregister worker: {registration_response}")
         else:
-            info("We are not registered, no need to deregister")
+            logger.info("We are not registered, no need to deregister")
 
 
 def shutdown_gracefully(worker: Worker) -> None:
@@ -213,12 +213,12 @@ def make_models_dir_if_not_exists() -> None:
 
 def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> None:
     if MODELS_DIR == "":
-        error("MODELS_DIR environment variable must be set!")
+        logger.error("MODELS_DIR environment variable must be set!")
         exit(1)
 
     make_models_dir_if_not_exists()
 
-    info(f"Environment: DB_HOST={DB_HOST}, DB_PORT={DB_PORT}, DB_NAME={DB_NAME}, MODELS_DIR={MODELS_DIR}")
+    logger.info(f"Environment: DB_HOST={DB_HOST}, DB_PORT={DB_PORT}, DB_NAME={DB_NAME}, MODELS_DIR={MODELS_DIR}")
 
     # Initialize server and worker
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
@@ -234,7 +234,7 @@ def run(master_hostname="localhost", master_port=50051, worker_port=50055) -> No
     hostname = socket.gethostname()
 
     # Start the server
-    info(f"Starting worker server on {hostname}:{worker_port}")
+    logger.info(f"Starting worker server on {hostname}:{worker_port}")
     server.add_insecure_port(f"{hostname}:{worker_port}")
     server.start()
     server.wait_for_termination()

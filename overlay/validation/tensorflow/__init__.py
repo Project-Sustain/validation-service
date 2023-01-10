@@ -1,4 +1,4 @@
-from logging import info, error
+from loguru import logger
 
 import os
 from math import sqrt
@@ -13,13 +13,13 @@ class TensorflowValidator(Validator):
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
         model_category_name = ModelCategory.Name(request.model_category)
-        info(f"TensorflowValidator::__init__(): model_category: {model_category_name}")
+        logger.info(f"TensorflowValidator::__init__(): model_category: {model_category_name}")
         if str(model_category_name) == "REGRESSION":
             self.validate_model_function = validate_regression_model
         elif str(model_category_name) == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
         else:
-            error(f"Unsupported model category: {model_category_name}")
+            logger.error(f"Unsupported model category: {model_category_name}")
 
 
 def validate_classification_model(
@@ -51,7 +51,7 @@ def validate_classification_model(
 
     from overlay.db.querier import Querier
 
-    info(f"Starting TensorflowValidator::validate_classification_model()")
+    logger.info(f"Starting TensorflowValidator::validate_classification_model()")
 
     raise NotImplementedError("validate_classification_model() is not implemented for class TensorflowValidator.")
 
@@ -88,7 +88,7 @@ def validate_regression_model(
 
     from overlay.db.querier import Querier
 
-    info(f"Starting TensorflowValidator::validate_regression_model()")
+    logger.info(f"Starting TensorflowValidator::validate_regression_model()")
 
     ok = True
     error_msg = ""
@@ -105,11 +105,11 @@ def validate_regression_model(
     model_dir = "/".join(model_path_parts)
     model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
     if os.path.exists(model_metrics_path):
-        info(f"P{model_metrics_path} exists, loading")
+        logger.info(f"P{model_metrics_path} exists, loading")
         with open(model_metrics_path, "r") as f:
             current_model_metrics = json.load(f)
     else:
-        info(f"P{model_metrics_path} does not exist, initializing for first time")
+        logger.info(f"P{model_metrics_path} does not exist, initializing for first time")
         # First time calculating variance/errors for model
         current_model_metrics = {
             "gis_join": gis_join,
@@ -123,7 +123,7 @@ def validate_regression_model(
     if verbose:
         model.summary()
 
-    info(f"mongo_host={mongo_host}, mongo_port={mongo_port}")
+    logger.info(f"mongo_host={mongo_host}, mongo_port={mongo_port}")
     querier = Querier(
         mongo_host=mongo_host,
         mongo_port=mongo_port,
@@ -146,54 +146,54 @@ def validate_regression_model(
     querier.close()
 
     allocation: int = len(features_df.index)
-    info(f"Loaded Pandas DataFrame from MongoDB of size {allocation}")
+    logger.info(f"Loaded Pandas DataFrame from MongoDB of size {allocation}")
 
     if allocation == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
-        error(error_msg)
+        logger.error(error_msg)
         return gis_join, 0, -1.0, -1.0, iteration, not ok, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
         scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
         features_df = pd.DataFrame(scaled, columns=features_df.columns)
-        info(f"Normalized Pandas DataFrame")
+        logger.info(f"Normalized Pandas DataFrame")
 
     # Pop the label column off into its own DataFrame
     label_df = features_df.pop(label_field)
 
     if verbose:
-        info(f"label_df: {label_df}")
+        logger.info(f"label_df: {label_df}")
 
     # Get predictions
     y_pred = model(features_df.values.astype(np.float32))
 
     if verbose:
-        info(f"y_pred: {y_pred}")
+        logger.info(f"y_pred: {y_pred}")
 
     # Use labels and predictions to evaluate the model
     y_true = np.array(label_df).reshape(-1, 1)
 
     if verbose:
-        info(f"y_true: {y_true}")
+        logger.info(f"y_true: {y_true}")
 
     if loss_function == "MEAN_SQUARED_ERROR":
-        info("MEAN_SQUARED_ERROR...")
+        logger.info("MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
         m = np.mean(squared_residuals, axis=0)[0].item()
         loss = m
         s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0].item()
-        info(f"m = {m}, s = {s}, loss = {loss}")
+        logger.info(f"m = {m}, s = {s}, loss = {loss}")
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
-        info("ROOT_MEAN_SQUARED_ERROR...")
+        logger.info("ROOT_MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
         m = np.mean(squared_residuals, axis=0)[0].item()
         loss = sqrt(m)
         s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])[0].item()
 
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
-        info("MEAN_ABSOLUTE_ERROR...")
+        logger.info("MEAN_ABSOLUTE_ERROR...")
         absolute_residuals = np.abs(y_true - y_pred)
         m = np.mean(absolute_residuals, axis=0)[0].item()
         loss = m
@@ -202,7 +202,7 @@ def validate_regression_model(
     else:
         profiler.stop()
         error_msg = f"Unsupported loss function {loss_function}"
-        error(error_msg)
+        logger.error(error_msg)
         return gis_join, allocation, -1.0, -1.0, iteration, not ok, error_msg, profiler.elapsed
 
     # Merging old metrics in with new metrics using Welford's method (if applicable)
@@ -234,5 +234,5 @@ def validate_regression_model(
 
     profiler.stop()
 
-    info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
+    logger.info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
     return gis_join, allocation, loss, variance, iteration, ok, "", profiler.elapsed

@@ -4,7 +4,7 @@ import os
 import socket
 from pymongo import MongoClient
 from progressbar import ProgressBar, Bar, Percentage, SimpleProgress, Timer
-from logging import info, root
+from loguru import logger
 
 import urllib
 
@@ -24,21 +24,21 @@ def discover_gis_joins() -> dict:
     # Connect to local mongod instance; connecting to mongos instance will find all GISJOINs in entire cluster,
     # rather than just the local shards.
     gis_join_counts: dict = {}  # { gis_join -> count }
-    info("Inside locality.py, just above the call to mongod")
-    info("Inside locality.py, password and username: ", DB_PASSWORD, DB_USERNAME)
+    logger.info("Inside locality.py, just above the call to mongod")
+    logger.info("Inside locality.py, password and username: ", DB_PASSWORD, DB_USERNAME)
 
     # client: MongoClient = MongoClient("mongodb://localhost:27017")
 
 
     client: MongoClient = MongoClient(f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@localhost:27017")
-    info("below error")
+    logger.info("below error")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     distinct_gis_joins: list = coll.distinct("GISJOIN")
     for gis_join in distinct_gis_joins:
         count = coll.count_documents({"GISJOIN": gis_join})
         gis_join_counts[gis_join] = count
-        info(f"gis_join={gis_join}, count={count}")
+        logger.info(f"gis_join={gis_join}, count={count}")
 
     client.close()
     return gis_join_counts
@@ -48,10 +48,10 @@ def discover_gis_joins() -> dict:
 # or discover them via mongo
 def get_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     if gis_join_chunk_locations_file_exists():
-        info(f"Cached GISJOIN chunk locations file exists at {GIS_JOIN_CHUNK_LOCATION_FILE}; loading from file")
+        logger.info(f"Cached GISJOIN chunk locations file exists at {GIS_JOIN_CHUNK_LOCATION_FILE}; loading from file")
         return load_gis_join_chunk_locations(shard_metadata)
     else:
-        info(f"No cached GISJOIN chunk locations file found; discovering chunk locations via MongoDB queries")
+        logger.info(f"No cached GISJOIN chunk locations file found; discovering chunk locations via MongoDB queries")
         return discover_gis_join_chunk_locations(shard_metadata)
 
 
@@ -65,7 +65,7 @@ def get_gis_join_chunk_locations(shard_metadata: dict) -> dict:
 def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
     resources_dir = 'overlay/resources'
     county_gis_joins = load_gis_joins(resources_dir)
-    info(f"Loaded in county GISJOIN list of size {len(county_gis_joins)}, retrieving chunk locations from MongoDB...")
+    logger.info(f"Loaded in county GISJOIN list of size {len(county_gis_joins)}, retrieving chunk locations from MongoDB...")
 
     mongo_client = MongoClient(f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}")
     db = mongo_client[DB_NAME]
@@ -89,7 +89,7 @@ def discover_gis_join_chunk_locations(shard_metadata: dict) -> dict:
 
     bar.finish()
 
-    info(f"Saving GISJOIN chunk locations to {GIS_JOIN_CHUNK_LOCATION_FILE}")
+    logger.info(f"Saving GISJOIN chunk locations to {GIS_JOIN_CHUNK_LOCATION_FILE}")
     save_gis_join_chunk_locations(gis_joins_to_shards)
 
     return gis_joins_to_shards
@@ -100,10 +100,10 @@ def discover_gis_join_counts():
     resources_dir = 'overlay/resources'
     gis_join_counts_filename = f"{resources_dir}/gis_join_counts.json"
     if os.path.exists(gis_join_counts_filename):
-        info(f"Cached file {gis_join_counts_filename} already exists, skipping discovering counts")
+        logger.info(f"Cached file {gis_join_counts_filename} already exists, skipping discovering counts")
         return
 
-    info(f"No cached {gis_join_counts_filename} file exists, discovering counts...")
+    logger.info(f"No cached {gis_join_counts_filename} file exists, discovering counts...")
     gis_join_counts = {}
     county_gis_joins = load_gis_joins(resources_dir)
     mongo_client = MongoClient(f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}")
@@ -119,10 +119,10 @@ def discover_gis_join_counts():
 
     bar.finish()
 
-    info(f"Saving GISJOIN counts to {gis_join_counts_filename}")
+    logger.info(f"Saving GISJOIN counts to {gis_join_counts_filename}")
     with open(gis_join_counts_filename, "w") as json_file:
         json.dump(gis_join_counts, json_file)
-    info("Success")
+    logger.info("Success")
 
 
 # Loads all county GISJOIN values from gis_joins.json as a list.
@@ -166,7 +166,7 @@ def save_gis_join_chunk_locations(shard_metadata: dict) -> None:
     json_str += "}"
     with open(GIS_JOIN_CHUNK_LOCATION_FILE, "w") as f:
         f.write(json_str)
-        info(f"Saved {GIS_JOIN_CHUNK_LOCATION_FILE}")
+        logger.info(f"Saved {GIS_JOIN_CHUNK_LOCATION_FILE}")
 
 
 def gis_join_chunk_locations_file_exists() -> bool:

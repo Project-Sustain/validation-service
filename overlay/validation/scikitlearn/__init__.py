@@ -1,4 +1,4 @@
-from logging import info, error
+from loguru import logger
 
 from overlay.profiler import Timer
 from overlay.validation import Validator
@@ -10,13 +10,13 @@ class ScikitLearnValidator(Validator):
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
         model_category_name = ModelCategory.Name(request.model_category)
-        info(f"ScikitLearnValidator::__init__(): model_category: {model_category_name}")
+        logger.info(f"ScikitLearnValidator::__init__(): model_category: {model_category_name}")
         if str(model_category_name) == "REGRESSION":
             self.validate_model_function = validate_regression_model
         elif str(model_category_name) == "CLASSIFICATION":
             self.validate_model_function = validate_classification_model
         else:
-            error(f"Unsupported model category: {model_category_name}")
+            logger.error(f"Unsupported model category: {model_category_name}")
 
 
 def validate_classification_model(
@@ -47,7 +47,7 @@ def validate_classification_model(
 
     from overlay.db.querier import Querier
 
-    info(f"Starting ScikitLearnValidator::validate_classification_model()")
+    logger.info(f"Starting ScikitLearnValidator::validate_classification_model()")
 
     ok = True
     error_msg = ""
@@ -56,7 +56,7 @@ def validate_classification_model(
     profiler.start()
 
     # Load ScikitLearn classification model from disk
-    info(f"Loading Scikit-Learn classification model from {model_path}")
+    logger.info(f"Loading Scikit-Learn classification model from {model_path}")
     model = pickle.load(open(model_path, 'rb'))
 
     # Create or load persisted model metrics
@@ -64,11 +64,11 @@ def validate_classification_model(
     model_dir = "/".join(model_path_parts)
     model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
     if os.path.exists(model_metrics_path):
-        info(f"P{model_metrics_path} exists, loading")
+        logger.info(f"P{model_metrics_path} exists, loading")
         with open(model_metrics_path, "r") as f:
             current_model_metrics = json.load(f)
     else:
-        info(f"P{model_metrics_path} does not exist, initializing for first time")
+        logger.info(f"P{model_metrics_path} does not exist, initializing for first time")
         # First time calculating variance/errors for model
         current_model_metrics = {
             "gis_join": gis_join,
@@ -81,7 +81,7 @@ def validate_classification_model(
 
     if verbose:
         model_type = type(model).__name__
-        info(f"Model type (from binary): {model_type}")
+        logger.info(f"Model type (from binary): {model_type}")
 
     querier = Querier(
         mongo_host=mongo_host,
@@ -105,24 +105,24 @@ def validate_classification_model(
     querier.close()
 
     allocation: int = len(features_df.index)
-    info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+    logger.info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
     if allocation == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
-        error(error_msg)
+        logger.error(error_msg)
         return gis_join, 0, -1.0, -1.0, iteration, not ok, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
         scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
         features_df = pd.DataFrame(scaled, columns=features_df.columns)
-        info(f"Normalized Pandas DataFrame")
+        logger.info(f"Normalized Pandas DataFrame")
 
     # Pop the label column off into its own DataFrame
     label_df = features_df.pop(label_field)
 
     if verbose:
-        info(f"label_df: {label_df}")
+        logger.info(f"label_df: {label_df}")
 
     # Get predictions (clasification)
     inputs_numpy = features_df.to_numpy()
@@ -130,40 +130,40 @@ def validate_classification_model(
     y_pred_class = model.predict(inputs_numpy)
 
     if verbose:
-        info(f"y_true: {y_true}")
+        logger.info(f"y_true: {y_true}")
 
     # calculate accuracy (percentage of correct predictions)
     accuracy = metrics.accuracy_score(y_true, y_pred_class)
-    info(f"Accuracy: {accuracy}")
+    logger.info(f"Accuracy: {accuracy}")
 
     # value counts
     # TODO: check conversion format of y_true
-    # info(f"Value counts: {y_true.value_counts()}")
+    # logger.info(f"Value counts: {y_true.value_counts()}")
 
     # percentage of ones
-    info(f"Percentage of 1s: {y_true.mean()}")
+    logger.info(f"Percentage of 1s: {y_true.mean()}")
 
     # percentage of zeroes
-    info(f"Percentage of 0s: {1 - y_true.mean()}")
+    logger.info(f"Percentage of 0s: {1 - y_true.mean()}")
 
     # null accuracy (for binary classification)
-    info(f"Null accuracy: {max(y_true.mean(), 1 - y_true.mean())}")
+    logger.info(f"Null accuracy: {max(y_true.mean(), 1 - y_true.mean())}")
 
     # save confusion matrix and slice into four pieces
     confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
 
-    info(f"Confusion matrix: {confusion_matrix}")
+    logger.info(f"Confusion matrix: {confusion_matrix}")
 
     TP = confusion_matrix[1, 1]
     TN = confusion_matrix[0, 0]
     FP = confusion_matrix[0, 1]
     FN = confusion_matrix[1, 0]
 
-    info(f"False positivity rate: {TN / (TN + FP)}")
+    logger.info(f"False positivity rate: {TN / (TN + FP)}")
     precision = metrics.precision_score(y_true, y_pred_class)
     recall = metrics.recall_score(y_true, y_pred_class)
-    info(f"Precision: {precision}")
-    info(f"Recall: {recall}")
+    logger.info(f"Precision: {precision}")
+    logger.info(f"Recall: {recall}")
 
     # ROC Curves and Area Under the Curve (AUC)
     y_pred_prob = model.predict_proba(features_df)[:, 1]
@@ -178,7 +178,7 @@ def validate_classification_model(
     sensitivity2, specificity2 = evaluate_threshold(0.3)
 
     roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
-    info(f"roc_auc_score: {roc_auc_score}")
+    logger.info(f"roc_auc_score: {roc_auc_score}")
 
     # TODO: MVC design patterns
     # pivot the data for different views
@@ -210,7 +210,7 @@ def validate_regression_model(
         normalize_inputs: bool,
         verbose: bool = True) -> (str, int, float, float, int, bool, str, float):
     # Returns the gis_join, allocation, loss, variance, iteration, ok status, error message, and duration
-    info("Starting ScikitLearnValidator::validate_regression_model()")
+    logger.info("Starting ScikitLearnValidator::validate_regression_model()")
 
     import pandas as pd
     import os
@@ -230,7 +230,7 @@ def validate_regression_model(
     profiler.start()
 
     # Load ScikitLearn model from disk
-    info(f"Loading Scikit-Learn model from {model_path}")
+    logger.info(f"Loading Scikit-Learn model from {model_path}")
     model = pickle.load(open(model_path, 'rb'))
 
     # Create or load persisted model metrics
@@ -238,11 +238,11 @@ def validate_regression_model(
     model_dir = "/".join(model_path_parts)
     model_metrics_path = f"{model_dir}/model_metrics_{gis_join}.json"
     if os.path.exists(model_metrics_path):
-        info(f"P{model_metrics_path} exists, loading")
+        logger.info(f"P{model_metrics_path} exists, loading")
         with open(model_metrics_path, "r") as f:
             current_model_metrics = json.load(f)
     else:
-        info(f"P{model_metrics_path} does not exist, initializing for first time")
+        logger.info(f"P{model_metrics_path} does not exist, initializing for first time")
         # First time calculating variance/errors for model
         current_model_metrics = {
             "gis_join": gis_join,
@@ -255,11 +255,11 @@ def validate_regression_model(
 
     if verbose:
         model_type = type(model).__name__
-        info(f"Model type (from binary): {model_type}")
+        logger.info(f"Model type (from binary): {model_type}")
         if model_type == "LinearRegression":
-            info(f"Model Description: Coefficients: {model.coef_}, Intercept: {model.intercept_}")
+            logger.info(f"Model Description: Coefficients: {model.coef_}, Intercept: {model.intercept_}")
         elif model_type == "GradientBoostingRegressor":
-            info(f"Model Description(feature_importances: {model.feature_importances_},"
+            logger.info(f"Model Description(feature_importances: {model.feature_importances_},"
                  f"oob_improvement: {model.oob_improvement_},"
                  f"train_score: {model.train_score_},"
                  f"loss: {model.loss_},"
@@ -269,7 +269,7 @@ def validate_regression_model(
                  f"n_estimators: {model.n_estimators_},"
                  f"max_features: {model.max_features_})")
         elif model_type == "SVR":
-            info(f"Model Description(class_weight: {model.class_weight_},"
+            logger.info(f"Model Description(class_weight: {model.class_weight_},"
                  f"coef: {model.coef_},"
                  f"dual_coef: {model.dual_coef_},"
                  f"fit_status: {model.fit_status_},"
@@ -279,8 +279,8 @@ def validate_regression_model(
                  f"support: {model.support_},"
                  f"support_vectors_: {model.support_vectors_})")
         elif model_type == "RandomForestRegressor":
-            info(f"Selecting RandomForestRegressor")
-            # info(f"Model Description(base_estimator: {model.base_estimator_},"
+            logger.info(f"Selecting RandomForestRegressor")
+            # logger.info(f"Model Description(base_estimator: {model.base_estimator_},"
             #      f"estimators: {model.estimators_}),"
             #      f"feature_importances_: {model.feature_importances_},"
             #      f"n_features_in: {model.n_features_in},"
@@ -288,7 +288,7 @@ def validate_regression_model(
             #      f"oob_score: {model.oob_score_},"
             #      f"oob_prediction: {model.oob_score_}")
         else:
-            error(f"Unsupported model type: {model_type}")
+            logger.error(f"Unsupported model type: {model_type}")
 
     querier = Querier(
         mongo_host=mongo_host,
@@ -312,24 +312,24 @@ def validate_regression_model(
     querier.close()
 
     allocation: int = len(features_df.index)
-    info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+    logger.info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
     if allocation == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
-        error(error_msg)
+        logger.error(error_msg)
         return gis_join, 0, -1.0, -1.0, iteration, not ok, error_msg, 0.0
 
     # Normalize features, if requested
     if normalize_inputs:
         scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
         features_df = pd.DataFrame(scaled, columns=features_df.columns)
-        info(f"Normalized Pandas DataFrame")
+        logger.info(f"Normalized Pandas DataFrame")
 
     # Pop the label column off into its own DataFrame
     label_df = features_df.pop(label_field)
 
     if verbose:
-        info(f"label_df: {label_df}")
+        logger.info(f"label_df: {label_df}")
 
     # Get predictions
     inputs_numpy = features_df.to_numpy()
@@ -337,25 +337,25 @@ def validate_regression_model(
     y_pred = model.predict(inputs_numpy)
 
     if verbose:
-        info(f"y_true: {y_true}")
+        logger.info(f"y_true: {y_true}")
 
     if loss_function == "MEAN_SQUARED_ERROR":
-        info("MEAN_SQUARED_ERROR...")
+        logger.info("MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
         m = np.mean(squared_residuals, axis=0)
         loss = m
         s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])
-        info(f"m = {m}, s = {s}, loss = {loss}")
+        logger.info(f"m = {m}, s = {s}, loss = {loss}")
 
     elif loss_function == "ROOT_MEAN_SQUARED_ERROR":
-        info("MEAN_SQUARED_ERROR...")
+        logger.info("MEAN_SQUARED_ERROR...")
         squared_residuals = np.square(y_true - y_pred)
         m = np.mean(squared_residuals, axis=0)
         loss = sqrt(m)
         s = (np.var(squared_residuals, axis=0, ddof=0) * squared_residuals.shape[0])
 
     elif loss_function == "MEAN_ABSOLUTE_ERROR":
-        info("MEAN_ABSOLUTE_ERROR...")
+        logger.info("MEAN_ABSOLUTE_ERROR...")
         absolute_residuals = np.abs(y_true - y_pred)
         loss = np.mean(absolute_residuals, axis=0)
         m = np.mean(absolute_residuals, axis=0)[0]
@@ -364,7 +364,7 @@ def validate_regression_model(
     else:
         profiler.stop()
         error_msg = f"Unsupported loss function {loss_function}"
-        error(error_msg)
+        logger.error(error_msg)
         return gis_join, allocation, -1.0, -1.0, iteration, not ok, error_msg, profiler.elapsed
 
     # Merging old metrics in with new metrics using Welford's method (if applicable)
@@ -396,5 +396,5 @@ def validate_regression_model(
 
     profiler.stop()
 
-    info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
+    logger.info(f"Evaluation results for GISJOIN {gis_join}: {loss}")
     return gis_join, allocation, loss, variance, iteration, ok, "", profiler.elapsed
