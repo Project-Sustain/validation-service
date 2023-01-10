@@ -20,3 +20,4 @@ welford
 jsonschema
 psutil
 loguru
+logtail-python

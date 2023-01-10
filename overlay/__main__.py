@@ -1,7 +1,9 @@
 import sys
 import getopt
 import logging
-from logging import info, error
+# from logging import info, error
+from loguru import logger
+from logtail import LogtailHandler
 
 from overlay import flask_server
 from overlay import master_server
@@ -78,11 +80,14 @@ def is_valid_master_uri(uri):
                     port = int(parts[1])
                     return True, hostname, port
                 except ValueError as e:
-                    error(f"Unable to parse port number: {e}")
+                    logger.error(f"Unable to parse port number: {e}")
     return False
 
 
 if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s %(levelname) - 4s %(message)s',
                         level=logging.INFO, datefmt='%d-%b-%y %H:%M:%S')
+
+    logtail_handler = LogtailHandler(source_token="XNNnZVaULWn2HqDDjekp85Dq")
+    logger.add(logtail_handler)
     main()
