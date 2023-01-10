@@ -9,7 +9,10 @@ import numpy as np
 import uuid
 from queue import Queue
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from loguru import logger
+from logtail import LogtailHandler
+
 from typing import Iterator
 
 from overlay import validation_pb2_grpc
@@ -21,6 +24,10 @@ from overlay.validation_pb2 import WorkerRegistrationRequest, WorkerRegistration
     ValidationJobRequest, JobMode, BudgetType, ValidationBudget, IncrementalVarianceBudget, SpatialCoverage, \
     SpatialAllocation, SpatialResolution, ExperimentResponse, ValidationMetric, Metric, ResponseMetric
 
+
+# Logtail - Validation Service - Master Server
+logtail_handler = LogtailHandler(source_token="YN2gJuRDYKmTHqK2ZL3zPVe1")
+logger.add(logtail_handler)
 
 class JobMetadata:
 
