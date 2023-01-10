@@ -10,7 +10,7 @@ class PyTorchValidator(Validator):
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
         model_category_name = ModelCategory.Name(request.model_category)
-        logger.info(f"PyTorchValidator::__init__(): model_category: {model_category_name}")
+        logger.debug(f"PyTorchValidator::__init__(): model_category: {model_category_name}")
         if str(model_category_name) == "REGRESSION":
             self.validate_model_function = validate_regression_model
         elif str(model_category_name) == "CLASSIFICATION":
@@ -112,7 +112,7 @@ def validate_classification_model(
     querier.close()
 
     allocation: int = len(features_df.index)
-    logger.info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+    logger.success(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
     if allocation == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
@@ -123,7 +123,7 @@ def validate_classification_model(
     if normalize_inputs:
         scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
         features_df = pd.DataFrame(scaled, columns=features_df.columns)
-        logger.info(f"Normalized Pandas DataFrame")
+        logger.success(f"Normalized Pandas DataFrame")
 
     # Pop the label column off into its own DataFrame
     label_df = features_df.pop(label_field)
@@ -137,15 +137,15 @@ def validate_classification_model(
     y_true_tensor = y_true_tensor.view(y_true_tensor.shape[0], 1).squeeze(-1)
 
     n_samples, n_features = inputs_tensor.shape
-    logger.info(f'n_samples: {n_samples}, n_features: {n_features}')
+    logger.success(f'n_samples: {n_samples}, n_features: {n_features}')
 
     # Get model predictions
     with torch.no_grad():
         # criterion = torch.nn.MSELoss()
         logger.info("PyTorchValidator::validate_classification_model(): creating y_predicted_tensor")
         y_predicted_tensor = model(inputs_tensor)
-        logger.info(f"y_predicted: {y_predicted_tensor}")
-        logger.info(f"y_true_tensor: {y_true_tensor}")
+        logger.success(f"y_predicted: {y_predicted_tensor}")
+        logger.success(f"y_true_tensor: {y_true_tensor}")
         y_predicted_numpy = y_predicted_tensor.numpy()
         y_true_numpy = y_true_tensor.numpy()
 

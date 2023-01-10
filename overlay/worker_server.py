@@ -40,7 +40,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         self.saved_models_path: str = MODELS_DIR
         self.is_registered = False
         self.gis_tree: GisTree = GisTree()
-        logger.info("Made it into worker_server, just above discover_gis_joins()")
+        logger.trace("Made it into worker_server, just above discover_gis_joins()")
         self.local_gis_joins: dict = discover_gis_joins()  # { gis_join -> count }
         for gis_join, count in self.local_gis_joins.items():
             self.gis_tree.insert_county(gis_join, {"count": count})
@@ -71,7 +71,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
 
             if registration_response.success:
                 self.is_registered = True
-                logger.info(f"Successfully registered worker {self.hostname}:{self.port}")
+                logger.success(f"Successfully registered worker {self.hostname}:{self.port}")
             else:
                 logger.error(f"Failed to register worker {self.hostname}:{self.port}: {registration_response}")
 
@@ -179,7 +179,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
         with open(model_file_path, "wb") as binary_file:
             binary_file.write(request.model_file.data)
 
-        logger.info(f"Worker::save_model(): Finished saving model to {model_file_path}")
+        logger.success(f"Worker::save_model(): Finished saving model to {model_file_path}")
         return ok
 
     def deregister(self):
@@ -192,7 +192,7 @@ class Worker(validation_pb2_grpc.WorkerServicer):
                 )
 
                 if registration_response.success:
-                    logger.info(f"Successfully deregistered worker: {registration_response}")
+                    logger.success(f"Successfully deregistered worker: {registration_response}")
                     self.is_registered = False
                 else:
                     logger.error(f"Failed to deregister worker: {registration_response}")

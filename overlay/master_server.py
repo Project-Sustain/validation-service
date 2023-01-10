@@ -166,7 +166,7 @@ def launch_worker_jobs_multithreaded(job: JobMetadata, request: ValidationJobReq
                 logger.info(f"Consumed response from queue: {response}")
                 yield response
 
-    logger.info("Finished job")
+    logger.success("Finished job")
 
 
 def save_intermediate_response_data(total_budget: int, initial_allocation: int, initial_response_metrics: list) -> None:
@@ -196,7 +196,7 @@ def save_intermediate_response_data(total_budget: int, initial_allocation: int, 
     with open(filename, "w") as f:
         json.dump(save_obj, f)
 
-    logger.info(f"Saved {filename}")
+    logger.success(f"Saved {filename}")
 
 
 def save_optimal_allocations(allocations: dict) -> None:
@@ -204,7 +204,7 @@ def save_optimal_allocations(allocations: dict) -> None:
     with open(filename, "w") as f:
         json.dump(allocations, f)
 
-    logger.info(f"Saved {filename}")
+    logger.success(f"Saved {filename}")
 
 
 def save_numpy_array(numpy_array) -> None:
@@ -212,7 +212,7 @@ def save_numpy_array(numpy_array) -> None:
     with open(filename, "w") as f:
         json.dump(numpy_array.tolist(), f)
 
-    logger.info(f"Saved {filename}")
+    logger.success(f"Saved {filename}")
 
 
 def save_gis_join_counts(counts) -> None:
@@ -220,7 +220,7 @@ def save_gis_join_counts(counts) -> None:
     with open(filename, "w") as f:
         json.dump(counts, f)
 
-    logger.info(f"Saved {filename}")
+    logger.success(f"Saved {filename}")
 
 
 def aggregate_metrics_by_state(flattened_metrics: list) -> list:  # returns list(ValidationMetric) at State level
@@ -302,7 +302,7 @@ class Master(validation_pb2_grpc.MasterServicer):
 
         job_id: str = generate_job_id()  # Random UUID for the job
         job: JobMetadata = JobMetadata(job_id, [allocation.gis_join for allocation in spatial_allocations])
-        logger.info(f"Master: Created job id {job_id}")
+        logger.success(f"Master: Created job id {job_id}")
 
         # Find and select workers with GISJOINs local to them
         for spatial_allocation in spatial_allocations:
@@ -532,7 +532,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         # Create a WorkerMetadata object for tracking
         shard: ShardMetadata = self.shard_metadata[request.rs_name]
         worker: WorkerMetadata = WorkerMetadata(request.hostname, request.port, shard)
-        logger.info(
+        logger.success(
             f"Master: Successfully added Worker: {worker}, responsible for {len(shard.gis_join_metadata)} GISJOINs")
         self.tracked_workers[request.hostname] = worker
         return WorkerRegistrationResponse(success=True)
@@ -543,7 +543,7 @@ class Master(validation_pb2_grpc.MasterServicer):
         if self.is_worker_registered(request.hostname):
             logger.info(f"Master: Worker {request.hostname} is registered. Removing...")
             del self.tracked_workers[request.hostname]
-            logger.info(f"Master: Worker {request.hostname} is now deregistered and removed.")
+            logger.success(f"Master: Worker {request.hostname} is now deregistered and removed.")
             return WorkerRegistrationResponse(success=True)
         else:
             logger.error(f"Master: Worker {request.hostname} is not registered, can't remove")

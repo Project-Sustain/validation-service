@@ -133,7 +133,7 @@ def validation_experiment():
 
                 # Submit validation experiment job
                 experiment_grpc_response: ExperimentResponse = stub.SubmitExperiment(validation_grpc_request)
-                logger.info(f"Experiment Response received: {experiment_grpc_response}")
+                logger.success(f"Experiment Response received: {experiment_grpc_response}")
 
             response_code: int = HTTPStatus.OK if experiment_grpc_response.ok else HTTPStatus.INTERNAL_SERVER_ERROR
             return build_json_response(experiment_grpc_response), response_code
