@@ -22,7 +22,7 @@ class Querier:
         self.mongo_host = mongo_host
         # authorization --> don't commit to this branch
 
-        logger.info("inside querier")
+        logger.trace("inside querier")
         self.mongo_uri = f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@{mongo_host}:{mongo_port}"
 
         # end authorization

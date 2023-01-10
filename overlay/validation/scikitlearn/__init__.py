@@ -10,7 +10,7 @@ class ScikitLearnValidator(Validator):
     def __init__(self, request: ValidationJobRequest, shared_executor, gis_join_counts):
         super().__init__(request, shared_executor, gis_join_counts)
         model_category_name = ModelCategory.Name(request.model_category)
-        logger.info(f"ScikitLearnValidator::__init__(): model_category: {model_category_name}")
+        logger.debug(f"ScikitLearnValidator::__init__(): model_category: {model_category_name}")
         if str(model_category_name) == "REGRESSION":
             self.validate_model_function = validate_regression_model
         elif str(model_category_name) == "CLASSIFICATION":
@@ -105,7 +105,7 @@ def validate_classification_model(
     querier.close()
 
     allocation: int = len(features_df.index)
-    logger.info(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
+    logger.success(f"Loaded Pandas DataFrame from MongoDB of size {len(features_df.index)}")
 
     if allocation == 0:
         error_msg = f"No records found for GISJOIN {gis_join}"
@@ -134,36 +134,36 @@ def validate_classification_model(
 
     # calculate accuracy (percentage of correct predictions)
     accuracy = metrics.accuracy_score(y_true, y_pred_class)
-    logger.info(f"Accuracy: {accuracy}")
+    logger.success(f"Accuracy: {accuracy}")
 
     # value counts
     # TODO: check conversion format of y_true
     # logger.info(f"Value counts: {y_true.value_counts()}")
 
     # percentage of ones
-    logger.info(f"Percentage of 1s: {y_true.mean()}")
+    logger.success(f"Percentage of 1s: {y_true.mean()}")
 
     # percentage of zeroes
-    logger.info(f"Percentage of 0s: {1 - y_true.mean()}")
+    logger.success(f"Percentage of 0s: {1 - y_true.mean()}")
 
     # null accuracy (for binary classification)
-    logger.info(f"Null accuracy: {max(y_true.mean(), 1 - y_true.mean())}")
+    logger.success(f"Null accuracy: {max(y_true.mean(), 1 - y_true.mean())}")
 
     # save confusion matrix and slice into four pieces
     confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
 
-    logger.info(f"Confusion matrix: {confusion_matrix}")
+    logger.success(f"Confusion matrix: {confusion_matrix}")
 
     TP = confusion_matrix[1, 1]
     TN = confusion_matrix[0, 0]
     FP = confusion_matrix[0, 1]
     FN = confusion_matrix[1, 0]
 
-    logger.info(f"False positivity rate: {TN / (TN + FP)}")
+    logger.success(f"False positivity rate: {TN / (TN + FP)}")
     precision = metrics.precision_score(y_true, y_pred_class)
     recall = metrics.recall_score(y_true, y_pred_class)
-    logger.info(f"Precision: {precision}")
-    logger.info(f"Recall: {recall}")
+    logger.success(f"Precision: {precision}")
+    logger.success(f"Recall: {recall}")
 
     # ROC Curves and Area Under the Curve (AUC)
     y_pred_prob = model.predict_proba(features_df)[:, 1]
@@ -178,7 +178,7 @@ def validate_classification_model(
     sensitivity2, specificity2 = evaluate_threshold(0.3)
 
     roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
-    logger.info(f"roc_auc_score: {roc_auc_score}")
+    logger.success(f"roc_auc_score: {roc_auc_score}")
 
     # TODO: MVC design patterns
     # pivot the data for different views
