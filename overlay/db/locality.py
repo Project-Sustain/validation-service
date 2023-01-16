@@ -31,7 +31,7 @@ def discover_gis_joins() -> dict:
 
 
     client: MongoClient = MongoClient(f"mongodb://{DB_USERNAME}:{DB_PASSWORD}@localhost:27017")
-    logger.info("below error")
+    logger.debug("below error")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
     distinct_gis_joins: list = coll.distinct("GISJOIN")
