@@ -56,3 +56,24 @@ y_pred_class = model.predict(inputs_numpy)
 
 accuracy = metrics.accuracy_score(y_true, y_pred_class)
 print(f'Accuracy: {accuracy}')
+print(f'Percentage of 1s: {y_true.mean()}')
+print(f'Percentage of 0s: {1 - y_true.mean()}')
+
+null_accuracy = max(y_true.mean(), 1 - y_true.mean())
+print(f'Null accuracy: {null_accuracy}')
+
+confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
+print(f'Confusion Matrix: {confusion_matrix}')
+
+precision = metrics.precision_score(y_true, y_pred_class)
+recall = metrics.recall_score(y_true, y_pred_class)
+print(f'Precision: {precision}')
+print(f'Recall: {recall}')
+
+# ROC Curves and Area Under the Curve (AUC)
+y_pred_prob = model.predict_proba(features_df)[:, 1]
+fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
+roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
+print(f'fpr: {fpr}')
+print(f'tpr: {tpr}')
+print(f'roc_auc_score: {roc_auc_score}')
