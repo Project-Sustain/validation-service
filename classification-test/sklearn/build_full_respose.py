@@ -20,4 +20,10 @@ noaa = db['noaa_nam']
 
 single_raw_data = noaa.find({'GISJOIN': 'G0600470'})
 df = pd.DataFrame(list(single_raw_data))
+print("DF:")
 print(df)
+
+print('---------------------')
+gis_joins = noaa.distinct('GISJOIN')
+print(len(gis_joins))
+
