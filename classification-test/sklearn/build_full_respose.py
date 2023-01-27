@@ -30,10 +30,14 @@ db_connection = pymongo.MongoClient(MONGO_URL)
 db = db_connection[DB_NAME]
 noaa = db['noaa_nam']
 
-single_raw_data = noaa.find({'GISJOIN': 'G0600470'})
-df = pd.DataFrame(list(single_raw_data))
-print("DF:")
-print(df)
+query = {'GISJOIN': 'G0600470'}
+# Build projection
+projection = {"_id": 0}
+for feature in FEATURES_FIELDS:
+    projection[feature] = 1
+projection[LABEL_FIELD] = 1
+
+single_raw_data = noaa.find(query, projection)
 
 print('---------------------')
 gis_joins = noaa.distinct('GISJOIN')
@@ -47,7 +51,6 @@ scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
 features_df = pd.DataFrame(scaled, columns=features_df.columns)
 
 label_df = features_df.pop(LABEL_FIELD)
-features_df = features_df[FEATURES_FIELDS]
 
 inputs_numpy = features_df.to_numpy()
 y_true = label_df.to_numpy()
