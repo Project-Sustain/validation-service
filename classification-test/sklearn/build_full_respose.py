@@ -72,7 +72,7 @@ for gis_join in gis_joins:
         print(f'Recall: {recall}')
 
         # ROC Curves and Area Under the Curve (AUC)
-        y_pred_prob = model.predict_proba(features_df)[:, 1]
+        y_pred_prob = model.predict_proba(features_df)
         fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
         roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
         print(f'fpr: {fpr}')
