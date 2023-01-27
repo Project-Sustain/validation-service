@@ -28,52 +28,55 @@ db_connection = pymongo.MongoClient(MONGO_URL)
 db = db_connection[DB_NAME]
 noaa = db['noaa_nam']
 
-query = {'GISJOIN': 'G0600470'}
-# Build projection
-projection = {"_id": 0}
-for feature in FEATURES_FIELDS:
-    projection[feature] = 1
-projection[LABEL_FIELD] = 1
-
-single_raw_data = noaa.find(query, projection)
-
-print('---------------------')
 gis_joins = noaa.distinct('GISJOIN')
 print(f'No. of GISJOINs: {len(gis_joins)}')
-print('---------------------\n')
 
-# Load trained model
-model = pickle.load(open('model.pkl', 'rb'))
-features_df = pd.DataFrame(list(single_raw_data))
-scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
-features_df = pd.DataFrame(scaled, columns=features_df.columns)
+count = 1
+for gis_join in gis_joins:
+    try:
+        query = {'GISJOIN': gis_join}
+        # Build projection
+        projection = {"_id": 0}
+        for feature in FEATURES_FIELDS:
+            projection[feature] = 1
+        projection[LABEL_FIELD] = 1
 
-label_df = features_df.pop(LABEL_FIELD)
+        single_raw_data = noaa.find(query, projection)
 
-inputs_numpy = features_df.to_numpy()
-y_true = label_df.to_numpy()
-y_pred_class = model.predict(inputs_numpy)
+        # Load trained model
+        model = pickle.load(open('model.pkl', 'rb'))
+        features_df = pd.DataFrame(list(single_raw_data))
+        scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        features_df = pd.DataFrame(scaled, columns=features_df.columns)
 
-accuracy = metrics.accuracy_score(y_true, y_pred_class)
-print(f'Accuracy: {accuracy}')
-print(f'Percentage of 1s: {y_true.mean()}')
-print(f'Percentage of 0s: {1 - y_true.mean()}')
+        label_df = features_df.pop(LABEL_FIELD)
 
-null_accuracy = max(y_true.mean(), 1 - y_true.mean())
-print(f'Null accuracy: {null_accuracy}')
+        inputs_numpy = features_df.to_numpy()
+        y_true = label_df.to_numpy()
+        y_pred_class = model.predict(inputs_numpy)
 
-confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
-print(f'Confusion Matrix: {confusion_matrix}')
+        accuracy = metrics.accuracy_score(y_true, y_pred_class)
+        print(f'Accuracy: {accuracy}')
+        print(f'Percentage of 1s: {y_true.mean()}')
+        print(f'Percentage of 0s: {1 - y_true.mean()}')
 
-precision = metrics.precision_score(y_true, y_pred_class)
-recall = metrics.recall_score(y_true, y_pred_class)
-print(f'Precision: {precision}')
-print(f'Recall: {recall}')
+        null_accuracy = max(y_true.mean(), 1 - y_true.mean())
+        print(f'Null accuracy: {null_accuracy}')
 
-# ROC Curves and Area Under the Curve (AUC)
-y_pred_prob = model.predict_proba(features_df)[:, 1]
-fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
-roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
-print(f'fpr: {fpr}')
-print(f'tpr: {tpr}')
-print(f'roc_auc_score: {roc_auc_score}')
+        confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
+        print(f'Confusion Matrix: {confusion_matrix}')
+
+        precision = metrics.precision_score(y_true, y_pred_class)
+        recall = metrics.recall_score(y_true, y_pred_class)
+        print(f'Precision: {precision}')
+        print(f'Recall: {recall}')
+
+        # ROC Curves and Area Under the Curve (AUC)
+        y_pred_prob = model.predict_proba(features_df)[:, 1]
+        fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
+        roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
+        print(f'fpr: {fpr}')
+        print(f'tpr: {tpr}')
+        print(f'roc_auc_score: {roc_auc_score}')
+    except:
+        print(f'Error in {gis_join}')
