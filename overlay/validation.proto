@@ -123,6 +123,7 @@ message ValidationMetric {
   oneof validation_metric {
     RegressionValidationMetric regression_validation_metric = 1;
     ClassificationValidationMetric classification_validation_metric = 2;
+    ClassificationResponse classification_response = 3;
   }
 }
 
@@ -136,6 +137,12 @@ message RegressionValidationMetric {
   int32 iteration = 7;
   bool ok = 8;
   string error_msg = 9;
+}
+
+message ClassificationResponse {
+  bool ok = 1;
+  string error_message = 2;
+  string results = 3;
 }
 
 message ClassificationValidationMetric {
