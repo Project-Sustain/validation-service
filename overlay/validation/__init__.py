@@ -185,28 +185,6 @@ class Validator:
 
 
 # Stub for function that needs to be implemented in concrete subclasses
-def validate_regression_model(
-        gis_join: str,
-        gis_join_count: int,
-        model_path: str,
-        feature_fields: list,
-        label_field: str,
-        loss_function: str,
-        mongo_host: str,
-        mongo_port: int,
-        read_preference: str,
-        read_concern: str,
-        database: str,
-        collection: str,
-        limit: int,
-        sample_rate: float,
-        normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, float, float, bool, str, float):
-    # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
-    raise NotImplementedError("validate_regression_model() is not implemented for abstract class Validator.")
-
-
-# Stub for function that needs to be implemented in concrete subclasses
 def validate_classification_model(
         gis_join: str,
         gis_join_count: int,

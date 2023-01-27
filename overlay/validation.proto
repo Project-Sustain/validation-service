@@ -120,51 +120,14 @@ message Metric {
 }
 
 message ValidationMetric {
-  oneof validation_metric {
-    RegressionValidationMetric regression_validation_metric = 1;
-    ClassificationValidationMetric classification_validation_metric = 2;
-    ClassificationResponse classification_response = 3;
-  }
+  ClassificationResponse classification_response = 1;
 }
 
-message RegressionValidationMetric {
-  string gis_join = 1;
-  int64  allocation = 2;
-  double loss = 3;
-  double accuracy = 4;
-  double variance = 5;
-  double duration_sec = 6;
-  int32 iteration = 7;
-  bool ok = 8;
-  string error_msg = 9;
-}
 
 message ClassificationResponse {
   bool ok = 1;
   string error_message = 2;
   string results = 3;
-}
-
-message ClassificationValidationMetric {
-  string gis_join = 1;
-  int64 allocation = 2;
-  bool ok = 3;
-  double duration_sec = 4;
-  string error_message = 5;
-  double precision = 6;
-  double recall = 7;
-  double f1_score = 8;
-  message RocGraph {
-    message Point {
-      int32 x = 1;
-      int32 y = 2;
-    }
-    repeated Point points = 1;
-    string graph_title = 2;
-    string x_title = 3;
-    string y_title = 4;
-  }
-  RocGraph roc_graph = 9;
 }
 
 message ModelFile {
