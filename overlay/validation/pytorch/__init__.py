@@ -149,7 +149,9 @@ def validate_classification_model(
         y_predicted_numpy = y_predicted_tensor.numpy()
         y_true_numpy = y_true_tensor.numpy()
 
-    raise NotImplementedError("validate_classification_model() is not implemented for class PyTorchValidator.")
+    # raise NotImplementedError("validate_classification_model() is not implemented for class PyTorchValidator.")
+    logger.debug(f"Returning GISJOIN: {gis_join}")
+    return gis_join, 0, "no_error", "{sample_results}"
 
 
 # Independent function designed to be launched either within the same thread as the main process,
