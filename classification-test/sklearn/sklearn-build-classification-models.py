@@ -62,9 +62,10 @@ print(f'y_test: {y_test.shape}')
 
 print('INFO: Train and Test sets created')
 
-dtree_model = DecisionTreeClassifier(max_depth=2).fit(X_train, y_train)
+dtree_model = DecisionTreeClassifier(max_depth=2).fit(X_train.values, y_train.values)
 print('INFO: Model created')
 
 dtree_predictions = dtree_model.predict(X_test)
-pickle.dump(dtree_model, open('../pickles/classification_model.pkl', 'wb'))
+#pickle.dump(dtree_model, open('../pickles/classification_model.pkl', 'wb'))
+pickle.dump(dtree_model, open('model.pkl', 'wb'))
 print("[INFO] Model serialized to file")

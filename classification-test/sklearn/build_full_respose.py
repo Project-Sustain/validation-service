@@ -54,11 +54,11 @@ for gis_join in gis_joins:
 
     label_df = features_df.pop(LABEL_FIELD)
 
-    inputs_numpy = features_df.to_numpy()
-    print(f'inputs_numpy: {inputs_numpy}')
-    y_true = label_df.to_numpy()
+    #inputs_numpy = features_df.to_numpy()
+    #print(f'inputs_numpy: {inputs_numpy}')
+    y_true = label_df.values
     print(f'y_true: {y_true}')
-    y_pred_class = model.predict(inputs_numpy)
+    y_pred_class = model.predict(features_df.values)
     print(f'y_pred_class: {y_pred_class}')
 
     accuracy = metrics.accuracy_score(y_true, y_pred_class)
@@ -84,5 +84,4 @@ for gis_join in gis_joins:
     print(f'fpr: {fpr}')
     print(f'tpr: {tpr}')
     print(f'roc_auc_score: {roc_auc_score}')
-    print(f'Error in {gis_join}')
     sys.exit(1)
