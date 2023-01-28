@@ -2,6 +2,7 @@
 import pymongo
 import pandas as pd
 import os
+import sys
 import json
 import pickle
 from sklearn.preprocessing import MinMaxScaler
@@ -22,7 +23,8 @@ FEATURES_FIELDS = [
     "PRESSURE_AT_SURFACE_PASCAL",
 ]
 
-LABEL_FIELD = "CATEGORICAL_SNOW_SURFACE_BINARY"
+#LABEL_FIELD = "CATEGORICAL_SNOW_SURFACE_BINARY"
+LABEL_FIELD = "CATEGORICAL_RAIN_SURFACE_BINARY"
 
 db_connection = pymongo.MongoClient(MONGO_URL)
 db = db_connection[DB_NAME]
@@ -42,18 +44,23 @@ for gis_join in gis_joins:
         projection[LABEL_FIELD] = 1
 
         single_raw_data = noaa.find(query, projection)
+        print(f'[+] Queried {gis_join}')
 
         # Load trained model
         model = pickle.load(open('model.pkl', 'rb'))
         features_df = pd.DataFrame(list(single_raw_data))
         scaled = MinMaxScaler(feature_range=(0, 1)).fit_transform(features_df)
+        print('[+] Scaled')
         features_df = pd.DataFrame(scaled, columns=features_df.columns)
 
         label_df = features_df.pop(LABEL_FIELD)
 
         inputs_numpy = features_df.to_numpy()
+        print(f'inputs_numpy: {inputs_numpy}')
         y_true = label_df.to_numpy()
+        print(f'y_true: {y_true}')
         y_pred_class = model.predict(inputs_numpy)
+        print(f'y_pred_class: {y_pred_class}')
 
         accuracy = metrics.accuracy_score(y_true, y_pred_class)
         print(f'Accuracy: {accuracy}')
@@ -80,3 +87,6 @@ for gis_join in gis_joins:
         print(f'roc_auc_score: {roc_auc_score}')
     except:
         print(f'Error in {gis_join}')
+    finally:
+        sys.exit(1)
+
