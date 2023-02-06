@@ -124,7 +124,7 @@ def validate_classification_model(
     if verbose:
         logger.info(f"label_df: {label_df}")
 
-    # Get predictions (clasification)
+    # Get predictions (classification)
     inputs_numpy = features_df.to_numpy()
     y_true = label_df.to_numpy()
     y_pred_class = model.predict(inputs_numpy)
@@ -140,51 +140,35 @@ def validate_classification_model(
     # TODO: check conversion format of y_true
     # logger.info(f"Value counts: {y_true.value_counts()}")
 
-    # percentage of ones
-    logger.success(f"Percentage of 1s: {y_true.mean()}")
-
-    # percentage of zeroes
-    logger.success(f"Percentage of 0s: {1 - y_true.mean()}")
-
-    # null accuracy (for binary classification)
-    logger.success(f"Null accuracy: {max(y_true.mean(), 1 - y_true.mean())}")
-
     # save confusion matrix and slice into four pieces
     confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
 
     logger.success(f"Confusion matrix: {confusion_matrix}")
+    thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-    TP = confusion_matrix[1, 1]
-    TN = confusion_matrix[0, 0]
-    FP = confusion_matrix[0, 1]
-    FN = confusion_matrix[1, 0]
+    for t in thresholds:
+        y_pred_prob = (model.predict_proba(features_df)[:, 1] >= t).astype(int)
 
-    logger.success(f"False positivity rate: {TN / (TN + FP)}")
-    precision = metrics.precision_score(y_true, y_pred_class)
-    recall = metrics.recall_score(y_true, y_pred_class)
-    logger.success(f"Precision: {precision}")
-    logger.success(f"Recall: {recall}")
+        # Calculate Precision
+        precision = metrics.precision_score(y_true, y_pred_class, zero_division=0)
+        logger.success(f"Precision (t = {t}): {precision}")
 
-    # ROC Curves and Area Under the Curve (AUC)
-    y_pred_prob = model.predict_proba(features_df)[:, 1]
-    fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
+        # Calculate Recall
+        recall = metrics.recall_score(y_true, y_pred_class, zero_division=0)
+        logger.success(f"Recall (t = {t}): {recall}")
 
-    def evaluate_threshold(threshold):
-        sensitivity = tpr[thresholds > threshold][-1]
-        specificity = 1 - fpr[thresholds > threshold][-1]
-        return [sensitivity, specificity]
+        # ROC Curves and Area Under the Curve (AUC)
+        fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
+        roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
+        logger.success(f"roc_auc_score (t = {t}): {roc_auc_score}")
 
-    sensitivity1, specificity1 = evaluate_threshold(0.5)
-    sensitivity2, specificity2 = evaluate_threshold(0.3)
+    # def evaluate_threshold(threshold):
+    #     sensitivity = tpr[thresholds > threshold][-1]
+    #     specificity = 1 - fpr[thresholds > threshold][-1]
+    #     return [sensitivity, specificity]
 
-    roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
-    logger.success(f"roc_auc_score: {roc_auc_score}")
-
-    # TODO: MVC design patterns
-    # pivot the data for different views
-    # implement a data structure
-    # where the client pivots easily
-    # partial streaming on the client side
+    # sensitivity1, specificity1 = evaluate_threshold(0.5)
+    # sensitivity2, specificity2 = evaluate_threshold(0.3)
 
     # raise NotImplementedError("validate_classification_model() is not implemented for class ScikitLearnValidator.")
     logger.debug(f"Returning GISJOIN: {gis_join}")
@@ -262,24 +246,24 @@ def validate_regression_model(
             logger.info(f"Model Description: Coefficients: {model.coef_}, Intercept: {model.intercept_}")
         elif model_type == "GradientBoostingRegressor":
             logger.info(f"Model Description(feature_importances: {model.feature_importances_},"
-                 f"oob_improvement: {model.oob_improvement_},"
-                 f"train_score: {model.train_score_},"
-                 f"loss: {model.loss_},"
-                 f"init_: {model.init_},"
-                 f"estimators: {model.estimators_},"
-                 f"n_classes: {model.n_classes_},"
-                 f"n_estimators: {model.n_estimators_},"
-                 f"max_features: {model.max_features_})")
+                        f"oob_improvement: {model.oob_improvement_},"
+                        f"train_score: {model.train_score_},"
+                        f"loss: {model.loss_},"
+                        f"init_: {model.init_},"
+                        f"estimators: {model.estimators_},"
+                        f"n_classes: {model.n_classes_},"
+                        f"n_estimators: {model.n_estimators_},"
+                        f"max_features: {model.max_features_})")
         elif model_type == "SVR":
             logger.info(f"Model Description(class_weight: {model.class_weight_},"
-                 f"coef: {model.coef_},"
-                 f"dual_coef: {model.dual_coef_},"
-                 f"fit_status: {model.fit_status_},"
-                 f"intercept: {model.intercept_},"
-                 f"n_support: {model.n_support_},"
-                 f"shape_fit: {model.shape_fit_},"
-                 f"support: {model.support_},"
-                 f"support_vectors_: {model.support_vectors_})")
+                        f"coef: {model.coef_},"
+                        f"dual_coef: {model.dual_coef_},"
+                        f"fit_status: {model.fit_status_},"
+                        f"intercept: {model.intercept_},"
+                        f"n_support: {model.n_support_},"
+                        f"shape_fit: {model.shape_fit_},"
+                        f"support: {model.support_},"
+                        f"support_vectors_: {model.support_vectors_})")
         elif model_type == "RandomForestRegressor":
             logger.info(f"Selecting RandomForestRegressor")
             # logger.info(f"Model Description(base_estimator: {model.base_estimator_},"
