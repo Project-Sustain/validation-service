@@ -147,7 +147,7 @@ def validate_classification_model(
     thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
     for t in thresholds:
-        y_pred_prob = (model.predict_proba(features_df)[:, 1] >= t).astype(int)
+        y_pred_prob = (model.predict_proba(inputs_numpy)[:, 1] >= t).astype(int)
 
         # Calculate Precision
         precision = metrics.precision_score(y_true, y_pred_class, zero_division=0)
