@@ -38,8 +38,8 @@ def validate_classification_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, str, str):
-    # Returns the gis_join, status, error_msg, results
+        verbose: bool = True) -> (str, int, float, float, bool, str, float):
+    # Returns the gis_join, allocation, loss, variance, ok status, error message, and duration
 
     import tensorflow as tf
     import pandas as pd

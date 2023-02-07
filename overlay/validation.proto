@@ -108,16 +108,24 @@ message WorkerValidationJobResponse {
 
 message Metric {
   string gis_join = 1;
-  int64  allocation = 2;
-  double loss = 3;
-  double accuracy = 4;
-  double variance = 5;
-  double duration_sec = 6;
-  int32 iteration = 7;
-  bool ok = 8;
-  string error_msg = 9;
-  string hostname = 10;
+  bool ok = 2;
+  string response = 3;
+  string error_msg = 4;
+  string hostname = 5;
 }
+
+//message Metric {
+//  string gis_join = 1;
+//  int64  allocation = 2;
+//  double loss = 3;
+//  double accuracy = 4;
+//  double variance = 5;
+//  double duration_sec = 6;
+//  int32 iteration = 7;
+//  bool ok = 8;
+//  string error_msg = 9;
+//  string hostname = 10;
+//}
 
 message ValidationMetric {
   oneof validation_metric {

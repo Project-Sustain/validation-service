@@ -45,7 +45,7 @@ class Validator:
             for spatial_allocation in self.request.allocations:
                 gis_join: str = spatial_allocation.gis_join
                 gis_join_count: int = self.gis_join_counts[gis_join]
-                returned_gis_join, allocation, loss, variance, iteration, ok, error_msg, duration_sec = \
+                returned_gis_join, ok, response, error_msg = \
                     self.validate_model_function(
                         gis_join=gis_join,
                         gis_join_count=gis_join_count,
@@ -77,12 +77,8 @@ class Validator:
                 # ))
                 yield Metric(
                     gis_join=gis_join,
-                    allocation=allocation,
-                    loss=loss,
-                    variance=variance,
-                    duration_sec=duration_sec,
-                    iteration=iteration,
                     ok=ok,
+                    response=response,
                     error_msg=error_msg,
                     hostname=self.hostname
                 )
@@ -149,7 +145,7 @@ class Validator:
 
             # Wait on all tasks to finish -- Iterate over completed tasks, get their result, and log/append to responses
             for future in as_completed(executors_list):
-                gis_join, allocation, loss, variance, iteration, ok, error_msg, duration_sec = future.result()
+                gis_join, ok, response, error_msg = future.result()
                 # metrics.append(ValidationMetric(
                 #     gis_join=gis_join,
                 #     allocation=allocation,
@@ -162,12 +158,8 @@ class Validator:
                 logger.info(f"Yielding metric for gis_join={gis_join}")
                 yield Metric(
                     gis_join=gis_join,
-                    allocation=allocation,
-                    loss=loss,
-                    variance=variance,
-                    duration_sec=duration_sec,
-                    iteration=iteration,
                     ok=ok,
+                    respons=response,
                     error_msg=error_msg,
                     hostname=self.hostname
                 )
@@ -223,6 +215,6 @@ def validate_classification_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, str, str):
-    # Returns the gis_join, status, error_msg, results
+        verbose: bool = True) -> (str, bool, str, str):
+    # Returns the gis_join, ok_status, response, error_msg
     raise NotImplementedError("validate_classification_model() is not implemented for abstract class Validator.")

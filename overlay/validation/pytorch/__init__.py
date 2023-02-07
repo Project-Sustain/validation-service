@@ -35,8 +35,8 @@ def validate_classification_model(
         limit: int,
         sample_rate: float,
         normalize_inputs: bool,
-        verbose: bool = True) -> (str, int, str, str):
-    # Returns the gis_join, status, error_msg, results
+        verbose: bool = True) -> (str, bool, str, str):
+    # Returns the gis_join, ok_status, response, error_msg
 
     import torch
     import os
@@ -151,7 +151,8 @@ def validate_classification_model(
 
     # raise NotImplementedError("validate_classification_model() is not implemented for class PyTorchValidator.")
     logger.debug(f"Returning GISJOIN: {gis_join}")
-    return gis_join, 0, "no_error", "{sample_results}"
+    # Returns the gis_join, ok_status, response, error_msg
+    return gis_join, True, "{sample_results}", "no_error"
 
 
 # Independent function designed to be launched either within the same thread as the main process,
