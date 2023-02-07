@@ -132,37 +132,37 @@ def validate_classification_model(
         logger.info(f"y_true: {y_true}")
 
     # Predict
-    y_pred_class = model.predict(inputs_numpy)
+    # y_pred_class = model.predict(inputs_numpy)
 
     # calculate accuracy (percentage of correct predictions)
-    accuracy = metrics.accuracy_score(y_true, y_pred_class)
-    logger.success(f"Accuracy: {accuracy}")
+    # accuracy = metrics.accuracy_score(y_true, y_pred_class)
+    # logger.success(f"Accuracy: {accuracy}")
 
     # value counts
     # TODO: check conversion format of y_true
     # logger.info(f"Value counts: {y_true.value_counts()}")
 
     # save confusion matrix and slice into four pieces
-    confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
+    # confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
 
-    logger.success(f"Confusion matrix: {confusion_matrix}")
-    thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+    # logger.success(f"Confusion matrix: {confusion_matrix}")
+    # thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-    for t in thresholds:
-        y_pred_prob = (model.predict_proba(inputs_numpy)[:, 1] >= t).astype(int)
+    # for t in thresholds:
+    #     y_pred_prob = (model.predict_proba(inputs_numpy)[:, 1] >= t).astype(int)
 
         # Calculate Precision
-        precision = metrics.precision_score(y_true, y_pred_class, zero_division=0)
-        logger.success(f"Precision (t = {t}): {precision}")
+        # precision = metrics.precision_score(y_true, y_pred_class, zero_division=0)
+        # logger.success(f"Precision (t = {t}): {precision}")
 
         # Calculate Recall
-        recall = metrics.recall_score(y_true, y_pred_class, zero_division=0)
-        logger.success(f"Recall (t = {t}): {recall}")
+        # recall = metrics.recall_score(y_true, y_pred_class, zero_division=0)
+        # logger.success(f"Recall (t = {t}): {recall}")
 
         # ROC Curves and Area Under the Curve (AUC)
-        fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
-        roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
-        logger.success(f"roc_auc_score (t = {t}): {roc_auc_score}")
+        # fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
+        # roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
+        # logger.success(f"roc_auc_score (t = {t}): {roc_auc_score}")
 
     # def evaluate_threshold(threshold):
     #     sensitivity = tpr[thresholds > threshold][-1]
