@@ -127,10 +127,12 @@ def validate_classification_model(
     # Get predictions (classification)
     inputs_numpy = features_df.to_numpy()
     y_true = label_df.to_numpy()
-    y_pred_class = model.predict(inputs_numpy)
 
     if verbose:
         logger.info(f"y_true: {y_true}")
+
+    # Predict
+    y_pred_class = model.predict(inputs_numpy)
 
     # calculate accuracy (percentage of correct predictions)
     accuracy = metrics.accuracy_score(y_true, y_pred_class)
