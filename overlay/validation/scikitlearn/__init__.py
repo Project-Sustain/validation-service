@@ -3,6 +3,7 @@ from loguru import logger
 from overlay.profiler import Timer
 from overlay.validation import Validator
 from overlay.validation_pb2 import ValidationJobRequest, ModelCategory
+import json
 
 
 class ScikitLearnValidator(Validator):
@@ -226,6 +227,7 @@ def validate_classification_model(
         }
     }
     '''
+    result = json.dumps(result, separators=(',', ':'))
     return gis_join, True, result, ""
 
 
