@@ -573,7 +573,6 @@ class Master(validation_pb2_grpc.MasterServicer):
                 job_id=job_id
             )
 
-        #
         # return ValidationJobResponse(
         #     id=job_id,
         #     ok=True,
