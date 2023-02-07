@@ -567,11 +567,7 @@ class Master(validation_pb2_grpc.MasterServicer):
             logger.info(f"in submit validation -- {response}")
             yield ResponseMetric(
                 gis_join=response.gis_join,
-                allocation=response.allocation,
-                loss=response.loss,
-                accuracy=response.accuracy,
-                variance=response.variance,
-                duration_sec=response.duration_sec,
+                response=response.response,
                 ok=response.ok,
                 error_msg=response.error_msg,
                 job_id=job_id
