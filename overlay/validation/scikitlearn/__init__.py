@@ -180,7 +180,7 @@ def validate_classification_model(
     # Returns the gis_join, ok_status, response, error_msg
     # result = '{"auc_of_roc":0.5,"roc_graph":{"x_coordinates":[0,1],"y_coordinates":[0,1]},"0.1":{"precision":0.3476,"recall":1},"0.2":{"precision":0.4296,"recall":0.9385},"0.3":{"precision":0.4752,"recall":0.7385},"0.4":{"precision":0.4286,"recall":0.4154},"0.5":{"precision":0.4865,"recall":0.2769},"0.6":{"precision":0.5,"recall":0.1231},"0.7":{"precision":0.5,"recall":0.0769},"0.8":{"precision":1,"recall":0.0462},"0.9":{"precision":0,"recall":0}}'
 
-    result = generate(gis_join).to_json_string()
+    result = generate(gis_join)
     logger.debug(f"gis_join: {gis_join}, result: {result}")
     return gis_join, True, result, ""
 
