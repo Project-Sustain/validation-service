@@ -242,7 +242,7 @@ def validation():
                     logger.info("==========================================================")
 
                     for validation_grpc_response in stub.SubmitValidationJob(validation_grpc_request):
-                        logger.info(f"inside flask server!! {validation_grpc_response}")
+                        logger.trace(f"{validation_grpc_response}")
                         dict_response = MessageToDict(validation_grpc_response, preserving_proto_field_name=True)
                         yield json.dumps(dict_response, indent=None) + '\n'
                         # yield build_json_response(validation_grpc_response)
