@@ -11,6 +11,7 @@ MODELS_DIR = os.environ.get("MODELS_DIR")
 # password = os.environ.get('ROOT_MONGO_PASS')
 DB_USERNAME = "root"
 DB_PASSWORD = "rootPass"
+DYNAMIC = True
 
 if __name__ == "__main__":
     print(f'DB_HOST: {DB_HOST}')
