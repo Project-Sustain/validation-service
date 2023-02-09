@@ -102,4 +102,4 @@ def generate(gis_join: str):
         gis_join_result.y_coordinates = tpr
         # print(f'auc_of_roc: {gis_join_result.auc_of_roc}')
 
-    return json.dumps(gis_join_result)
+    return json.dumps(gis_join_result.to_json_string())
