@@ -10,11 +10,11 @@ from loguru import logger
 import pickle
 
 randoms = []
-# with open('./data/gis_joins.json') as in_file:
+# with open('overlay/data/gis_joins.json') as in_file:
 #     gis_joins = json.load(in_file)
 # print(f'gis_joins: {len(gis_joins)}')
 
-path = './data/temp_data.csv'
+path = 'overlay/data/temp_data.csv'
 col_names = ['f1', 'f2', 'f3', 'f4', 'f5',
              'f6', 'f7', 'f8', 'label']
 pima = pd.read_csv(path, header=None, names=col_names)
