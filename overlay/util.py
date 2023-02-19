@@ -55,7 +55,7 @@ class Result:
 limit = 3088
 
 
-def generate(gis_join: str):
+def generate(gis_join: str, feature_df, label_df):
     gis_join_result = Result(gis_join)
     random_state = random.randint(0, limit)
     while random_state in randoms:

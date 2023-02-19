@@ -134,54 +134,10 @@ def validate_classification_model(
     if verbose:
         logger.info(f"y_true: {y_true}")
 
-    # Predict
-    # y_pred_class = model.predict(inputs_numpy)
-
-    # calculate accuracy (percentage of correct predictions)
-    # accuracy = metrics.accuracy_score(y_true, y_pred_class)
-    # logger.success(f"Accuracy: {accuracy}")
-
-    # value counts
-    # TODO: check conversion format of y_true
-    # logger.info(f"Value counts: {y_true.value_counts()}")
-
-    # save confusion matrix and slice into four pieces
-    # confusion_matrix = metrics.confusion_matrix(y_true, y_pred_class)
-
-    # logger.success(f"Confusion matrix: {confusion_matrix}")
-    # thresholds = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-
-    # for t in thresholds:
-    #     y_pred_prob = (model.predict_proba(inputs_numpy)[:, 1] >= t).astype(int)
-
-    # Calculate Precision
-    # precision = metrics.precision_score(y_true, y_pred_class, zero_division=0)
-    # logger.success(f"Precision (t = {t}): {precision}")
-
-    # Calculate Recall
-    # recall = metrics.recall_score(y_true, y_pred_class, zero_division=0)
-    # logger.success(f"Recall (t = {t}): {recall}")
-
-    # ROC Curves and Area Under the Curve (AUC)
-    # fpr, tpr, thresholds = metrics.roc_curve(y_true, y_pred_prob)
-    # roc_auc_score = metrics.roc_auc_score(y_true, y_pred_prob)
-    # logger.success(f"roc_auc_score (t = {t}): {roc_auc_score}")
-
-    # def evaluate_threshold(threshold):
-    #     sensitivity = tpr[thresholds > threshold][-1]
-    #     specificity = 1 - fpr[thresholds > threshold][-1]
-    #     return [sensitivity, specificity]
-
-    # sensitivity1, specificity1 = evaluate_threshold(0.5)
-    # sensitivity2, specificity2 = evaluate_threshold(0.3)
-
-    # raise NotImplementedError("validate_classification_model() is not implemented for class ScikitLearnValidator.")
     logger.debug(f"Returning GISJOIN: {gis_join}")
-    # Returns the gis_join, ok_status, response, error_msg
-    # result = '{"auc_of_roc":0.5,"roc_graph":{"x_coordinates":[0,1],"y_coordinates":[0,1]},"0.1":{"precision":0.3476,"recall":1},"0.2":{"precision":0.4296,"recall":0.9385},"0.3":{"precision":0.4752,"recall":0.7385},"0.4":{"precision":0.4286,"recall":0.4154},"0.5":{"precision":0.4865,"recall":0.2769},"0.6":{"precision":0.5,"recall":0.1231},"0.7":{"precision":0.5,"recall":0.0769},"0.8":{"precision":1,"recall":0.0462},"0.9":{"precision":0,"recall":0}}'
 
-    result = generate(gis_join)
-    logger.debug(f"gis_join: {gis_join}, result: {result}")
+    result = generate(gis_join, features_df, label_df)
+    # TODO: handle errors
     return gis_join, True, result, ""
 
 
