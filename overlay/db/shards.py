@@ -64,7 +64,8 @@ def discover_shards():
 # Example return value: ("shard7rs", ReplicaSetMembership.SECONDARY)
 def get_rs_member_state() -> (str, ReplicaSetMembership):
     info("Discovering MongoDB shards...")
-    client = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
+
+    client = MongoClient(f"mongodb://{username}:{password}@{DB_HOST}:27017")
     rs_status = client.admin.command({"replSetGetStatus": 1})
     rs_name: str = rs_status["set"]
     rs_state: int = rs_status["myState"]  # https://www.mongodb.com/docs/manual/reference/replica-states/

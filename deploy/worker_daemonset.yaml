@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: validation-svc-workers
+spec:
+  selector:
+    matchLabels:
+      name: validation-svc-worker
+  template:
+    metadata:
+      labels:
+        name: validation-svc-worker
+    spec:
+      nodeSelector:
+        validationSvcWorker: "true"
+      containers:
+        - name: validation-svc-worker
+          image: sustain/validation-service:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50058
+          # Right now the easiest way to do this without creating a cluster service is just to set the master_uri to the
+          # validation-svc-master pod's cluster IP.
+          command: [ "python3", "-m", "overlay", "--worker", "--master_uri=<validation-svc-master-ip>:<master_port>", "--port=50058" ]
+          env:
+            - name: NODE_HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName  # tell the pod about the host it's on, so it can talk to the local mongod
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP

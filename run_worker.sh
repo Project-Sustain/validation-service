@@ -17,7 +17,7 @@ if [ "$DAEMON" == "--daemon" ]; then
   WORKER_PROCESSES=$(ps -aux | grep "[o]verlay --worker")
   [ "$WORKER_PROCESSES" != "" ] && echo -e "Found worker processes running!\n$WORKER_PROCESSES\nPlease kill first before starting." && exit 1
 
-  nohup python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt 2>&1 & disown
+  nohup python3 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT" > log.txt 2>&1 & disown
 else
-  python3.8 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT"
+  python3 -m overlay --worker --master_uri="$MASTER_URI" --port="$WORKER_PORT"
 fi
