@@ -1,8 +1,8 @@
 FROM rockylinux:9.1 AS base
 
 # Install python3 and development tools
-RUN dnf update -y && dnf install python3 -y
-RUN dnf -y groupinstall development
+RUN dnf update -y && dnf install -y python3 python3-pip
+RUN dnf groupinstall -y development
 RUN python3 -V
 
 # Set up operations in /app
