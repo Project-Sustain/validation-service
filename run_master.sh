@@ -15,9 +15,9 @@ if [[ $# -ge 1 ]]; then
   [[ $1 == "-h" ]]  && print_usage && exit 0
   MASTER_PORT=$1
   if [ $# -eq 2 ] && [ "$2" == "--local" ]; then
-    python3.8 -m overlay --master --port="$MASTER_PORT" --local
+    python3 -m overlay --master --port="$MASTER_PORT" --local
   else
-    python3.8 -m overlay --master --port="$MASTER_PORT"
+    python3 -m overlay --master --port="$MASTER_PORT"
   fi
 fi
 
