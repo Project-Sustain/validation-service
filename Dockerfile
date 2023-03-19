@@ -9,7 +9,9 @@ RUN python3 -V
 RUN mkdir -p /app
 WORKDIR /app
 
-COPY *.sh requirements.txt overlay/ resources/ /app/
+COPY *.sh requirements.txt /app/
+COPY overlay/ /app/
+COPY resources/ /app/
 
 # Install python requirements and create .env file
 RUN python3 -m pip install -r requirements.txt && \
