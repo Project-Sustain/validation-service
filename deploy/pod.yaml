@@ -9,8 +9,7 @@ spec:
       imagePullPolicy: Always
       ports:
         - containerPort: 50059
-      command:
-        - "python3 -m overlay --master --port=50059"
+      command: ["python3", "-m", "overlay", "--master", "--port=50059"]
       env:
         - name: NODE_HOSTNAME
           valueFrom:
