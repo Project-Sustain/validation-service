@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DB_HOST = os.environ.get("DB_HOST")
+DB_HOST = os.environ.get("NODE_HOSTNAME")
 DB_PORT = int(os.environ.get("DB_PORT"))
 DB_NAME = os.environ.get("DB_NAME")
 MODELS_DIR = os.environ.get("MODELS_DIR")
