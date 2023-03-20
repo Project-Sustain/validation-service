@@ -8,8 +8,8 @@ spec:
       image: sustain/validation-service:latest
       imagePullPolicy: Always
       ports:
-        - containerPort: 50059
-      #command: ["python3", "-m", "overlay", "--master", "--port=50059"]
+        - containerPort: 50058
+      command: ["python3", "-m", "overlay", "--master", "--port=50059"]
       env:
         - name: NODE_HOSTNAME
           valueFrom:
