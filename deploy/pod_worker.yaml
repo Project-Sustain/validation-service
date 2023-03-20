@@ -1,16 +1,15 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: validation-svc-master-pod
+  name: validation-svc-pod-work
 spec:
-  nodeName: lattice-100
   containers:
     - name: validation-svc-container
       image: sustain/validation-service:latest
       imagePullPolicy: Always
       ports:
         - containerPort: 50059
-      command: ["python3", "-m", "overlay", "--master", "--port=50059"]
+      #command: ["python3", "-m", "overlay", "--master", "--port=50059"]
       env:
         - name: NODE_HOSTNAME
           valueFrom:
