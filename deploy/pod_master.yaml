@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: validation-svc-master-pod
+  name: validation-svc-master
 spec:
   nodeName: lattice-100
   containers:
-    - name: validation-svc-container
+    - name: validation-svc-master
       image: sustain/validation-service:latest
       imagePullPolicy: Always
       ports:
