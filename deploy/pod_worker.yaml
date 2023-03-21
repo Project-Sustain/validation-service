@@ -3,19 +3,21 @@ kind: Pod
 metadata:
   name: validation-svc-worker
 spec:
-  nodeName: lattice-134
+  nodeName: lattice-134  # selects the node to launch the pod on
   containers:
     - name: validation-svc-worker
       image: sustain/validation-service:latest
       imagePullPolicy: Always
       ports:
         - containerPort: 50058
-      command: ["python3", "-m", "overlay", "--worker", "--master-uri=<validation-svc-master-ip>", "--port=50058"]
+      # Right now the easiest way to do this without creating a cluster service is just to set the master_uri to the
+      # validation-svc-master pod's cluster IP.
+      command: ["python3", "-m", "overlay", "--worker", "--master_uri=<validation-svc-master-ip>", "--port=50058"]
       env:
         - name: NODE_HOSTNAME
           valueFrom:
             fieldRef:
-              fieldPath: spec.nodeName
+              fieldPath: spec.nodeName  # tell the pod about the host it's on, so it can talk to the local mongod
         - name: POD_NAME
           valueFrom:
             fieldRef:
