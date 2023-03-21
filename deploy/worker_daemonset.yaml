@@ -1,15 +1,18 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: validation-svc-workers
 spec:
+  selector:
+    matchLabels:
+      name: validation-svc-worker
   template:
     metadata:
       labels:
         app: validation-svc-worker
     spec:
       nodeSelector:
-        validationSvcWorker: true
+        validationSvcWorker: "true"
       containers:
         - name: validation-svc-worker
           image: sustain/validation-service:latest
@@ -18,7 +21,7 @@ spec:
             - containerPort: 50058
           # Right now the easiest way to do this without creating a cluster service is just to set the master_uri to the
           # validation-svc-master pod's cluster IP.
-          command: [ "python3", "-m", "overlay", "--worker", "--master_uri=<validation-svc-master-ip>", "--port=50058" ]
+          command: [ "python3", "-m", "overlay", "--worker", "--master_uri=<validation-svc-master-ip>:<master_port>", "--port=50058" ]
           env:
             - name: NODE_HOSTNAME
               valueFrom:
