@@ -19,7 +19,7 @@ to launch a worker pod _only_ on the nodes labeled as such.
     ```
 2. Take note of the IP address assigned to the pod (IP field):
     ```bash
-    kubectl get pods -o wide | grep validation-svc-master
+    kubectl get pod validation-svc-master -o yaml | grep "podIP:"
     ```
 3. Edit [worker_daemonset.yaml](./worker_daemonset.yaml) and replace the
 the `PodSpec.containers.[0].command` field's master URI and port to the `<pod_ip>:50059`
