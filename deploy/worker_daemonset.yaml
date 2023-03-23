@@ -9,7 +9,7 @@ spec:
   template:
     metadata:
       labels:
-        app: validation-svc-worker
+        name: validation-svc-worker
     spec:
       nodeSelector:
         validationSvcWorker: "true"
