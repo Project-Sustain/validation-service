@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: validation-svc-flask
+spec:
+  nodeName: lattice-100
+  containers:
+    - name: validation-svc-flask
+      image: sustain/validation-service:latest
+      imagePullPolicy: Always
+      ports:
+        - containerPort: 50057
+      command: [ "python3", "-m", "overlay", "--flaskserver", "--master_uri=192.168.249.107:50059", "--port=50057" ]
+      env:
+        - name: NODE_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
