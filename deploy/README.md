@@ -23,7 +23,7 @@ to launch a worker pod _only_ on the nodes labeled as such.
     ```
 3. Edit [worker_daemonset.yaml](./worker_daemonset.yaml) and replace the
 the `PodSpec.containers.[0].command` field's master URI and port to the `<pod_ip>:50059`
-   - Example: `command: [ "python3", "-m", "overlay", "--worker", "--master_uri=192.168.249.106:50059", "--port=50058" ]`
+   - Example: `command: [ "python3", "-m", "overlay", "--worker", "--master_uri=<master-ip>:<master-port>", "--port=50058" ]`
 4. Deploy the DaemonSet once the master pod has fully spun up:
     ```bash
     kubectl apply -f worker_daemonset.yaml
@@ -44,4 +44,5 @@ Delete the resources you created in the reverse order:
 ```bash
 kubectl delete -f worker_daemonset.yaml
 kubectl delete -f pod_master.yaml
+kubectl delete -f pod_flask.yaml
 ```
