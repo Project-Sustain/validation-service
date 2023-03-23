@@ -28,8 +28,13 @@ the `PodSpec.containers.[0].command` field's master URI and port to the `<pod_ip
     ```bash
     kubectl apply -f worker_daemonset.yaml
     ```
-5. Use `k9s` or `kubectl` to watch the logs of the master pod, or worker pods as they come online:
-   - `kubectl logs -f validation-svc-master -c validation-svc-master`
+5. Deploy Flask Server
+   ```bash
+    kubectl apply -f pod_flask.yaml
+6. ```
+6. Use `k9s` or `kubectl` to watch the logs of the master pod, or worker pods as they come online:
+   - Master: `kubectl logs -f validation-svc-master -c validation-svc-master`
+   - Flask: `kubectl logs -f validation-svc-flask -c validation-svc-flask`
    - `k9s` -> `:daemonsets`
 
 ## Teardown
