@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: validation-service
+spec:
+  clusterIP: 10.98.54.125
+  selector:
+    app: validation-svc-master
+  ports:
+  - port: 50059
+    targetPort: 50059
+    name: master-port
