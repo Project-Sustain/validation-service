@@ -10,12 +10,12 @@ spec:
       imagePullPolicy: Always
       ports:
         - containerPort: 50057
-      command: [ "python3", "-m", "overlay", "--flaskserver", "--master_uri=<validation-svc-master-ip>:<master-port>", "--port=50057" ]
+      command: [ "python3", "-m", "overlay", "--flaskserver", "--master_uri=192.168.249.107:50059", "--port=50057" ]
       env:
         - name: NODE_HOSTNAME
           valueFrom:
             fieldRef:
-              filedPath: spec.nodeName
+              fieldPath: spec.nodeName
         - name: POD_NAME
           valueFrom:
             fieldRef:
