@@ -28,8 +28,7 @@ def discover_gis_joins() -> dict:
 
     # client: MongoClient = MongoClient("mongodb://localhost:27017")
 
-    
-    client: MongoClient = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
+    client: MongoClient = MongoClient(f"mongodb://{username}:{password}@{DB_HOST}:27017")
     info("below error")
     db = client["sustaindb"]
     coll = db["noaa_nam"]
@@ -178,7 +177,7 @@ def get_hostname():
 
 # Returns one of ["SECONDARY", "PRIMARY", "NOT_FOUND"]
 def get_replica_set_status() -> str:
-    client = MongoClient(f"mongodb://{username}:{password}@localhost:27017")
+    client = MongoClient(f"mongodb://{username}:{password}@{DB_HOST}:27017")
     repl_set_status = client.admin.command("replSetGetStatus")
     for member in repl_set_status["members"]:
         member_name = member["name"]
